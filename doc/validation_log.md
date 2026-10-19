@@ -21,7 +21,7 @@ explicitly stated ("by construction").
 | Borders over-trade | France pushes 27.5 TWh into Spain | ES-FR corridor capability 5.2 GW (3 AC lines × 0.7 + 2×1 GW INELFE) vs 2.8 GW commercial NTC |
 | PHS/hydro artifacts | PHS 7.4 GW @ 295 h; reservoir 1,402 h; RoR 0.5 vs 2.2 GW | JRC hydro database misclassification (river-cascade dams counted as storage) |
 | Biomass/waste unconstrained | runs ~98% CF vs ~39% real | fuel-limited plants, no availability cap |
-| Ghost lignite 0.51 GW; mainland oil | — | stale inventory (no lignite in Spain since 2022) |
+| Ghost lignite ES 0.51 GW + FR 0.98 GW; mainland oil | lignite runs 4.1 TWh baseload at 28 EUR/MWh (coal group 4.1 vs 3.0 TWh actual) | stale inventory (no operating lignite in Spain since 2022 or in France); zeroed by `national_capacities` |
 | Demand −3.4% | ENTSO-E vs Redeia busbar definition | closure, not error |
 | Portugal (found later) | hydro 10.3 vs 14.9 TWh; biomass ~100% CF; wind CF 14.1% vs 29.2% real; 4.2 of 5.6 GW in the worst CF bin | same EIA gap + same biomass issue + ERA5 bias compounded by bad GEM plant coordinates |
 
@@ -38,7 +38,7 @@ principled part of the wind treatment; the factor below covers only the residual
 | Patch | What it does | Data |
 |---|---|---|
 | `boundary_flows` | FR external borders (GB, IT, CH, DE+BE) fixed to measured hourly 2024 flows; on in every variant (closure, not calibration) | RTE eCO2mix extract, vendored; −86.1 TWh net checks against RTE's ≈ −89 total minus ES |
-| `national_capacities` | Fleet totals per carrier and scope (ES peninsular / Balearics, PT, FR) set pro rata to published actuals; creates missing units with technology-data efficiency (ES coal, Balearic OCGT); for 2024, wind/solar use **average operating capacity** (mean of year-end 2023/2024 — ~6 GW of PV commissioned during 2024) | `national_capacities.csv` (Redeia ISE, RTE, REN/Ember) |
+| `national_capacities` | Fleet totals per carrier and scope (ES peninsular / Balearics, PT, FR) set pro rata to published actuals; creates missing units with technology-data efficiency (ES coal, Balearic OCGT); zeroes the phantom lignite units; for 2024, wind/solar use **average operating capacity** (mean of year-end 2023/2024 — ~6 GW of PV commissioned during 2024) | `national_capacities.csv` (Redeia ISE, RTE, REN/Ember) |
 | `wind_correction` | ES and PT onwind profiles scaled so fleet availability matches cited annual generation; factors derived **at run time** (ES ×1.187, PT ×2.053), capped at 1.0; FR untouched. New-build PPA candidates inherit corrected profiles by construction | ES: Redeia; PT: `pt_actuals.csv` (Ember extract, vendored; capacity cross-checks Redeia/REN) |
 | `phs_split` | Pure PHS energy 120 GWh (Huclin et al.), pumping 3,306 MW, round-trip 0.75; mixed PHS stays inside reservoir hydro per Redeia convention | `national_capacities.csv` |
 | `chp_profile` | Cogeneration as a fixed profile: monthly shape derived at run time from the vendored Redeia monthly cogeneration CO2 series, scaled to published annual output (16.42 TWh, 0.366 tCO2/MWh_el), distributed by nodal load share. By construction | `chp.csv` + vendored REData JSON |

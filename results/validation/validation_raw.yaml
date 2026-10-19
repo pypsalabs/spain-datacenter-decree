@@ -4,6 +4,6 @@ gates_total: 8
 failed:
   gen_solar_pv: model 64.7943 vs actual 44.1935 (+46.6%)
   gen_hydro: model 24.3293 vs actual 34.9464 (-30.4%)
-  gen_ccgt_plus_chp: model 22.1443 vs actual 48.4374 (-54.3%)
-  co2_power_sector_total: model 9.9879 vs actual 21.9052 (-54.4%)
-  net_export_total: model -9.6213 vs actual 10.227 (-194.1%)
+  gen_ccgt_plus_chp: model 18.259 vs actual 48.4374 (-62.3%)
+  co2_power_sector_total: model 13.6791 vs actual 21.9052 (-37.5%)
+  net_export_total: model -9.6698 vs actual 10.227 (-194.6%)

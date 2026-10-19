@@ -171,15 +171,7 @@ def _ensure_carriers(n: pypsa.Network, carriers: Sequence[str]) -> None:
 
 
 def _ensure_base_carriers(n: pypsa.Network) -> None:
-    """Ensure study carriers (CHP, csp, boundary, load) exist and stale lignite inventory entries are removed."""
-    if not n.generators.empty and (n.generators["carrier"] == "lignite").any():
-        lignite_gens = list(n.generators.index[n.generators["carrier"] == "lignite"])
-        n.remove("Generator", lignite_gens)
-        logger.info("Removed %d lignite generators.", len(lignite_gens))
-
-    if "lignite" in n.carriers.index:
-        n.remove("Carrier", "lignite")
-
+    """Ensure study carriers (CHP, csp, boundary, load) exist."""
     for car, co2 in (("CHP", 0.369), ("csp", 0.0), ("boundary", 0.0), ("load", 0.0)):
         if car not in n.carriers.index:
             n.add("Carrier", car, co2_emissions=co2)

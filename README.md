@@ -8,6 +8,32 @@ accounting following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
 weather year, validated against Redeia 2024 actuals; weather-year sensitivities (2010,
 2013, 2020) planned. No capacity-expansion year in the current scope.
 
+## Why this study?
+
+The next decade of digital infrastructure will be built somewhere and powered by
+something. Spain is deciding how. A draft royal decree would require new data centers to
+have "at least 80% of consumption backed by new renewable generation, hour-by-hour, with
+forfeiture of grid access on non-compliance". The stakes are measured in gigawatts: data
+centers already hold ~6.3 GW of granted transmission access, about a third of all granted
+demand access, with a further ~16 GW of requests pending.
+
+The policy's logic: additional demand must bring additional clean supply, matched at the
+hours it actually consumes. Done right, this makes new load a system asset. It finances
+new wind, solar and storage, caps its own marginal emissions, and hedges the operator
+against wholesale price volatility. Without it, every new flat gigawatt is served by the
+gas margin: higher emissions, deeper gas import dependency, higher consumer prices, and
+data centers exposed to every price swing. Bad for Spanish society, and bad for the data
+center operators themselves.
+
+This study provides a transparent, quantitative assessment of the policy impact. This repository contains the dispatch model of  today's Spanish electiricity system, validated against actual data, in which a new data center procures 24/7 carbon-free energy under the proposed 80% hourly matching rule. It measures system costs, emissions, prices and the procurement portfolio against an unmatched baseline, so that both the Spanish government and the data center industry can
+see what the policy does before it takes effect.
+
+We do this work in the open, for the public record. Every input number is cited and its
+primary source vendored in this repository; every correction to the model is documented,
+switchable and re-validated; every figure and table in the report can be reproduced from
+scratch with the included scripts. Anyone, from a ministry analyst to a competing research
+group, can check the numbers, challenge them, and build on them.
+
 ## Model
 
 - **PyPSA-Eur v2026.09.0** as a git submodule; zero upstream files modified, everything is

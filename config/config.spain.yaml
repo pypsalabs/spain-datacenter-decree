@@ -157,7 +157,8 @@ spain_cfe:
     prices: false               # marginal costs from cited fuel + EU ETS prices (raw has no CO2 price)
     ntc_caps: false             # ES-FR / ES-PT / Balearic corridors capped to published NTC
     demand: false               # country loads scaled to cited annual busbar demand
-    hydro_inflow: false         # validation year only: inflow to observed 2024 hydro energy
+    hydro_inflow: false         # wy2024 runs only: inflow to observed 2024 hydro energy
+    fr_nuclear_profile: false   # FR nuclear seasonalized by the measured 2024 monthly output (calendar assumed to persist)
     ma_ad_exports: false        # fixed ES exports to Morocco and Andorra
   # named variants override the patch defaults; the {variant} wildcard picks one
   variants:
@@ -173,6 +174,7 @@ spain_cfe:
       ntc_caps: true
       demand: true
       hydro_inflow: true
+      fr_nuclear_profile: true
       ma_ad_exports: true
   weather_years:
     reference: 2024

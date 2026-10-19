@@ -13,6 +13,7 @@ import pypsa
 import pytest
 
 from scripts.prepare_network import (
+    _patch_fr_nuclear_profile,
     _patch_wind_correction,
     attach_boundary_flows,
     freeze_fleet,
@@ -163,6 +164,69 @@ def test_wind_correction_missing_factor_raises(tmp_path: Path) -> None:
     }
     with pytest.raises(ValueError, match="No wind correction factor for ES"):
         _patch_wind_correction(n, ctx)
+
+
+def _nuclear_toy() -> pypsa.Network:
+    n = pypsa.Network()
+    n.set_snapshots(pd.date_range("2024-01-01", "2024-12-31 23:00", freq="MS"))
+    n.add("Bus", "FR0 0AC", carrier="AC", country="FR", x=2.0, y=48.0)
+    n.add(
+        "Generator",
+        "FR0 0AC nuclear",
+        bus="FR0 0AC",
+        carrier="nuclear",
+        p_nom=60000.0,
+        p_max_pu=0.715,
+    )
+    return n
+
+
+def _nuclear_csv(tmp_path: Path) -> Path:
+    lines = ["country,year,month,carrier_or_metric,value,unit,source_id,note"]
+    values = [
+        48294,
+        44152,
+        40228,
+        37040,
+        37420,
+        36626,
+        38422,
+        38432,
+        38120,
+        40224,
+        45879,
+        49262,
+    ]
+    lines += [
+        f"FR,2024,{m},nuclear_generation_monthly_mean,{v},MW,rte_eco2mix_2024_nuclear,test"
+        for m, v in enumerate(values, start=1)
+    ]
+    (tmp_path / "fr_nuclear_monthly_2024.csv").write_text("\n".join(lines) + "\n")
+    return tmp_path
+
+
+def test_fr_nuclear_profile_seasonalizes_preserving_annual_mean(tmp_path: Path) -> None:
+    """The monthly shape is applied with the annual weighted mean kept at the flat factor."""
+    n = _nuclear_toy()
+    ctx = {"custom_dir": _nuclear_csv(tmp_path), "weather_year": 2024}
+    _patch_fr_nuclear_profile(n, ctx)
+
+    profile = n.generators_t.p_max_pu["FR0 0AC nuclear"]
+    assert np.isclose(profile.mean(), 0.715, rtol=1e-9)
+    assert profile.max() <= 1.0
+    dec = profile[profile.index.month == 12].iloc[0]
+    jun = profile[profile.index.month == 6].iloc[0]
+    assert dec > 0.715 > jun
+    assert np.isclose(dec / jun, 49262 / 36626, rtol=1e-9)
+
+
+def test_fr_nuclear_profile_applies_in_every_weather_year(tmp_path: Path) -> None:
+    """The planned-outage calendar persists: other weather years get the same shape."""
+    n = _nuclear_toy()
+    ctx = {"custom_dir": _nuclear_csv(tmp_path), "weather_year": 2013}
+    _patch_fr_nuclear_profile(n, ctx)
+    profile = n.generators_t.p_max_pu["FR0 0AC nuclear"]
+    assert np.isclose(profile.mean(), 0.715, rtol=1e-9)
 
 
 def test_wind_correction_backcast_requires_wy2024(tmp_path: Path) -> None:

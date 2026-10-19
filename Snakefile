@@ -104,6 +104,7 @@ rule prepare_network:
             "data/custom/validation_2024_es.csv",
             "data/custom/pt_actuals.csv",
             "data/custom/wind_correction.csv",
+            "data/custom/fr_nuclear_monthly_2024.csv",
         ],
     output:
         network="resources/{run}/networks/base_{year}_{variant}.nc",

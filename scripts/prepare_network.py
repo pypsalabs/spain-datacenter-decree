@@ -48,6 +48,10 @@ Patches
 - ``demand``: scale each country's load to the cited annual busbar demand.
 - ``hydro_inflow``: wy2024 runs only; scale ES/PT reservoir inflow to the observed
   2024 hydro energy (the upstream EIA normalization data ends before 2024).
+- ``fr_nuclear_profile``: seasonalize French nuclear availability with the measured
+  2024 monthly output shape (eCO2mix), preserving the upstream annual availability
+  factor; applied in every run (the planned-outage calendar is assumed to persist
+  across weather years).
 - ``ma_ad_exports``: fixed ES exports to Morocco and Andorra as flat loads at the
   nearest Spanish nodes.
 """
@@ -141,6 +145,7 @@ PATCH_ORDER: tuple[str, ...] = (
     "ntc_caps",
     "demand",
     "hydro_inflow",
+    "fr_nuclear_profile",
     "ma_ad_exports",
 )
 
@@ -838,6 +843,53 @@ def _patch_hydro_inflow(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
         )
 
 
+def _patch_fr_nuclear_profile(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
+    """
+    Seasonal French nuclear availability from the measured 2024 maintenance calendar.
+
+    Replaces the flat upstream annual availability factor on French nuclear with the
+    monthly shape of measured 2024 output (eCO2mix via ODRE), normalized so the
+    weighted annual mean equals the upstream factor: annual energy capability is
+    unchanged, only its seasonality. Applied in **every** run regardless of weather
+    year: the shape reflects the planned-outage calendar, assumed to persist, so
+    weather-year sensitivities change weather, not the nuclear calendar. Monthly
+    output is a lower bound on availability (summer modulation), a stated
+    conservatism.
+    """
+    monthly = (
+        _custom(ctx, "fr_nuclear_monthly_2024.csv")
+        .set_index("month")["value"]
+        .astype(float)
+    )
+    if sorted(monthly.index) != list(range(1, 13)):
+        raise ValueError("fr_nuclear_monthly_2024.csv must have one row per month.")
+
+    gens = n.generators.index[
+        (n.generators["carrier"] == "nuclear")
+        & n.generators["bus"].isin(set(_country_buses(n, "FR")))
+    ]
+    if gens.empty:
+        raise ValueError("No French nuclear generators found.")
+
+    w = n.snapshot_weightings["generators"]
+    shape = pd.Series([monthly[ts.month] for ts in n.snapshots], index=n.snapshots)
+    shape = shape / (float((shape * w).sum()) / float(w.sum()))
+    for g in gens:
+        profile = shape * float(n.generators.at[g, "p_max_pu"])
+        if float(profile.max()) > 1.0:
+            raise ValueError(f"FR nuclear profile for '{g}' exceeds 1.0.")
+        n.generators_t.p_max_pu[g] = profile
+    annual_mean = float(n.generators.loc[gens, "p_max_pu"].mean())
+    logger.info(
+        "FR nuclear availability seasonalized on %d units: monthly %.3f-%.3f "
+        "around the preserved annual mean %.3f.",
+        len(gens),
+        float(shape.min()) * annual_mean,
+        float(shape.max()) * annual_mean,
+        annual_mean,
+    )
+
+
 def _patch_ma_ad_exports(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     """Fixed ES exports to Morocco and Andorra as flat loads at the nearest nodes."""
     val = _custom(ctx, "validation_2024_es.csv")
@@ -866,6 +918,7 @@ PATCH_FUNCTIONS: dict[str, Callable[[pypsa.Network, Mapping[str, Any]], None]] =
     "ntc_caps": _patch_ntc_caps,
     "demand": _patch_demand,
     "hydro_inflow": _patch_hydro_inflow,
+    "fr_nuclear_profile": _patch_fr_nuclear_profile,
     "ma_ad_exports": _patch_ma_ad_exports,
 }
 

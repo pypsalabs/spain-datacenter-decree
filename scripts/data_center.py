@@ -4,10 +4,10 @@
 """
 Prepare a PyPSA-Eur network for 24/7 CFE data center procurement.
 
-Adds flat data center loads at the configured Spanish hub buses (additional to
+Adds flat data center loads at the configured Spanish site buses (additional to
 existing background electricity demand), extendable PPA renewable generator
-candidates across Spain (or at host nodes only), and standalone DC battery
-storage (``Bus`` + ``Store`` + charger/discharger ``Link``s) at each hub.
+candidates at the best resource class across Spain (or in the local region only), and standalone DC battery
+storage (``Bus`` + ``Store`` + charger/discharger ``Link``s) at each site.
 
 Processed technology costs from ``PyPSA/technology-data v0.15.0`` are stored by
 PyPSA-Eur v2026.09.0 in ``pypsa-eur/resources/{run}/costs_{planning_year}_processed.csv``
@@ -17,7 +17,7 @@ PyPSA-Eur v2026.09.0 in ``pypsa-eur/resources/{run}/costs_{planning_year}_proces
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -26,19 +26,8 @@ import pypsa
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_HUBS: dict[str, float] = {
-    "ES0 6AC": 0.6,
-    "ES0 7AC": 0.4,
-}
-HUB_NAME_TO_BUS: dict[str, str] = {
-    "Madrid": "ES0 6AC",
-    "Aragon": "ES0 7AC",
-    "Aragón": "ES0 7AC",
-}
-HUB_BUS_TO_LOAD_NAME: dict[str, str] = {
-    "ES0 6AC": "DC Madrid",
-    "ES0 7AC": "DC Aragon",
-}
+# Default DC site: Aragon (the hyperscale pipeline); overridden via config spain_cfe.dc
+DEFAULT_SITE_BUSES: tuple[str, ...] = ("ES0 7AC",)
 DEFAULT_PPA_CARRIERS: tuple[str, ...] = ("onwind", "solar", "solar-hsat")
 DEFAULT_DISCOUNT_RATE: float = 0.07
 
@@ -146,21 +135,39 @@ def _compute_tech_costs(
     }
 
 
-def _normalize_hubs(hubs: Mapping[str, float] | None) -> list[tuple[str, str, float]]:
-    """Normalize ``hubs`` mapping into a list of ``(hub_bus, load_name, weight)`` tuples."""
-    eff_hubs = dict(hubs) if hubs is not None else dict(DEFAULT_HUBS)
-    resolved: list[tuple[str, str, float]] = []
-    for key, share in eff_hubs.items():
-        key_str = str(key).strip()
-        if key_str in HUB_NAME_TO_BUS:
-            hub_bus = HUB_NAME_TO_BUS[key_str]
-            clean_name = key_str.replace("ó", "o")
-            load_name = f"DC {clean_name}"
-        else:
-            hub_bus = key_str
-            load_name = HUB_BUS_TO_LOAD_NAME.get(hub_bus, f"DC {hub_bus}")
-        resolved.append((hub_bus, load_name, float(share)))
-    return resolved
+def _best_class_gens(
+    n: pypsa.Network, bus: str, carrier: str
+) -> tuple[str, float] | None:
+    """
+    Pick the PPA reference generator at ``bus`` for ``carrier``: the resource class
+    (CF bin) with the highest mean availability among those with remaining potential.
+
+    Returns ``(reference_generator, remaining_potential_mw)`` or ``None`` if the
+    bus has no background generator of that carrier.
+    """
+    bg_mask = (
+        (n.generators["bus"] == bus)
+        & (n.generators["carrier"] == carrier)
+        & (~n.generators.index.astype(str).str.startswith("DC"))
+    )
+    bg_gens = n.generators.index[bg_mask]
+    if bg_gens.empty:
+        return None
+
+    remaining = (
+        n.generators.loc[bg_gens, "p_nom_max"] - n.generators.loc[bg_gens, "p_nom"]
+    ).where(lambda s: s > 0.0, 0.0)
+    t_cols = bg_gens.intersection(n.generators_t.p_max_pu.columns)
+    mean_cf = pd.Series(
+        n.generators.loc[bg_gens, "p_max_pu"].astype(float), index=bg_gens
+    )
+    if not t_cols.empty:
+        mean_cf.loc[t_cols] = n.generators_t.p_max_pu[t_cols].mean()
+
+    with_room = remaining[remaining > 0.0]
+    pool = with_room.index if not with_room.empty else bg_gens
+    best = mean_cf.loc[pool].idxmax()
+    return str(best), float(remaining.at[best])
 
 
 def _ensure_carriers(n: pypsa.Network, carriers: Sequence[str]) -> None:
@@ -180,7 +187,7 @@ def _ensure_base_carriers(n: pypsa.Network) -> None:
 def attach_data_center(
     n: pypsa.Network,
     dc_mw: float,
-    hubs: Mapping[str, float] | None = None,
+    site_buses: Sequence[str] | None = None,
     siting: str = "spain_wide",
     ppa_carriers: Sequence[str] | None = None,
     costs: pd.DataFrame | str | Path | None = None,
@@ -195,14 +202,15 @@ def attach_data_center(
     n : pypsa.Network
         Prepared base network (15 buses: ES 9 / FR 4 / PT 2).
     dc_mw : float
-        Total data center flat baseload demand in MW across all hubs.
-    hubs : Mapping[str, float] | None, optional
-        Mapping from hub bus ID (``'ES0 6AC'``, ``'ES0 7AC'``) or hub name
-        (``'Madrid'``, ``'Aragon'``) to load share. Defaults to
-        ``{'ES0 6AC': 0.6, 'ES0 7AC': 0.4}``.
+        Flat baseload demand in MW hosted at **each** site bus.
+    site_buses : Sequence[str] | None, optional
+        Network buses hosting a data center, each with the full ``dc_mw``.
+        Defaults to ``('ES0 7AC',)`` (Aragon); the site labels and their node
+        mapping live in the config under ``spain_cfe.dc``.
     siting : str, default 'spain_wide'
-        PPA candidate siting scope: ``'spain_wide'`` (all 9 ES AC buses) or
-        ``'host_node'`` (only the hub buses).
+        PPA candidate scope: ``'spain_wide'`` (the best resource class at every
+        ES AC bus; the optimizer chooses where to contract) or ``'local_region'``
+        (the best class in the DC's own region only).
     ppa_carriers : Sequence[str] | None, optional
         Extendable PPA generator carriers. Defaults to
         ``['onwind', 'solar', 'solar-hsat']``.
@@ -230,36 +238,34 @@ def attach_data_center(
         return n
 
     siting_norm = str(siting).strip().lower()
-    if siting_norm not in {"spain_wide", "host_node"}:
+    if siting_norm not in {"spain_wide", "local_region"}:
         raise ValueError(
-            f"Unsupported siting '{siting}'. Expected 'spain_wide' or 'host_node'."
+            f"Unsupported siting '{siting}'. Expected 'spain_wide' or 'local_region'."
         )
 
-    resolved_hubs = _normalize_hubs(hubs)
-    for hub_bus, _, _ in resolved_hubs:
-        if hub_bus not in n.buses.index:
-            raise KeyError(f"Hub bus '{hub_bus}' not found in network buses.")
+    sites = list(site_buses) if site_buses is not None else list(DEFAULT_SITE_BUSES)
+    for site_bus in sites:
+        if site_bus not in n.buses.index:
+            raise KeyError(f"DC site bus '{site_bus}' not found in network buses.")
 
-    # 1. Add flat DC loads at hub buses (additional to existing background demand)
+    # 1. Add a flat DC load of the full dc_mw at each site bus
     _ensure_carriers(n, ["DC load"])
-    total_dc_mw = float(dc_mw)
-    for hub_bus, load_name, share in resolved_hubs:
-        load_p = total_dc_mw * share
+    for site_bus in sites:
+        load_name = f"DC {site_bus} load"
         if load_name in n.loads.index:
             n.remove("Load", load_name)
         n.add(
             "Load",
             load_name,
-            bus=hub_bus,
+            bus=site_bus,
             carrier="DC load",
-            p_set=load_p,
+            p_set=float(dc_mw),
         )
         logger.info(
-            "Added flat DC load '%s' at bus '%s': %.2f MW (share=%.2f)",
+            "Added flat DC load '%s' at bus '%s': %.2f MW",
             load_name,
-            hub_bus,
-            load_p,
-            share,
+            site_bus,
+            float(dc_mw),
         )
 
     if policy_norm == "unmatched_dc":
@@ -295,32 +301,23 @@ def attach_data_center(
         not_dc_bus = ~n.buses.index.astype(str).str.startswith("DC")
         candidate_buses = list(n.buses.index[es_mask & not_dc_bus])
     else:
-        candidate_buses = [hub_bus for hub_bus, _, _ in resolved_hubs]
+        candidate_buses = list(sites)
 
-    # 3. Add extendable PPA generator candidates 'DC {bus} {carrier}'
+    # 3. Add extendable PPA candidates 'DC {bus} {carrier}': the best resource class
+    # (highest-CF bin with remaining potential) at each candidate bus
     added_ppas = 0
     for bus in candidate_buses:
         for car in carriers_list:
-            bg_mask = (
-                (n.generators["bus"] == bus)
-                & (n.generators["carrier"] == car)
-                & (~n.generators.index.astype(str).str.startswith("DC"))
-            )
-            bg_gens = n.generators.index[bg_mask]
-            if bg_gens.empty:
+            picked = _best_class_gens(n, bus, car)
+            if picked is None:
                 logger.warning(
                     "No background generator found at bus '%s' for carrier '%s'; skipping PPA candidate.",
                     bus,
                     car,
                 )
                 continue
+            ref_gen, rem_potential = picked
 
-            # Remaining technical potential: floor at 0 without calling .clip()
-            p_nom_existing = float(n.generators.loc[bg_gens, "p_nom"].sum())
-            p_nom_max_existing = float(n.generators.loc[bg_gens, "p_nom_max"].sum())
-            rem_potential = max(p_nom_max_existing - p_nom_existing, 0.0)
-
-            ref_gen = bg_gens[0]
             if (
                 not n.generators_t.p_max_pu.empty
                 and ref_gen in n.generators_t.p_max_pu.columns
@@ -357,7 +354,7 @@ def attach_data_center(
         siting_norm,
     )
 
-    # 4. Add standalone DC battery at each hub (Bus + Store + charger/discharger Links)
+    # 4. Add a standalone DC battery at each site (Bus + Store + charger/discharger Links)
     store_cost = _compute_tech_costs(
         costs_df, "battery storage", discount_rate=discount_rate
     )
@@ -366,7 +363,7 @@ def attach_data_center(
     )
     one_way_eff = float(np.sqrt(inv_cost["efficiency"]))
 
-    for hub_bus, _, _ in resolved_hubs:
+    for hub_bus in sites:
         bat_bus_name = f"DC {hub_bus} battery"
         bat_store_name = f"DC {hub_bus} battery"
         charger_name = f"DC {hub_bus} battery charger"
@@ -437,7 +434,7 @@ def attach_data_center(
             lifetime=inv_cost["lifetime"],
         )
         logger.info(
-            "Added DC battery at hub '%s': Store cap_cost=%.2f EUR/MWh/a, "
+            "Added DC battery at site '%s': Store cap_cost=%.2f EUR/MWh/a, "
             "Inverter cap_cost=%.2f EUR/MW/a, one_way_eff=%.4f",
             hub_bus,
             store_cost["capital_cost"],

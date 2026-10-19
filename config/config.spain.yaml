@@ -70,9 +70,14 @@ atlite:
   show_progress: false
 
 renewable:
+  # 5 CF classes per region for every PPA-candidate technology; existing plants are
+  # spatially joined to their class, so fleet profiles reflect where plants actually
+  # stand, and DC PPA candidates contract the best class with remaining potential.
   onwind:
-    # 5 CF classes per region; existing plants are spatially joined to their class,
-    # so the fleet profile reflects where turbines actually stand (validation C2).
+    resource_classes: 5
+  solar:
+    resource_classes: 5
+  solar-hsat:
     resource_classes: 5
 
 clustering:
@@ -153,13 +158,29 @@ spain_cfe:
       hydro_inflow: true
       ma_ad_exports: true
   weather_years:
-    reference: 2013
-    best: 2020
-    worst: 2010
+    reference: 2024
+    sensitivities: [2010, 2013, 2020]
   dc:
-    hubs:
-      Madrid: 0.6
-      Aragon: 0.4
+    # Each listed site hosts the FULL dc_mw (e.g. [aragon, madrid] means dc_mw at each).
+    # Aragon is the study default: the GW-scale new-build pipeline is there (AWS 33.7bn EUR
+    # Zaragoza/Huesca/Teruel, Microsoft Villamayor de Gallego, QTS/Blackstone campus).
+    sites: [aragon]
+    # Study dc_mw levels: 500 / 1000 / 2000 / 4000 / 6000 MW. Context (news, Oct 2026):
+    # Red Electrica has granted data centers ~6.3 GW of transmission access (~34% of all
+    # demand access) with ~15.8 GW of requests pending; MITECO cites >12 GW of access and
+    # connection rights granted since 2021; SpainDC expects 2-3 GW installed by 2030.
+    # So 500 MW = near-term single-hub build-out, 2000 MW = realistic 2030 national fleet,
+    # 6000 MW = all granted access materializes (stress case).
+    nodes:
+      andalusia: ES0 0AC
+      catalonia: ES0 1AC
+      basque_country: ES0 2AC
+      castilla_leon: ES0 3AC
+      valencia_murcia: ES0 4AC
+      galicia: ES0 5AC
+      madrid: ES0 6AC
+      aragon: ES0 7AC
+      balearics: ES1 0AC
     profile: flat
     discount_rate: 0.07
   ppa:

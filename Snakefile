@@ -40,7 +40,7 @@ wildcard_constraints:
     policy=r"no_dc|unmatched_dc|annual_100_res|(?:strict_)?hourly_\d+_(?:ppa_only|grid_credit)(?:_cfe)?",
     target=r"\d+(?:\.\d+)?",
     dc_mw=r"\d+(?:\.\d+)?",
-    siting=r"spain_wide|host_node",
+    siting=r"spain_wide|local_region",
 
 
 rule prepare_network:
@@ -110,7 +110,12 @@ rule solve_network:
         tol=lambda w: config["spain_cfe"]["iteration"]["tol"],
         damping=lambda w: config["spain_cfe"]["iteration"]["damping"],
         meta=lambda w: (
-            f"planning_year={w.year},weather_year={str(w.run).removeprefix('wy')},variant={w.variant}"
+            f"planning_year={w.year},weather_year={str(w.run).removeprefix('wy')},variant={w.variant},"
+            f"sites={'+'.join(config['spain_cfe']['dc']['sites'])}"
+        ),
+        dc_nodes=lambda w: ",".join(
+            config["spain_cfe"]["dc"]["nodes"][s]
+            for s in config["spain_cfe"]["dc"]["sites"]
         ),
         r0_arg=lambda w, input: (
             f'--r0-network "{input.r0_network[0]}"' if input.r0_network else ""
@@ -126,6 +131,7 @@ rule solve_network:
             --policy "{wildcards.policy}" \
             --target "{wildcards.target}" \
             --dc-mw "{wildcards.dc_mw}" \
+            --dc-nodes "{params.dc_nodes}" \
             --siting "{wildcards.siting}" \
             --excess-share "{params.excess_share}" \
             --max-iter "{params.max_iter}" \

@@ -82,9 +82,8 @@ def test_no_dc_adds_zero_assets(
 def test_unmatched_dc_adds_loads_only(
     base_sliced_network: pypsa.Network, costs_2025: pd.DataFrame
 ) -> None:
-    """Policy 'unmatched_dc' must add 2 flat DC loads (600/400 MW) and 0 DC gens/stores."""
+    """Policy 'unmatched_dc' adds one flat full-size DC load at the site and nothing else."""
     n = base_sliced_network.copy()
-    bg_load_madrid = float(n.loads.loc[n.loads["bus"] == "ES0 6AC", "p_set"].sum())
     bg_load_aragon = float(n.loads.loc[n.loads["bus"] == "ES0 7AC", "p_set"].sum())
 
     attach_data_center(
@@ -96,35 +95,44 @@ def test_unmatched_dc_adds_loads_only(
     )
 
     dc_loads = n.loads.index[n.loads.index.astype(str).str.startswith("DC")]
-    assert list(dc_loads) == ["DC Madrid", "DC Aragon"]
-    assert n.loads.at["DC Madrid", "bus"] == "ES0 6AC"
-    assert n.loads.at["DC Aragon", "bus"] == "ES0 7AC"
-    assert n.loads.at["DC Madrid", "carrier"] == "DC load"
-    assert n.loads.at["DC Aragon", "carrier"] == "DC load"
-    assert np.isclose(n.loads.at["DC Madrid", "p_set"], 600.0)
-    assert np.isclose(n.loads.at["DC Aragon", "p_set"], 400.0)
+    assert list(dc_loads) == ["DC ES0 7AC load"]
+    assert n.loads.at["DC ES0 7AC load", "bus"] == "ES0 7AC"
+    assert n.loads.at["DC ES0 7AC load", "carrier"] == "DC load"
+    assert np.isclose(n.loads.at["DC ES0 7AC load", "p_set"], 1000.0)
 
-    # Background loads at the hub buses remain untouched (DC load is additional)
-    bg_loads_madrid_after = n.loads[
-        (n.loads["bus"] == "ES0 6AC")
-        & (~n.loads.index.astype(str).str.startswith("DC"))
-    ]
-    bg_loads_aragon_after = n.loads[
+    # Background load at the site bus remains untouched (DC load is additional)
+    bg_loads_after = n.loads[
         (n.loads["bus"] == "ES0 7AC")
         & (~n.loads.index.astype(str).str.startswith("DC"))
     ]
-    assert np.isclose(float(bg_loads_madrid_after["p_set"].sum()), bg_load_madrid)
-    assert np.isclose(float(bg_loads_aragon_after["p_set"].sum()), bg_load_aragon)
+    assert np.isclose(float(bg_loads_after["p_set"].sum()), bg_load_aragon)
 
     assert not n.generators.index.astype(str).str.startswith("DC").any()
     assert not n.stores.index.astype(str).str.startswith("DC").any()
     assert not n.links.index.astype(str).str.startswith("DC").any()
 
 
-def test_spain_wide_adds_27_ppa_gens_and_2_batteries(
+def test_each_site_gets_full_dc_mw(
     base_sliced_network: pypsa.Network, costs_2025: pd.DataFrame
 ) -> None:
-    """Siting 'spain_wide' adds 27 PPA gens (9 ES buses x 3 carriers), 2 batteries, 2 loads."""
+    """With two sites, each hosts the full dc_mw (no splitting)."""
+    n = base_sliced_network.copy()
+    attach_data_center(
+        n,
+        dc_mw=1000.0,
+        site_buses=["ES0 7AC", "ES0 6AC"],
+        siting="spain_wide",
+        costs=costs_2025,
+        policy="unmatched_dc",
+    )
+    assert np.isclose(n.loads.at["DC ES0 7AC load", "p_set"], 1000.0)
+    assert np.isclose(n.loads.at["DC ES0 6AC load", "p_set"], 1000.0)
+
+
+def test_spain_wide_adds_27_ppa_gens_and_site_battery(
+    base_sliced_network: pypsa.Network, costs_2025: pd.DataFrame
+) -> None:
+    """Siting 'spain_wide' adds 27 PPA gens (9 ES buses x 3 carriers), 1 battery, 1 load."""
     n = base_sliced_network.copy()
     attach_data_center(
         n,
@@ -141,21 +149,11 @@ def test_spain_wide_adds_27_ppa_gens_and_2_batteries(
     dc_chargers = [lk for lk in dc_links if "battery charger" in str(lk)]
     dc_dischargers = [lk for lk in dc_links if "battery discharger" in str(lk)]
 
-    assert len(dc_loads) == 2
+    assert len(dc_loads) == 1
     assert len(dc_gens) == 27  # 9 ES buses x 3 carriers
-    assert len(dc_stores) == 2
-    assert len(dc_chargers) == 2
-    assert len(dc_dischargers) == 2
-
-    assert set(dc_stores) == {"DC ES0 6AC battery", "DC ES0 7AC battery"}
-    assert set(dc_chargers) == {
-        "DC ES0 6AC battery charger",
-        "DC ES0 7AC battery charger",
-    }
-    assert set(dc_dischargers) == {
-        "DC ES0 6AC battery discharger",
-        "DC ES0 7AC battery discharger",
-    }
+    assert list(dc_stores) == ["DC ES0 7AC battery"]
+    assert dc_chargers == ["DC ES0 7AC battery charger"]
+    assert dc_dischargers == ["DC ES0 7AC battery discharger"]
 
     assert n.generators.loc[dc_gens, "p_nom_extendable"].all()
     assert (n.generators.loc[dc_gens, "p_nom"] == 0.0).all()
@@ -164,42 +162,56 @@ def test_spain_wide_adds_27_ppa_gens_and_2_batteries(
     assert n.links.loc[dc_links, "p_nom_extendable"].all()
 
 
-def test_host_node_adds_6_ppa_gens(
+def test_local_region_adds_3_ppa_gens(
     base_sliced_network: pypsa.Network, costs_2025: pd.DataFrame
 ) -> None:
-    """Siting 'host_node' adds only 2 x 3 = 6 extendable PPA generators at ES0 6AC and ES0 7AC."""
+    """Siting 'local_region' adds only 3 extendable PPA generators at the site bus."""
     n = base_sliced_network.copy()
     attach_data_center(
         n,
         dc_mw=1000.0,
-        siting="host_node",
+        siting="local_region",
         costs=costs_2025,
         policy="hourly_80_grid_credit",
     )
 
     dc_gens = n.generators.index[n.generators.index.astype(str).str.startswith("DC")]
-    assert len(dc_gens) == 6
-    expected_gens = {
-        f"DC {bus} {car}"
-        for bus in ("ES0 6AC", "ES0 7AC")
-        for car in ("onwind", "solar", "solar-hsat")
-    }
+    expected_gens = {f"DC ES0 7AC {car}" for car in ("onwind", "solar", "solar-hsat")}
     assert set(dc_gens) == expected_gens
 
 
-@pytest.mark.xfail(
-    reason="open item C4: PPA candidates are not yet resource-class-aware "
-    "(background onwind is split into CF bins; the candidate must pick a bin)",
-    strict=False,
-)
-def test_ppa_potentials_and_profiles_match_background(
+def _expected_best_class(n: pypsa.Network, bus: str, car: str) -> tuple[str, float]:
+    """Reference implementation: highest-mean-CF class with remaining potential."""
+    bg = n.generators.index[
+        (n.generators["bus"] == bus)
+        & (n.generators["carrier"] == car)
+        & (~n.generators.index.astype(str).str.startswith("DC"))
+    ]
+    remaining = (
+        n.generators.loc[bg, "p_nom_max"] - n.generators.loc[bg, "p_nom"]
+    ).where(lambda s: s > 0.0, 0.0)
+    mean_cf = pd.Series(n.generators.loc[bg, "p_max_pu"].astype(float), index=bg)
+    t_cols = bg.intersection(n.generators_t.p_max_pu.columns)
+    if not t_cols.empty:
+        mean_cf.loc[t_cols] = n.generators_t.p_max_pu[t_cols].mean()
+    pool = remaining[remaining > 0.0].index
+    if pool.empty:
+        pool = bg
+    best = mean_cf.loc[pool].idxmax()
+    return str(best), float(remaining.at[best])
+
+
+def test_ppa_candidates_use_best_resource_class(
     base_sliced_network: pypsa.Network, costs_2025: pd.DataFrame
 ) -> None:
-    """Verify p_nom_max equals remaining technical potential (>= 0) and p_max_pu matches node."""
+    """Each PPA candidate carries the best remaining resource class: its profile and potential."""
     n = base_sliced_network.copy()
-    # Force one background generator to exceed p_nom_max to test non-negative floor
-    n.generators.at["ES0 0AC 0 onwind", "p_nom"] = (
-        float(n.generators.at["ES0 0AC 0 onwind", "p_nom_max"]) + 500.0
+    # Fill every onwind class at one bus to test the zero-remaining fallback
+    full_bus_mask = (n.generators["bus"] == "ES0 0AC") & (
+        n.generators["carrier"] == "onwind"
+    )
+    n.generators.loc[full_bus_mask, "p_nom"] = (
+        n.generators.loc[full_bus_mask, "p_nom_max"] + 500.0
     )
 
     attach_data_center(
@@ -217,27 +229,21 @@ def test_ppa_potentials_and_profiles_match_background(
     for g in dc_gens:
         bus = str(n.generators.at[g, "bus"])
         car = str(n.generators.at[g, "carrier"])
-        bg_gens = n.generators.index[
-            (n.generators["bus"] == bus)
-            & (n.generators["carrier"] == car)
-            & (~n.generators.index.astype(str).str.startswith("DC"))
-        ]
-        assert len(bg_gens) >= 1
-        expected_pot = max(
-            float(n.generators.loc[bg_gens, "p_nom_max"].sum())
-            - float(n.generators.loc[bg_gens, "p_nom"].sum()),
-            0.0,
-        )
+        ref_bg, expected_pot = _expected_best_class(n, bus, car)
         assert np.isclose(
             float(n.generators.at[g, "p_nom_max"]), expected_pot, rtol=1e-6, atol=1e-6
         )
-
-        ref_bg = bg_gens[0]
-        pd.testing.assert_series_equal(
-            n.generators_t.p_max_pu[g],
-            n.generators_t.p_max_pu[ref_bg],
-            check_names=False,
-        )
+        if ref_bg in n.generators_t.p_max_pu.columns:
+            pd.testing.assert_series_equal(
+                n.generators_t.p_max_pu[g],
+                n.generators_t.p_max_pu[ref_bg],
+                check_names=False,
+            )
+        else:
+            assert np.isclose(
+                float(n.generators.at[g, "p_max_pu"]),
+                float(n.generators.at[ref_bg, "p_max_pu"]),
+            )
 
 
 def test_capital_costs_match_v015_annuity_formula(
@@ -249,7 +255,7 @@ def test_capital_costs_match_v015_annuity_formula(
     attach_data_center(
         n,
         dc_mw=1000.0,
-        siting="host_node",
+        siting="local_region",
         costs=costs_2025,
         discount_rate=discount_rate,
         policy="hourly_80_grid_credit",
@@ -279,7 +285,7 @@ def test_capital_costs_match_v015_annuity_formula(
         fom = float(costs_2025.at[row_key, "FOM"])
         lt = float(costs_2025.at[row_key, "lifetime"])
         expected_cap = (calculate_annuity(lt, discount_rate) + fom / 100.0) * inv
-        gen_name = f"DC ES0 6AC {car}"
+        gen_name = f"DC ES0 7AC {car}"
         assert np.isclose(
             float(n.generators.at[gen_name, "capital_cost"]),
             expected_cap,
@@ -299,7 +305,7 @@ def test_capital_costs_match_v015_annuity_formula(
         calculate_annuity(lt_store, discount_rate) + fom_store / 100.0
     ) * inv_store
     assert np.isclose(
-        float(n.stores.at["DC ES0 6AC battery", "capital_cost"]),
+        float(n.stores.at["DC ES0 7AC battery", "capital_cost"]),
         exp_store_cap,
         rtol=1e-6,
     )
@@ -311,23 +317,23 @@ def test_capital_costs_match_v015_annuity_formula(
         calculate_annuity(lt_link, discount_rate) + fom_link / 100.0
     ) * inv_link
     assert np.isclose(
-        float(n.links.at["DC ES0 6AC battery charger", "capital_cost"]),
+        float(n.links.at["DC ES0 7AC battery charger", "capital_cost"]),
         exp_link_cap,
         rtol=1e-6,
     )
     assert np.isclose(
-        float(n.links.at["DC ES0 6AC battery discharger", "capital_cost"]),
+        float(n.links.at["DC ES0 7AC battery discharger", "capital_cost"]),
         0.0,
     )
 
     eta_rt = float(costs_2025.at["battery inverter", "efficiency"])
     assert np.isclose(
-        float(n.links.at["DC ES0 6AC battery charger", "efficiency"]),
+        float(n.links.at["DC ES0 7AC battery charger", "efficiency"]),
         np.sqrt(eta_rt),
         rtol=1e-6,
     )
     assert np.isclose(
-        float(n.links.at["DC ES0 6AC battery discharger", "efficiency"]),
+        float(n.links.at["DC ES0 7AC battery discharger", "efficiency"]),
         np.sqrt(eta_rt),
         rtol=1e-6,
     )

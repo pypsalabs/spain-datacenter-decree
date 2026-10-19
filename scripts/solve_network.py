@@ -5,8 +5,8 @@
 Solve a 24/7 CFE procurement scenario on a prepared base network.
 
 Takes the base network from ``prepare_network.py``, attaches the data center
-(flat load at the Madrid/Aragon hubs, PPA candidates at the Spanish nodes,
-standalone battery; see ``scripts/data_center.py``), adds the policy constraint
+(flat load at the configured site, Aragon by default; best-resource-class PPA
+candidates; standalone battery; see ``scripts/data_center.py``), adds the policy constraint
 from ``scripts/cfe_constraints.py`` as linopy extra functionality, and solves
 with HiGHS dual simplex. Grid-credit policies resolve the bilinear grid-share
 term with the fixed-point iteration in ``scripts/iterate.py``, starting from the
@@ -358,7 +358,18 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--policy", type=str, required=True)
     parser.add_argument("--target", type=float, default=None)
     parser.add_argument("--dc-mw", type=float, default=1000.0)
-    parser.add_argument("--siting", type=str, default="spain_wide")
+    parser.add_argument(
+        "--dc-nodes",
+        type=str,
+        default="",
+        help="Comma-separated site buses, each hosting the full dc_mw (default: Aragon).",
+    )
+    parser.add_argument(
+        "--siting",
+        type=str,
+        default="spain_wide",
+        choices=["spain_wide", "local_region"],
+    )
     parser.add_argument("--r0-network", type=Path, default=None)
     parser.add_argument("--excess-share", type=float, default=DEFAULT_EXCESS_SHARE)
     parser.add_argument("--max-iter", type=int, default=DEFAULT_MAX_ITER)
@@ -375,7 +386,12 @@ def main(argv: list[str] | None = None) -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     if "snakemake" in globals():
         smk = globals()["snakemake"]
-        cfg = smk.config.get("spain_cfe", {})
+        cfg = dict(smk.config.get("spain_cfe", {}))
+        dc_block = dict(cfg.get("dc", {}))
+        dc_block["site_buses"] = [
+            dc_block["nodes"][s] for s in dc_block.get("sites", [])
+        ]
+        cfg["dc"] = dc_block
         w = smk.wildcards
         net_in, costs_in = Path(smk.input.network), Path(smk.input.costs)
         r0_in = Path(smk.input.r0_network[0]) if smk.input.r0_network else None
@@ -408,6 +424,11 @@ def main(argv: list[str] | None = None) -> None:
                 "tol": args.tol,
                 "damping": args.damping,
             },
+            "dc": {
+                "site_buses": [
+                    b.strip() for b in args.dc_nodes.split(",") if b.strip()
+                ],
+            },
         }
 
     iter_cfg = cfg.get("iteration", {})
@@ -418,7 +439,7 @@ def main(argv: list[str] | None = None) -> None:
     attach_data_center(
         n,
         dc_mw=dc_mw,
-        hubs=dc_cfg.get("hubs"),
+        site_buses=dc_cfg.get("site_buses") or None,
         siting=siting,
         ppa_carriers=cfg.get("ppa", {}).get("carriers"),
         costs=load_costs(costs_in),

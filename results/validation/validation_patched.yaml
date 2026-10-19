@@ -2,4 +2,4 @@ network: results/wy2024/networks/solved_2024_patched_no_dc_t0_0mw_spain_wide.nc
 gates_passed: 7
 gates_total: 8
 failed:
-  net_export_total: model 0.9626 vs actual 10.227 (-90.6%)
+  net_export_total: model 0.8153 vs actual 10.227 (-92.0%)

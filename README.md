@@ -1,18 +1,21 @@
 # Spain Hourly Matching
 
 A study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
-centers: a 15-node ES/FR/PT dispatch model of today's Spanish system (2025/26 fleet),
+centers: a PyPSA model of today's Spanish electricity system (2025/26 fleet),
 built on [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with datacenter PPA & 24/7-CFE procurement
 model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
 
 ## Why this study?
 
 The next decade of digital infrastructure will be built somewhere and powered by
-something. Spain is deciding how. A draft royal decree would require new data centers to
-have "at least 80% of consumption backed by new renewable generation, hour-by-hour, with
-forfeiture of grid access on non-compliance". The stakes are measured in gigawatts: data
-centers already hold ~6.3 GW of granted transmission access, about a third of all granted
-demand access, with a further ~16 GW of requests pending.
+something. Spain is deciding how. A 
+[draft royal decree](https://www.miteco.gob.es/es/energia/participacion/2026/detalle-participacion-publica-k-851.html)
+would require new data centers (from 1 MW of grid access) to back, in every hour, at
+least 80% of their consumption with renewable electricity generated that same hour by
+new Spanish installations, with forfeiture of grid access on non-compliance. The stakes
+are measured in gigawatts: data centers already hold
+~6.3 GW of granted transmission access, about a third of all granted demand access, with
+a further ~16 GW of requests pending.
 
 The policy's logic: additional demand must bring additional clean supply, matched at the
 hours it actually consumes. Done right, this makes new load a system asset. It finances

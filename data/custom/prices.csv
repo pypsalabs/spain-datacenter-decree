@@ -1,0 +1,19 @@
+country,year,carrier_or_metric,value,unit,source_id,note
+EU,2024,co2_ets_price,65.24,EUR/tCO2,icap_ets_2025,2024 annual average EU ETS allowance (EUA) auction/spot clearing price (~65 EUR/tCO2 per EEX/ICAP 2024 market report)
+EU,2025,co2_ets_price,70.00,EUR/tCO2,study_assumption_user_confirmed,study assumption (user-confirmed) per the decision log Decisions for 2025 planning horizon
+EU,2030,co2_ets_price,110.00,EUR/tCO2,study_assumption_user_confirmed,study assumption (user-confirmed) per the decision log Decisions for 2030 planning horizon
+EU,2024,gas_ttf_price,34.45,EUR/MWh_th,acer_gas_2024,2024 annual average Dutch TTF day-ahead/month-ahead natural gas wholesale price (~34 EUR/MWh_th per ACER/ICIS 2024 monitoring)
+EU,2025,gas_fuel_price,42.9003,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) gas fuel price from World Bank (2025) Commodity Markets
+EU,2030,gas_fuel_price,28.4158,EUR/MWh_th,pypsa_tech_data_v015_2030,PyPSA/technology-data v0.15.0 (EUR2025) gas fuel price from World Bank (2025) Commodity Markets
+EU,2025,coal_fuel_price,11.1717,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) hard coal fuel price from World Bank / ENTSO-E TYNDP 2024
+EU,2030,coal_fuel_price,7.8202,EUR/MWh_th,pypsa_tech_data_v015_2030,PyPSA/technology-data v0.15.0 (EUR2025) hard coal fuel price from ENTSO-E & ENTSOG TYNDP 2024 Scenarios Inputs
+EU,2025,lignite_fuel_price,7.9423,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) lignite fuel price from ENTSO-E & ENTSOG TYNDP 2024 Scenarios Inputs
+EU,2030,lignite_fuel_price,7.9423,EUR/MWh_th,pypsa_tech_data_v015_2030,PyPSA/technology-data v0.15.0 (EUR2025) lignite fuel price from ENTSO-E & ENTSOG TYNDP 2024 Scenarios Inputs
+EU,2025,oil_fuel_price,43.0008,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) oil fuel price from World Bank (2025) Commodity Markets
+EU,2030,oil_fuel_price,43.6295,EUR/MWh_th,pypsa_tech_data_v015_2030,PyPSA/technology-data v0.15.0 (EUR2025) oil fuel price from World Bank (2025) Commodity Markets
+EU,2025,nuclear_fuel_price,7.4536,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) nuclear/uranium fuel price from ENTSO-E & ENTSOG TYNDP 2024 Scenarios Inputs
+EU,2030,nuclear_fuel_price,7.4536,EUR/MWh_th,pypsa_tech_data_v015_2030,PyPSA/technology-data v0.15.0 (EUR2025) nuclear/uranium fuel price from ENTSO-E & ENTSOG TYNDP 2024 Scenarios Inputs
+EU,2025,biomass_fuel_price,9.3506,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) biomass fuel price (solid biomass 17.3312 EUR/MWh_th in v0.15.0)
+EU,2030,biomass_fuel_price,9.3506,EUR/MWh_th,pypsa_tech_data_v015_2030,PyPSA/technology-data v0.15.0 (EUR2025) biomass fuel price (solid biomass 17.3312 EUR/MWh_th in v0.15.0)
+ES,2024,day_ahead_price_omie_avg,63.04,EUR/MWh_el,omie_2024_informe_anual,OMIE 2024 arithmetic average Spanish day-ahead wholesale electricity price (63.04 EUR/MWh)
+ES,2025,day_ahead_price_omie_avg,65.28,EUR/MWh_el,omie_2025_informe_anual,OMIE 2025 arithmetic average Spanish day-ahead wholesale electricity price (65.28 EUR/MWh)

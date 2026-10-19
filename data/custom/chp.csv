@@ -1,0 +1,46 @@
+country,year,carrier_or_metric,value,unit,source_id,note
+ES,2023,chp_capacity_mw,5618.992,MW,redeia_ise_2025_potencia_instalada,National installed cogeneration capacity at year-end 2023 (excl. behind-the-meter autoconsumo)
+ES_peninsular,2023,chp_capacity_mw,5569.269,MW,redeia_ise_2025_potencia_instalada,Mainland (Peninsular ES1) installed cogeneration capacity at year-end 2023
+ES_baleares,2023,chp_capacity_mw,11.523,MW,redeia_ise_2025_potencia_instalada,Balearic Islands (ES4) installed cogeneration capacity at year-end 2023
+ES_mainland_baleares,2023,chp_capacity_mw,5580.792,MW,redeia_ise_2025_potencia_instalada,Combined Mainland + Balearic (ES1+ES4) installed cogeneration capacity at year-end 2023
+ES,2023,chp_generation_twh,17.329685,TWh,redeia_ise_2025_evolucion_demanda,National annual cogeneration electricity generation in 2023 (17329.685 GWh)
+ES_peninsular,2023,chp_generation_twh,17.292677,TWh,redeia_ise_2025_evolucion_demanda,Mainland (Peninsular ES1) annual cogeneration electricity generation in 2023 (17292.677 GWh)
+ES_baleares,2023,chp_generation_twh,0.037009,TWh,redeia_ise_2025_evolucion_demanda,Balearic Islands (ES4) annual cogeneration electricity generation in 2023 (37.009 GWh)
+ES_mainland_baleares,2023,chp_generation_twh,17.329685,TWh,redeia_ise_2025_evolucion_demanda,Combined Mainland + Balearic (ES1+ES4) annual cogeneration electricity generation in 2023
+ES,2023,chp_co2_mt,6.333055,MtCO2,redata_2023_emisiones_co2_mensual,National annual cogeneration CO2 emissions in 2023 (6333054.821 tCO2 eq.)
+ES_peninsular,2023,chp_co2_mt,6.318279,MtCO2,redata_2023_emisiones_co2_peninsular_mensual,Mainland (Peninsular ES1) annual cogeneration CO2 emissions in 2023 (6318279.436 tCO2 eq.)
+ES_baleares,2023,chp_co2_mt,0.014775,MtCO2,redata_2023_emisiones_co2_baleares_mensual,Balearic Islands (ES4) annual cogeneration CO2 emissions in 2023 (14775.385 tCO2 eq.)
+ES_mainland_baleares,2023,chp_co2_mt,6.333055,MtCO2,redata_2023_emisiones_co2_mensual,Combined Mainland + Balearic (ES1+ES4) annual cogeneration CO2 emissions in 2023
+ES,2023,chp_capacity_factor,0.352066,per_unit,redeia_ise_2025_evolucion_demanda,Realized 2023 national cogeneration capacity factor (17329.685 GWh / (5618.992 MW * 8760 h))
+ES,2023,chp_emission_factor,0.365445,tCO2/MWh_el,redata_2023_emisiones_co2_mensual,Realized 2023 national cogeneration specific CO2 intensity (6.333055 MtCO2 / 17.329685 TWh)
+ES,2024,chp_capacity_mw,5582.248,MW,redeia_ise_2025_potencia_instalada,National installed cogeneration capacity at year-end 2024 (excl. behind-the-meter autoconsumo)
+ES_peninsular,2024,chp_capacity_mw,5532.525,MW,redeia_ise_2025_potencia_instalada,Mainland (Peninsular ES1) installed cogeneration capacity at year-end 2024
+ES_baleares,2024,chp_capacity_mw,11.523,MW,redeia_ise_2025_potencia_instalada,Balearic Islands (ES4) installed cogeneration capacity at year-end 2024
+ES_mainland_baleares,2024,chp_capacity_mw,5544.048,MW,redeia_ise_2025_potencia_instalada,Combined Mainland + Balearic (ES1+ES4) installed cogeneration capacity at year-end 2024
+ES,2024,chp_generation_twh,16.417964,TWh,redata_2024_estructura_generacion,National annual cogeneration electricity generation in 2024 (16417963.967 MWh)
+ES_peninsular,2024,chp_generation_twh,16.381280,TWh,redata_2024_estructura_generacion_peninsular,Mainland (Peninsular ES1) annual cogeneration electricity generation in 2024 (16381279.962 MWh)
+ES_baleares,2024,chp_generation_twh,0.036684,TWh,redata_2024_estructura_generacion_baleares,Balearic Islands (ES4) annual cogeneration electricity generation in 2024 (36684.005 MWh)
+ES_mainland_baleares,2024,chp_generation_twh,16.417964,TWh,redata_2024_estructura_generacion,Combined Mainland + Balearic (ES1+ES4) annual cogeneration electricity generation in 2024
+ES,2024,chp_co2_mt,6.003432,MtCO2,redata_2024_emisiones_co2_mensual,National annual cogeneration CO2 emissions in 2024 (6003431.944 tCO2 eq.)
+ES_peninsular,2024,chp_co2_mt,5.988544,MtCO2,redata_2024_emisiones_co2_peninsular_mensual,Mainland (Peninsular ES1) annual cogeneration CO2 emissions in 2024 (5988543.868 tCO2 eq.)
+ES_baleares,2024,chp_co2_mt,0.014888,MtCO2,redata_2024_emisiones_co2_baleares_mensual,Balearic Islands (ES4) annual cogeneration CO2 emissions in 2024 (14888.076 tCO2 eq.)
+ES_mainland_baleares,2024,chp_co2_mt,6.003432,MtCO2,redata_2024_emisiones_co2_mensual,Combined Mainland + Balearic (ES1+ES4) annual cogeneration CO2 emissions in 2024
+ES,2024,chp_capacity_factor,0.335742,per_unit,redata_2024_estructura_generacion,Realized 2024 national cogeneration capacity factor on 8760h basis (0.334825 on 8784h leap-year basis)
+ES,2024,chp_emission_factor,0.365662,tCO2/MWh_el,redata_2024_emisiones_co2_mensual,Realized 2024 national cogeneration specific CO2 intensity (6.003432 MtCO2 / 16.417964 TWh)
+ES,2025,chp_capacity_mw,5250.781,MW,redeia_ise_2025_potencia_instalada,National installed cogeneration capacity at year-end 2025 (actual Redeia ISE 2025; PNIEC 2023-2030 indicative 2025 trajectory was 4068 MW)
+ES_peninsular,2025,chp_capacity_mw,5202.058,MW,redeia_ise_2025_potencia_instalada,Mainland (Peninsular ES1) installed cogeneration capacity at year-end 2025
+ES_baleares,2025,chp_capacity_mw,10.523,MW,redeia_ise_2025_potencia_instalada,Balearic Islands (ES4) installed cogeneration capacity at year-end 2025
+ES_mainland_baleares,2025,chp_capacity_mw,5212.581,MW,redeia_ise_2025_potencia_instalada,Combined Mainland + Balearic (ES1+ES4) installed cogeneration capacity at year-end 2025
+ES,2025,chp_generation_twh,15.456031,TWh,redeia_ise_2025_evolucion_demanda,National annual cogeneration electricity generation in 2025 (15456.031 GWh)
+ES_peninsular,2025,chp_generation_twh,15.418212,TWh,redeia_ise_2025_evolucion_demanda,Mainland (Peninsular ES1) annual cogeneration electricity generation in 2025 (15418.212 GWh)
+ES_baleares,2025,chp_generation_twh,0.037820,TWh,redeia_ise_2025_evolucion_demanda,Balearic Islands (ES4) annual cogeneration electricity generation in 2025 (37.820 GWh)
+ES_mainland_baleares,2025,chp_generation_twh,15.456031,TWh,redeia_ise_2025_evolucion_demanda,Combined Mainland + Balearic (ES1+ES4) annual cogeneration electricity generation in 2025
+ES,2025,chp_co2_mt,5.675110,MtCO2,redata_2025_emisiones_co2_mensual,National annual cogeneration CO2 emissions in 2025 (5675109.609 tCO2 eq.)
+ES_peninsular,2025,chp_co2_mt,5.659741,MtCO2,redata_2025_emisiones_co2_peninsular_mensual,Mainland (Peninsular ES1) annual cogeneration CO2 emissions in 2025 (5659740.785 tCO2 eq.)
+ES_baleares,2025,chp_co2_mt,0.015369,MtCO2,redata_2025_emisiones_co2_baleares_mensual,Balearic Islands (ES4) annual cogeneration CO2 emissions in 2025 (15368.824 tCO2 eq.)
+ES_mainland_baleares,2025,chp_co2_mt,5.675110,MtCO2,redata_2025_emisiones_co2_mensual,Combined Mainland + Balearic (ES1+ES4) annual cogeneration CO2 emissions in 2025
+ES,2025,chp_capacity_factor,0.336024,per_unit,redeia_ise_2025_evolucion_demanda,Realized 2025 national cogeneration capacity factor (15456.031 GWh / (5250.781 MW * 8760 h))
+ES,2025,chp_emission_factor,0.367178,tCO2/MWh_el,redata_2025_emisiones_co2_mensual,Realized 2025 national cogeneration specific CO2 intensity (5.675110 MtCO2 / 15.456031 TWh)
+ES,2030,chp_capacity_mw,3784.000,MW,miteco_pniec_2023_2030,PNIEC 2023-2030 (RD 986/2024) Table 2.9 2030 installed capacity target for Cogeneracion (down from 4068 MW indicative 2025)
+ES,2030,chp_generation_twh,11.131910,TWh,miteco_pniec_2023_2030,2030 projected cogeneration output scaling PNIEC 3784 MW target at realized 2024-2025 utilization (33.58% CF)
+ES,2030,chp_co2_mt,4.070520,MtCO2,miteco_pniec_2023_2030,2030 projected cogeneration CO2 at 11.131910 TWh and 2024 emission intensity (0.365662 tCO2/MWh_el)

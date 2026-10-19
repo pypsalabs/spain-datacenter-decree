@@ -1,0 +1,7253 @@
+{
+  "textos33": {
+    "titulo": [
+      "Estructura de la potencia instalada por tipo de central y por CC.AA."
+    ],
+    "categoria": [
+      "Comunidad autónoma"
+    ],
+    "sistemaElectrico": [
+      "nacional por CC.AA"
+    ]
+  },
+  "lang": "es",
+  "grafica33": "33",
+  "datos33_year_5": [
+    [
+      "Andalucía",
+      "Aragón",
+      "Asturias, Principado de",
+      "Baleares, Islas",
+      "Canarias",
+      "Cantabria",
+      "Castilla - La Mancha",
+      "Castilla y León",
+      "Cataluña",
+      "Ceuta",
+      "Comunidad Valenciana",
+      "Extremadura",
+      "Galicia",
+      "Madrid, Comunidad de",
+      "Melilla",
+      "Región de Murcia",
+      "Comunidad de Navarra",
+      "País Vasco",
+      "Rioja, La",
+      "Nacional"
+    ],
+    [
+      "Hidráulica",
+      "Carbón",
+      "Ciclo Combinado",
+      "Eólica",
+      "Solar Fotovoltaica",
+      "Solar Térmica",
+      "Otras Renovables",
+      "Cogeneración",
+      "Residuos no Renovables",
+      "Residuos Renovables",
+      "Nuclear",
+      "Motor diésel",
+      "Turbina de Gas",
+      "Turbina de Vapor",
+      "Fuel",
+      "Hidroeólica",
+      "Turbinación bombeo",
+      "Baterías"
+    ],
+    {
+      "Hidráulica": [
+        3.7,
+        13,
+        21.2,
+        0,
+        0,
+        12.4,
+        6.1,
+        35.2,
+        16.2,
+        0,
+        7.7,
+        25.1,
+        34.1,
+        23.7,
+        0,
+        0.7,
+        7.5,
+        6,
+        3.7,
+        15
+      ],
+      "Carbón": [
+        5.2,
+        0,
+        32.9,
+        11.7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        12.8,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3.3
+      ],
+      "Ciclo Combinado": [
+        35.4,
+        18.2,
+        22.5,
+        40.1,
+        27.5,
+        0,
+        7.1,
+        0,
+        31.9,
+        0,
+        34.4,
+        0,
+        11.4,
+        0,
+        0,
+        62,
+        38.9,
+        66.3,
+        55.7,
+        23.1
+      ],
+      "Eólica": [
+        20.9,
+        45.6,
+        17.4,
+        0.2,
+        17.7,
+        4.4,
+        39.5,
+        51,
+        10.7,
+        0,
+        15,
+        0.4,
+        35.5,
+        0,
+        0,
+        5,
+        41.6,
+        5.2,
+        31.8,
+        25.2
+      ],
+      "Solar Fotovoltaica": [
+        18.6,
+        15.5,
+        0,
+        7.4,
+        5.7,
+        0.5,
+        28,
+        8.4,
+        2.5,
+        0,
+        4.9,
+        42.3,
+        0.2,
+        13.9,
+        0.1,
+        25.7,
+        5.4,
+        1.7,
+        7.1,
+        13.5
+      ],
+      "Solar Térmica": [
+        5.9,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3.3,
+        0,
+        0.2,
+        0,
+        0.6,
+        9.4,
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        0,
+        2
+      ],
+      "Otras Renovables": [
+        2.7,
+        0.2,
+        2.4,
+        0.3,
+        0.1,
+        1.6,
+        1,
+        0.8,
+        0.5,
+        0,
+        0.2,
+        0.5,
+        0.6,
+        9.8,
+        0,
+        0.2,
+        1.4,
+        0.9,
+        0.3,
+        1
+      ],
+      "Cogeneración": [
+        3.9,
+        5.1,
+        1.8,
+        0.6,
+        1.2,
+        34.5,
+        3.6,
+        4.6,
+        8.2,
+        0,
+        5.4,
+        0.1,
+        4.8,
+        46.1,
+        0,
+        5.9,
+        5.1,
+        15.4,
+        1.4,
+        5
+      ],
+      "Residuos no Renovables": [
+        0.3,
+        0.5,
+        1.9,
+        1.8,
+        0,
+        0.6,
+        0,
+        0,
+        0.3,
+        0,
+        0.8,
+        0,
+        0.4,
+        3.3,
+        1.4,
+        0,
+        0,
+        2.4,
+        0,
+        0.4
+      ],
+      "Residuos Renovables": [
+        0,
+        0,
+        0,
+        1.8,
+        0,
+        0.6,
+        0,
+        0,
+        0.2,
+        0,
+        0,
+        0,
+        0.2,
+        3.3,
+        1.4,
+        0,
+        0,
+        2,
+        0,
+        0.1
+      ],
+      "Nuclear": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        9.4,
+        0,
+        25.5,
+        0,
+        12.8,
+        22.2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        6.3
+      ],
+      "Motor diésel": [
+        0,
+        0,
+        0,
+        6.8,
+        15.5,
+        0,
+        0,
+        0,
+        0,
+        85.4,
+        0,
+        0,
+        0,
+        0,
+        82.4,
+        0,
+        0,
+        0,
+        0,
+        0.7
+      ],
+      "Turbina de Gas": [
+        0,
+        0,
+        0,
+        29.4,
+        16.5,
+        0,
+        0,
+        0,
+        0,
+        14.6,
+        0,
+        0,
+        0,
+        0,
+        14.8,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "Turbina de Vapor": [
+        0,
+        0,
+        0,
+        0,
+        15.3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.4
+      ],
+      "Fuel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Hidroeólica": [
+        0,
+        0,
+        0,
+        0,
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Turbinación bombeo": [
+        3.5,
+        2.1,
+        0,
+        0,
+        0,
+        45.3,
+        2,
+        0,
+        3.7,
+        0,
+        18.2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2.9
+      ],
+      "Baterías": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "datos33_year_4": [
+    [
+      "Andalucía",
+      "Aragón",
+      "Asturias, Principado de",
+      "Cantabria",
+      "Castilla - La Mancha",
+      "Castilla y León",
+      "Cataluña",
+      "Ceuta",
+      "Madrid, Comunidad de",
+      "Comunidad Valenciana",
+      "Extremadura",
+      "Galicia",
+      "Baleares, Islas",
+      "Canarias",
+      "Rioja, La",
+      "Melilla",
+      "Región de Murcia",
+      "Comunidad de Navarra",
+      "País Vasco",
+      "Nacional"
+    ],
+    [
+      "Hidráulica",
+      "Carbón",
+      "Ciclo Combinado",
+      "Eólica",
+      "Solar Fotovoltaica",
+      "Solar Térmica",
+      "Otras Renovables",
+      "Cogeneración",
+      "Residuos no Renovables",
+      "Residuos Renovables",
+      "Nuclear",
+      "Motor diésel",
+      "Turbina de Gas",
+      "Turbina de Vapor",
+      "Fuel",
+      "Hidroeólica",
+      "Turbinación bombeo",
+      "Baterías"
+    ],
+    {
+      "Hidráulica": [
+        3.5,
+        12.2,
+        21,
+        12.4,
+        5.2,
+        33.4,
+        16.1,
+        0,
+        23.7,
+        7.7,
+        21.4,
+        34.1,
+        0,
+        0,
+        3.7,
+        0,
+        0.7,
+        7.4,
+        6,
+        14.3
+      ],
+      "Carbón": [
+        3.2,
+        0,
+        32.7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        12.8,
+        11.3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2.9
+      ],
+      "Ciclo Combinado": [
+        33.4,
+        17.1,
+        22.3,
+        0,
+        6.1,
+        0,
+        31.7,
+        0,
+        0,
+        34.3,
+        0,
+        11.4,
+        38.6,
+        26.9,
+        55.7,
+        0,
+        61.3,
+        38.4,
+        66.1,
+        21.9
+      ],
+      "Eólica": [
+        20.2,
+        46.2,
+        18.3,
+        4.4,
+        38.4,
+        50.3,
+        11.4,
+        0,
+        0,
+        14.9,
+        0.4,
+        35.5,
+        0.2,
+        18.6,
+        31.8,
+        0,
+        5,
+        42.6,
+        5.2,
+        25.2
+      ],
+      "Solar Fotovoltaica": [
+        24.3,
+        17.1,
+        0,
+        0.6,
+        33.6,
+        11.1,
+        2.5,
+        0,
+        13.9,
+        5.1,
+        50.6,
+        0.2,
+        10.8,
+        6.6,
+        7.1,
+        0.1,
+        26.5,
+        5.4,
+        1.8,
+        16.9
+      ],
+      "Solar Térmica": [
+        5.6,
+        0,
+        0,
+        0,
+        2.8,
+        0,
+        0.2,
+        0,
+        0,
+        0.6,
+        8,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        1.9
+      ],
+      "Otras Renovables": [
+        2.5,
+        0.1,
+        2.4,
+        1.6,
+        0.9,
+        0.8,
+        0.5,
+        0,
+        9.8,
+        0.2,
+        0.4,
+        0.6,
+        0.3,
+        0.1,
+        0.3,
+        0,
+        0.2,
+        1.3,
+        0.9,
+        0.9
+      ],
+      "Cogeneración": [
+        3.7,
+        4.8,
+        1.8,
+        34.5,
+        3.1,
+        4.4,
+        8.1,
+        0,
+        46.1,
+        5.3,
+        0.1,
+        4.8,
+        0.5,
+        1.2,
+        1.4,
+        0,
+        5.8,
+        4.8,
+        15.4,
+        4.7
+      ],
+      "Residuos no Renovables": [
+        0.3,
+        0.5,
+        1.4,
+        0.6,
+        0,
+        0,
+        0.3,
+        0,
+        3.3,
+        0.8,
+        0,
+        0.4,
+        1.8,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2.4,
+        0.4
+      ],
+      "Residuos Renovables": [
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        0.2,
+        0,
+        3.3,
+        0,
+        0,
+        0.2,
+        1.8,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2,
+        0.1
+      ],
+      "Nuclear": [
+        0,
+        0,
+        0,
+        0,
+        8.1,
+        0,
+        25.3,
+        0,
+        0,
+        12.8,
+        19,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5.9
+      ],
+      "Motor diésel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        85.4,
+        0,
+        0,
+        0,
+        0,
+        6.5,
+        15.1,
+        0,
+        82.4,
+        0,
+        0,
+        0,
+        0.6
+      ],
+      "Turbina de Gas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14.6,
+        0,
+        0,
+        0,
+        0,
+        28.3,
+        16.2,
+        0,
+        14.8,
+        0,
+        0,
+        0,
+        1
+      ],
+      "Turbina de Vapor": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        15,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.4
+      ],
+      "Fuel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Hidroeólica": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Turbinación bombeo": [
+        3.3,
+        2,
+        0,
+        45.2,
+        1.7,
+        0,
+        3.7,
+        0,
+        0,
+        18.2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2.8
+      ],
+      "Baterías": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.2,
+        0
+      ]
+    }
+  ],
+  "datos33_year_3": [
+    [
+      "Andalucía",
+      "Aragón",
+      "Asturias, Principado de",
+      "Cantabria",
+      "Castilla - La Mancha",
+      "Castilla y León",
+      "Cataluña",
+      "Ceuta",
+      "Madrid, Comunidad de",
+      "Comunidad Valenciana",
+      "Extremadura",
+      "Galicia",
+      "Baleares, Islas",
+      "Canarias",
+      "Rioja, La",
+      "Melilla",
+      "Región de Murcia",
+      "Comunidad de Navarra",
+      "País Vasco",
+      "Nacional"
+    ],
+    [
+      "Hidráulica",
+      "Carbón",
+      "Ciclo Combinado",
+      "Eólica",
+      "Solar Fotovoltaica",
+      "Solar Térmica",
+      "Otras Renovables",
+      "Cogeneración",
+      "Residuos no Renovables",
+      "Residuos Renovables",
+      "Nuclear",
+      "Motor diésel",
+      "Turbina de Gas",
+      "Turbina de Vapor",
+      "Fuel",
+      "Hidroeólica",
+      "Turbinación bombeo",
+      "Baterías"
+    ],
+    {
+      "Hidráulica": [
+        3.3,
+        11.4,
+        21.1,
+        12.4,
+        4.5,
+        31.9,
+        16,
+        0,
+        23.7,
+        7.7,
+        19.4,
+        34.1,
+        0,
+        0,
+        3.7,
+        0,
+        0.6,
+        6.9,
+        6,
+        13.5
+      ],
+      "Carbón": [
+        3,
+        0,
+        32.7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        12.8,
+        10.7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2.7
+      ],
+      "Ciclo Combinado": [
+        31.1,
+        16,
+        22.3,
+        0,
+        5.2,
+        0,
+        31.5,
+        0,
+        0,
+        34.2,
+        0,
+        11.4,
+        36.7,
+        26.3,
+        55.5,
+        0,
+        59,
+        35.9,
+        65.9,
+        20.8
+      ],
+      "Eólica": [
+        19,
+        44.9,
+        18.3,
+        4.4,
+        33.4,
+        48.2,
+        11.5,
+        0,
+        0,
+        14.9,
+        0.8,
+        35.5,
+        0.2,
+        19.5,
+        31.7,
+        0,
+        4.8,
+        46.1,
+        5.2,
+        24.4
+      ],
+      "Solar Fotovoltaica": [
+        29.4,
+        20.8,
+        0,
+        0.6,
+        42.8,
+        15,
+        2.8,
+        0,
+        13.9,
+        5.6,
+        54.9,
+        0.2,
+        15.2,
+        7.1,
+        7.4,
+        0.1,
+        29.3,
+        5.3,
+        1.9,
+        20.8
+      ],
+      "Solar Térmica": [
+        5.2,
+        0,
+        0,
+        0,
+        2.4,
+        0,
+        0.2,
+        0,
+        0,
+        0.6,
+        7.2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        1.8
+      ],
+      "Otras Renovables": [
+        2.4,
+        0.1,
+        2.4,
+        1.6,
+        0.8,
+        0.7,
+        0.5,
+        0,
+        9.8,
+        0.2,
+        0.4,
+        0.6,
+        0.3,
+        0.3,
+        0.3,
+        0,
+        0.2,
+        1.3,
+        0.9,
+        0.9
+      ],
+      "Cogeneración": [
+        3.4,
+        4.4,
+        1.8,
+        34.5,
+        2.6,
+        4.2,
+        8.1,
+        0,
+        46.1,
+        5.2,
+        0.1,
+        4.8,
+        0.5,
+        1.2,
+        1.4,
+        0,
+        5.6,
+        4.5,
+        15.3,
+        4.4
+      ],
+      "Residuos no Renovables": [
+        0.3,
+        0.4,
+        1.4,
+        0.6,
+        0,
+        0,
+        0.3,
+        0,
+        3.3,
+        0.8,
+        0,
+        0.4,
+        1.7,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2.4,
+        0.3
+      ],
+      "Residuos Renovables": [
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        0.2,
+        0,
+        3.3,
+        0,
+        0,
+        0.2,
+        1.7,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2,
+        0.1
+      ],
+      "Nuclear": [
+        0,
+        0,
+        0,
+        0,
+        6.9,
+        0,
+        25.3,
+        0,
+        0,
+        12.7,
+        17.2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5.6
+      ],
+      "Motor diésel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        85.4,
+        0,
+        0,
+        0,
+        0,
+        6.2,
+        14.8,
+        0,
+        82.4,
+        0,
+        0,
+        0,
+        0.6
+      ],
+      "Turbina de Gas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14.6,
+        0,
+        0,
+        0,
+        0,
+        26.9,
+        15.8,
+        0,
+        14.8,
+        0,
+        0,
+        0,
+        0.9
+      ],
+      "Turbina de Vapor": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14.6,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.4
+      ],
+      "Fuel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Hidroeólica": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Turbinación bombeo": [
+        3.1,
+        1.9,
+        0,
+        45.2,
+        1.5,
+        0,
+        3.7,
+        0,
+        0,
+        18.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2.6
+      ],
+      "Baterías": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.4,
+        0
+      ]
+    }
+  ],
+  "datos33_year_2": [
+    [
+      "Andalucía",
+      "Aragón",
+      "Asturias, Principado de",
+      "Cantabria",
+      "Castilla - La Mancha",
+      "Castilla y León",
+      "Cataluña",
+      "Ceuta",
+      "Madrid, Comunidad de",
+      "Comunidad Valenciana",
+      "Extremadura",
+      "Galicia",
+      "Baleares, Islas",
+      "Canarias",
+      "Rioja, La",
+      "Melilla",
+      "Región de Murcia",
+      "Comunidad de Navarra",
+      "País Vasco",
+      "Nacional"
+    ],
+    [
+      "Hidráulica",
+      "Carbón",
+      "Ciclo Combinado",
+      "Eólica",
+      "Solar Fotovoltaica",
+      "Solar Térmica",
+      "Otras Renovables",
+      "Cogeneración",
+      "Residuos no Renovables",
+      "Residuos Renovables",
+      "Nuclear",
+      "Motor diésel",
+      "Turbina de Gas",
+      "Turbina de Vapor",
+      "Fuel",
+      "Hidroeólica",
+      "Turbinación bombeo",
+      "Baterías"
+    ],
+    {
+      "Hidráulica": [
+        2.9,
+        10.4,
+        21.1,
+        12.4,
+        4.1,
+        28.8,
+        15.9,
+        0,
+        23.6,
+        7.6,
+        17.3,
+        38.9,
+        0,
+        0,
+        3.7,
+        0,
+        0.6,
+        6.8,
+        6,
+        12.9
+      ],
+      "Carbón": [
+        2.7,
+        0,
+        32.7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        10.7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.6
+      ],
+      "Ciclo Combinado": [
+        27.8,
+        14.7,
+        22.3,
+        0,
+        4.8,
+        0,
+        31.4,
+        0,
+        0,
+        34,
+        0,
+        13,
+        36.5,
+        25.7,
+        55.5,
+        0,
+        57.3,
+        35.2,
+        66,
+        19.8
+      ],
+      "Eólica": [
+        17.1,
+        44.8,
+        18.3,
+        4.4,
+        31.5,
+        47.8,
+        11.6,
+        0,
+        0,
+        14.8,
+        0.7,
+        41,
+        0.2,
+        19.3,
+        31.7,
+        0,
+        4.6,
+        45.2,
+        5.2,
+        24.2
+      ],
+      "Solar Fotovoltaica": [
+        36.7,
+        23.8,
+        0,
+        0.6,
+        46.5,
+        18.9,
+        3.3,
+        0,
+        13.9,
+        6.1,
+        59.8,
+        0.2,
+        15.6,
+        8.9,
+        7.5,
+        0.1,
+        31.3,
+        7.1,
+        1.9,
+        24.7
+      ],
+      "Solar Térmica": [
+        4.7,
+        0,
+        0,
+        0,
+        2.2,
+        0,
+        0.2,
+        0,
+        0,
+        0.6,
+        6.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        1.7
+      ],
+      "Otras Renovables": [
+        2.1,
+        0.1,
+        2.4,
+        1.6,
+        0.7,
+        0.7,
+        0.5,
+        0,
+        10,
+        0.1,
+        0.3,
+        0.7,
+        0.3,
+        0.3,
+        0.3,
+        0,
+        0.1,
+        1.2,
+        0.9,
+        0.8
+      ],
+      "Cogeneración": [
+        3.1,
+        4.1,
+        1.8,
+        34.5,
+        2.4,
+        3.8,
+        7.8,
+        0,
+        46,
+        5.2,
+        0.1,
+        5.5,
+        0.5,
+        1.1,
+        1.4,
+        0,
+        5.4,
+        4.4,
+        15.1,
+        4.2
+      ],
+      "Residuos no Renovables": [
+        0.2,
+        0.4,
+        1.4,
+        0.6,
+        0,
+        0,
+        0.3,
+        0,
+        3.2,
+        0.8,
+        0,
+        0.4,
+        1.7,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2.4,
+        0.3
+      ],
+      "Residuos Renovables": [
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        0.2,
+        0,
+        3.2,
+        0,
+        0,
+        0.3,
+        1.7,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2,
+        0.1
+      ],
+      "Nuclear": [
+        0,
+        0,
+        0,
+        0,
+        6.4,
+        0,
+        25.1,
+        0,
+        0,
+        12.7,
+        15.3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5.4
+      ],
+      "Motor diésel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        85.4,
+        0,
+        0,
+        0,
+        0,
+        6.2,
+        14.5,
+        0,
+        82.4,
+        0,
+        0,
+        0,
+        0.6
+      ],
+      "Turbina de Gas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14.6,
+        0,
+        0,
+        0,
+        0,
+        26.8,
+        15.5,
+        0,
+        14.8,
+        0,
+        0,
+        0,
+        0.9
+      ],
+      "Turbina de Vapor": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14.3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.4
+      ],
+      "Fuel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Hidroeólica": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Turbinación bombeo": [
+        2.7,
+        1.7,
+        0,
+        45.2,
+        1.4,
+        0,
+        3.6,
+        0,
+        0,
+        18,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2.5
+      ],
+      "Baterías": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.4,
+        0
+      ]
+    }
+  ],
+  "datos33_year_1": [
+    [
+      "Andalucía",
+      "Aragón",
+      "Asturias, Principado de",
+      "Cantabria",
+      "Castilla - La Mancha",
+      "Castilla y León",
+      "Cataluña",
+      "Ceuta",
+      "Madrid, Comunidad de",
+      "Comunidad Valenciana",
+      "Extremadura",
+      "Galicia",
+      "Baleares, Islas",
+      "Canarias",
+      "Rioja, La",
+      "Melilla",
+      "Región de Murcia",
+      "Comunidad de Navarra",
+      "País Vasco",
+      "Nacional"
+    ],
+    [
+      "Hidráulica",
+      "Carbón",
+      "Ciclo Combinado",
+      "Eólica",
+      "Solar Fotovoltaica",
+      "Solar Térmica",
+      "Otras Renovables",
+      "Cogeneración",
+      "Residuos no Renovables",
+      "Residuos Renovables",
+      "Nuclear",
+      "Motor diésel",
+      "Turbina de Gas",
+      "Turbina de Vapor",
+      "Fuel",
+      "Hidroeólica",
+      "Turbinación bombeo",
+      "Baterías"
+    ],
+    {
+      "Hidráulica": [
+        2.6,
+        9.7,
+        21.1,
+        12.4,
+        3.8,
+        24.3,
+        15.8,
+        0,
+        19,
+        7.6,
+        16.4,
+        38.6,
+        0,
+        0,
+        3.4,
+        0,
+        0.6,
+        6.4,
+        6,
+        12
+      ],
+      "Carbón": [
+        2.4,
+        0,
+        18,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        10.6,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.1
+      ],
+      "Ciclo Combinado": [
+        24.6,
+        13.6,
+        22.4,
+        0,
+        4.4,
+        0,
+        31.3,
+        0,
+        0,
+        33.7,
+        0,
+        12.9,
+        36.3,
+        25.2,
+        50.2,
+        0,
+        53.8,
+        33.2,
+        66.5,
+        18.4
+      ],
+      "Eólica": [
+        15.3,
+        44.1,
+        18.4,
+        4.4,
+        29.2,
+        42.8,
+        11.7,
+        0,
+        0,
+        14.7,
+        0.7,
+        41.7,
+        0.2,
+        19.7,
+        32.7,
+        0,
+        4.3,
+        44.4,
+        5.2,
+        23.3
+      ],
+      "Solar Fotovoltaica": [
+        44,
+        26.9,
+        0,
+        0.6,
+        50.5,
+        29.5,
+        3.8,
+        0,
+        33.9,
+        7.3,
+        61.4,
+        0.2,
+        16.6,
+        9.7,
+        12.6,
+        0.1,
+        35.7,
+        10.8,
+        2,
+        29.2
+      ],
+      "Solar Térmica": [
+        4.1,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0.2,
+        0,
+        0,
+        0.6,
+        6.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.5,
+        0,
+        0,
+        1.6
+      ],
+      "Otras Renovables": [
+        1.9,
+        0.1,
+        2.4,
+        1.6,
+        0.6,
+        0.6,
+        0.5,
+        0,
+        8.1,
+        0.1,
+        0.7,
+        0.7,
+        0.3,
+        0.3,
+        0.2,
+        0,
+        0.1,
+        1.2,
+        0.9,
+        0.8
+      ],
+      "Cogeneración": [
+        2.6,
+        3.6,
+        1.6,
+        34.3,
+        2,
+        2.8,
+        7.5,
+        0,
+        33.8,
+        4.7,
+        0.1,
+        5.1,
+        0.5,
+        1.1,
+        0.9,
+        0,
+        4.9,
+        4,
+        14.5,
+        3.7
+      ],
+      "Residuos no Renovables": [
+        0.2,
+        0.4,
+        1.4,
+        0.6,
+        0,
+        0,
+        0.3,
+        0,
+        2.6,
+        0.6,
+        0,
+        0.4,
+        1.6,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2.4,
+        0.3
+      ],
+      "Residuos Renovables": [
+        0,
+        0,
+        0,
+        0.6,
+        0,
+        0,
+        0.2,
+        0,
+        2.6,
+        0,
+        0,
+        0.3,
+        1.6,
+        0,
+        0,
+        1.4,
+        0,
+        0,
+        2,
+        0.1
+      ],
+      "Nuclear": [
+        0,
+        0,
+        0,
+        0,
+        5.9,
+        0,
+        25,
+        0,
+        0,
+        12.6,
+        14.5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5
+      ],
+      "Motor diésel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        85.4,
+        0,
+        0,
+        0,
+        0,
+        6.1,
+        14.2,
+        0,
+        82.4,
+        0,
+        0,
+        0,
+        0.5
+      ],
+      "Turbina de Gas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14.6,
+        0,
+        0,
+        0,
+        0,
+        26.1,
+        15.2,
+        0,
+        14.8,
+        0,
+        0,
+        0,
+        0.8
+      ],
+      "Turbina de Vapor": [
+        0,
+        0,
+        14.7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        14.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.7
+      ],
+      "Fuel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Hidroeólica": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "Turbinación bombeo": [
+        2.4,
+        1.6,
+        0,
+        45.4,
+        1.3,
+        0,
+        3.6,
+        0,
+        0,
+        17.9,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2.3
+      ],
+      "Baterías": [
+        0,
+        0,
+        0,
+        0,
+        0.4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0.4,
+        0.1
+      ]
+    }
+  ],
+  "textos32": {
+    "titulo": [
+      "Desglose de potencia instalada a 31.12.2025"
+    ],
+    "categoria": [
+      "Energías"
+    ],
+    "sistemaElectrico": [
+      "nacional por CC.AA"
+    ]
+  },
+  "grafica32": "32",
+  "datos32Nacional": [
+    {
+      "Andalucía": {
+        "Hidráulica": "618.288",
+        "Hidroeólica": "0.000",
+        "Eólica": "3706.780",
+        "Solar Fotovoltaica": "10662.693",
+        "Solar Térmica": "1000.023",
+        "Otras Renovables": "455.854",
+        "Residuos Renovables": "0.000",
+        "Renovables": "16443.638",
+        "Nuclear": "0.000",
+        "Carbón": "570.050",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "5951.715",
+        "Cogeneración": "626.654",
+        "Residuos no Renovables": "51.293",
+        "No renovables": "7199.712",
+        "Turbinación bombeo": "584.870",
+        "Baterías": "0.597",
+        "Almacenamiento": "585.467",
+        "Total": "24228.816"
+      },
+      "Aragón": {
+        "Hidráulica": "1330.668",
+        "Hidroeólica": "0.000",
+        "Eólica": "6060.569",
+        "Solar Fotovoltaica": "3695.222",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "15.576",
+        "Residuos Renovables": "0.000",
+        "Renovables": "11102.035",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "1869.670",
+        "Cogeneración": "490.378",
+        "Residuos no Renovables": "49.900",
+        "No renovables": "2409.948",
+        "Turbinación bombeo": "219.140",
+        "Baterías": "0.000",
+        "Almacenamiento": "219.140",
+        "Total": "13731.123"
+      },
+      "Asturias": {
+        "Hidráulica": "805.660",
+        "Hidroeólica": "0.000",
+        "Eólica": "702.075",
+        "Solar Fotovoltaica": "1.226",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "90.535",
+        "Residuos Renovables": "0.000",
+        "Renovables": "1599.496",
+        "Nuclear": "0.000",
+        "Carbón": "688.040",
+        "Fuel+Gas": "561.885",
+        "Ciclo Combinado": "854.170",
+        "Cogeneración": "61.067",
+        "Residuos no Renovables": "53.948",
+        "No renovables": "2219.110",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "0.250",
+        "Almacenamiento": "0.250",
+        "Total": "3818.856"
+      },
+      "Cantabria": {
+        "Hidráulica": "98.597",
+        "Hidroeólica": "0.000",
+        "Eólica": "35.307",
+        "Solar Fotovoltaica": "4.988",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "12.862",
+        "Residuos Renovables": "4.967",
+        "Renovables": "156.721",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "0.000",
+        "Cogeneración": "272.840",
+        "Residuos no Renovables": "4.967",
+        "No renovables": "277.807",
+        "Turbinación bombeo": "360.600",
+        "Baterías": "0.000",
+        "Almacenamiento": "360.600",
+        "Total": "795.127"
+      },
+      "Castilla - La Mancha": {
+        "Hidráulica": "648.974",
+        "Hidroeólica": "0.000",
+        "Eólica": "4982.524",
+        "Solar Fotovoltaica": "8617.652",
+        "Solar Térmica": "349.400",
+        "Otras Renovables": "98.064",
+        "Residuos Renovables": "0.000",
+        "Renovables": "14696.614",
+        "Nuclear": "1003.410",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "758.740",
+        "Cogeneración": "343.953",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "2106.103",
+        "Turbinación bombeo": "215.000",
+        "Baterías": "62.560",
+        "Almacenamiento": "277.560",
+        "Total": "17080.277"
+      },
+      "Castilla y León": {
+        "Hidráulica": "4396.991",
+        "Hidroeólica": "0.000",
+        "Eólica": "7750.647",
+        "Solar Fotovoltaica": "5338.408",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "102.981",
+        "Residuos Renovables": "0.000",
+        "Renovables": "17589.027",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "0.000",
+        "Cogeneración": "513.438",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "513.438",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "0.250",
+        "Almacenamiento": "0.250",
+        "Total": "18102.715"
+      },
+      "Cataluña": {
+        "Hidráulica": "1915.115",
+        "Hidroeólica": "0.000",
+        "Eólica": "1418.320",
+        "Solar Fotovoltaica": "459.100",
+        "Solar Térmica": "22.500",
+        "Otras Renovables": "59.429",
+        "Residuos Renovables": "27.175",
+        "Renovables": "3901.638",
+        "Nuclear": "3032.810",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "3788.230",
+        "Cogeneración": "910.192",
+        "Residuos no Renovables": "36.617",
+        "No renovables": "7767.848",
+        "Turbinación bombeo": "439.840",
+        "Baterías": "0.000",
+        "Almacenamiento": "439.840",
+        "Total": "12109.326"
+      },
+      "Ceuta": {
+        "Hidráulica": "0.000",
+        "Hidroeólica": "0.000",
+        "Eólica": "0.000",
+        "Solar Fotovoltaica": "0.000",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "0.000",
+        "Residuos Renovables": "0.000",
+        "Renovables": "0.000",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "90.820",
+        "Ciclo Combinado": "0.000",
+        "Cogeneración": "0.000",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "90.820",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "0.000",
+        "Almacenamiento": "0.000",
+        "Total": "90.820"
+      },
+      "Madrid": {
+        "Hidráulica": "108.517",
+        "Hidroeólica": "0.000",
+        "Eólica": "0.000",
+        "Solar Fotovoltaica": "193.446",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "46.045",
+        "Residuos Renovables": "14.900",
+        "Renovables": "362.907",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "0.000",
+        "Cogeneración": "193.071",
+        "Residuos no Renovables": "14.900",
+        "No renovables": "207.971",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "0.000",
+        "Almacenamiento": "0.000",
+        "Total": "570.878"
+      },
+      "Comunidad Valenciana": {
+        "Hidráulica": "642.004",
+        "Hidroeólica": "0.000",
+        "Eólica": "1243.030",
+        "Solar Fotovoltaica": "620.402",
+        "Solar Térmica": "49.900",
+        "Otras Renovables": "10.053",
+        "Residuos Renovables": "0.000",
+        "Renovables": "2565.389",
+        "Nuclear": "1063.940",
+        "Carbón": "0.000",
+        "Fuel+Gas": "7.950",
+        "Ciclo Combinado": "2853.540",
+        "Cogeneración": "400.078",
+        "Residuos no Renovables": "54.150",
+        "No renovables": "4379.658",
+        "Turbinación bombeo": "1511.950",
+        "Baterías": "0.000",
+        "Almacenamiento": "1511.950",
+        "Total": "8456.997"
+      },
+      "Extremadura": {
+        "Hidráulica": "2277.362",
+        "Hidroeólica": "0.000",
+        "Eólica": "98.775",
+        "Solar Fotovoltaica": "8511.859",
+        "Solar Térmica": "849.000",
+        "Otras Renovables": "93.985",
+        "Residuos Renovables": "0.000",
+        "Renovables": "11830.981",
+        "Nuclear": "2017.130",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "0.000",
+        "Cogeneración": "8.328",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "2025.458",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "7.178",
+        "Almacenamiento": "7.178",
+        "Total": "13863.617"
+      },
+      "Galicia": {
+        "Hidráulica": "3731.276",
+        "Hidroeólica": "0.000",
+        "Eólica": "4028.940",
+        "Solar Fotovoltaica": "23.494",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "62.797",
+        "Residuos Renovables": "25.000",
+        "Renovables": "7871.507",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "1246.980",
+        "Cogeneración": "491.161",
+        "Residuos no Renovables": "40.680",
+        "No renovables": "1778.821",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "5.000",
+        "Almacenamiento": "5.000",
+        "Total": "9655.328"
+      },
+      "Baleares": {
+        "Hidráulica": "0.000",
+        "Hidroeólica": "0.000",
+        "Eólica": "3.558",
+        "Solar Fotovoltaica": "375.673",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "7.916",
+        "Residuos Renovables": "37.400",
+        "Renovables": "424.547",
+        "Nuclear": "0.000",
+        "Carbón": "241.200",
+        "Fuel+Gas": "731.000",
+        "Ciclo Combinado": "822.900",
+        "Cogeneración": "10.523",
+        "Residuos no Renovables": "37.400",
+        "No renovables": "1843.023",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "1.200",
+        "Almacenamiento": "1.200",
+        "Total": "2268.770"
+      },
+      "Canarias": {
+        "Hidráulica": "0.763",
+        "Hidroeólica": "11.320",
+        "Eólica": "677.435",
+        "Solar Fotovoltaica": "332.225",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "8.806",
+        "Residuos Renovables": "0.000",
+        "Renovables": "1030.549",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "1491.030",
+        "Ciclo Combinado": "865.400",
+        "Cogeneración": "38.200",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "2394.630",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "5.080",
+        "Almacenamiento": "5.080",
+        "Total": "3430.259"
+      },
+      "La Rioja": {
+        "Hidráulica": "52.426",
+        "Hidroeólica": "0.000",
+        "Eólica": "511.920",
+        "Solar Fotovoltaica": "197.277",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "2.477",
+        "Residuos Renovables": "0.000",
+        "Renovables": "764.099",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "784.700",
+        "Cogeneración": "14.372",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "799.072",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "0.100",
+        "Almacenamiento": "0.100",
+        "Total": "1563.271"
+      },
+      "Melilla": {
+        "Hidráulica": "0.000",
+        "Hidroeólica": "0.000",
+        "Eólica": "0.000",
+        "Solar Fotovoltaica": "0.060",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "0.000",
+        "Residuos Renovables": "1.084",
+        "Renovables": "1.144",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "75.610",
+        "Ciclo Combinado": "0.000",
+        "Cogeneración": "0.000",
+        "Residuos no Renovables": "1.084",
+        "No renovables": "76.694",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "0.000",
+        "Almacenamiento": "0.000",
+        "Total": "77.838"
+      },
+      "Murcia": {
+        "Hidráulica": "35.478",
+        "Hidroeólica": "0.000",
+        "Eólica": "264.090",
+        "Solar Fotovoltaica": "2170.366",
+        "Solar Térmica": "30.000",
+        "Otras Renovables": "8.365",
+        "Residuos Renovables": "0.000",
+        "Renovables": "2508.299",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "3263.710",
+        "Cogeneración": "299.912",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "3563.622",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "0.000",
+        "Almacenamiento": "0.000",
+        "Total": "6071.921"
+      },
+      "Navarra": {
+        "Hidráulica": "236.061",
+        "Hidroeólica": "0.000",
+        "Eólica": "1634.852",
+        "Solar Fotovoltaica": "395.814",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "42.851",
+        "Residuos Renovables": "0.000",
+        "Renovables": "2309.578",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "1222.320",
+        "Cogeneración": "147.922",
+        "Residuos no Renovables": "0.000",
+        "No renovables": "1370.242",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "1.150",
+        "Almacenamiento": "1.150",
+        "Total": "3680.970"
+      },
+      "País Vasco": {
+        "Hidráulica": "178.389",
+        "Hidroeólica": "0.000",
+        "Eólica": "155.372",
+        "Solar Fotovoltaica": "60.187",
+        "Solar Térmica": "0.000",
+        "Otras Renovables": "26.596",
+        "Residuos Renovables": "59.586",
+        "Renovables": "480.130",
+        "Nuclear": "0.000",
+        "Carbón": "0.000",
+        "Fuel+Gas": "0.000",
+        "Ciclo Combinado": "1968.070",
+        "Cogeneración": "428.695",
+        "Residuos no Renovables": "71.786",
+        "No renovables": "2468.551",
+        "Turbinación bombeo": "0.000",
+        "Baterías": "12.355",
+        "Almacenamiento": "12.355",
+        "Total": "2961.035"
+      },
+      "Nacional": {
+        "Hidráulica": "17076.568",
+        "Hidroeólica": "11.320",
+        "Eólica": "33274.194",
+        "Solar Fotovoltaica": "41660.091",
+        "Solar Térmica": "2300.823",
+        "Otras Renovables": "1145.192",
+        "Residuos Renovables": "170.112",
+        "Renovables": "95638.299",
+        "Nuclear": "7117.290",
+        "Carbón": "1499.290",
+        "Fuel+Gas": "2958.295",
+        "Ciclo Combinado": "26250.145",
+        "Cogeneración": "5250.781",
+        "Residuos no Renovables": "416.725",
+        "No renovables": "43492.526",
+        "Turbinación bombeo": "3331.400",
+        "Baterías": "95.720",
+        "Almacenamiento": "3427.120",
+        "Total": "142557.945"
+      }
+    },
+    [
+      "Hidráulica",
+      "Hidroeólica",
+      "Eólica",
+      "Solar Fotovoltaica",
+      "Solar Térmica",
+      "Otras Renovables",
+      "Residuos Renovables",
+      "Renovables",
+      "Nuclear",
+      "Carbón",
+      "Fuel+Gas",
+      "Ciclo Combinado",
+      "Cogeneración",
+      "Residuos no Renovables",
+      "No renovables",
+      "Turbinación bombeo",
+      "Baterías",
+      "Almacenamiento",
+      "Total"
+    ]
+  ],
+  "graficoGeneracionPotenciaInstaladaCCAAMapa": {
+    "mw": [
+      [
+        24228.816,
+        4,
+        "Andalucía"
+      ],
+      [
+        13731.123,
+        5,
+        "Aragón"
+      ],
+      [
+        3818.856,
+        11,
+        "Asturias, Principado de"
+      ],
+      [
+        2268.77,
+        18,
+        "Baleares, Islas"
+      ],
+      [
+        3430.259,
+        19,
+        "Canarias"
+      ],
+      [
+        795.127,
+        6,
+        "Cantabria"
+      ],
+      [
+        17080.277,
+        7,
+        "Castilla - La Mancha"
+      ],
+      [
+        18102.715,
+        8,
+        "Castilla y León"
+      ],
+      [
+        12109.326,
+        9,
+        "Cataluña"
+      ],
+      [
+        90.82,
+        12,
+        "Ceuta"
+      ],
+      [
+        8456.997,
+        15,
+        "Comunidad Valenciana"
+      ],
+      [
+        13863.617,
+        16,
+        "Extremadura"
+      ],
+      [
+        9655.328,
+        17,
+        "Galicia"
+      ],
+      [
+        570.878,
+        13,
+        "Madrid, Comunidad de"
+      ],
+      [
+        77.838,
+        8746,
+        "Melilla"
+      ],
+      [
+        6071.921,
+        21,
+        "Murcia, Región de"
+      ],
+      [
+        3680.97,
+        14,
+        "Navarra, Comunidad Foral de"
+      ],
+      [
+        2961.035,
+        10,
+        "País Vasco"
+      ],
+      [
+        1563.271,
+        20,
+        "Rioja, La"
+      ]
+    ],
+    "porcentaje": [
+      [
+        17,
+        4,
+        "Andalucía"
+      ],
+      [
+        9.6,
+        5,
+        "Aragón"
+      ],
+      [
+        2.7,
+        11,
+        "Asturias, Principado de"
+      ],
+      [
+        1.6,
+        18,
+        "Baleares, Islas"
+      ],
+      [
+        2.4,
+        19,
+        "Canarias"
+      ],
+      [
+        0.6,
+        6,
+        "Cantabria"
+      ],
+      [
+        12,
+        7,
+        "Castilla - La Mancha"
+      ],
+      [
+        12.7,
+        8,
+        "Castilla y León"
+      ],
+      [
+        8.5,
+        9,
+        "Cataluña"
+      ],
+      [
+        0.1,
+        12,
+        "Ceuta"
+      ],
+      [
+        5.9,
+        15,
+        "Comunidad Valenciana"
+      ],
+      [
+        9.7,
+        16,
+        "Extremadura"
+      ],
+      [
+        6.8,
+        17,
+        "Galicia"
+      ],
+      [
+        0.4,
+        13,
+        "Madrid, Comunidad de"
+      ],
+      [
+        0.1,
+        8746,
+        "Melilla"
+      ],
+      [
+        4.3,
+        21,
+        "Murcia, Región de"
+      ],
+      [
+        2.6,
+        14,
+        "Navarra, Comunidad Foral de"
+      ],
+      [
+        2.1,
+        10,
+        "País Vasco"
+      ],
+      [
+        1.1,
+        20,
+        "Rioja, La"
+      ]
+    ]
+  },
+  "graficoGeneracionPotenciaInstaladaCCAAMapa_texts": {
+    "titulo": "Mapa de potencia instalada por Comunidades Autónomas",
+    "categoria": "Comunidad autónoma",
+    "sistemaElectrico": "nacional por CC.AA"
+  },
+  "urlGeoJson": "/sites/default/files/json/baseMapas/es-ccaa.geo.json",
+  "graficoGeneracionEvolucionPotenciaInstaladaCO2": {
+    "nacional": {
+      "mw": [
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "data": [
+            3764.125,
+            3464.365,
+            3464.365,
+            2061.175,
+            1499.29
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "data": [
+            7.95,
+            7.95,
+            7.95,
+            7.95,
+            7.95
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            768.67,
+            768.67,
+            768.67,
+            768.67,
+            768.67
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            1148.65,
+            1148.65,
+            1148.65,
+            1148.65,
+            1137.15
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "data": [
+            482.64,
+            482.64,
+            482.64,
+            482.64,
+            1044.525
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            26250.145,
+            26250.145,
+            26250.145,
+            26250.145,
+            26250.145
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            5642.354,
+            5627.065,
+            5618.992,
+            5582.248,
+            5250.781
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            445.103,
+            425.663,
+            425.663,
+            425.663,
+            416.725
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "data": [
+            17093.802,
+            17093.802,
+            17096.92,
+            17096.31,
+            17076.568
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "data": [
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "data": [
+            11.32,
+            11.32,
+            11.32,
+            11.32,
+            11.32
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            28667.483,
+            30142.968,
+            30818.828,
+            32128.429,
+            33274.194
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            15392.401,
+            20207.791,
+            26246.327,
+            32838.789,
+            41660.091
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "data": [
+            2302.223,
+            2302.223,
+            2302.223,
+            2302.223,
+            2300.823
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            1102.486,
+            1104.156,
+            1112.353,
+            1113.544,
+            1145.192
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            170.112,
+            170.112,
+            170.112,
+            170.112,
+            170.112
+          ],
+          "stack": "NO_CO2"
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "data": [
+            3.4,
+            3,
+            2.8,
+            1.6,
+            1.1
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            0.7,
+            0.7,
+            0.6,
+            0.6,
+            0.6
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            1,
+            1,
+            0.9,
+            0.9,
+            0.8
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "data": [
+            0.4,
+            0.4,
+            0.4,
+            0.4,
+            0.8
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            23.8,
+            22.6,
+            21.3,
+            20.3,
+            18.9
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            5.1,
+            4.8,
+            4.6,
+            4.3,
+            3.8
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            0.4,
+            0.4,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "data": [
+            15.5,
+            14.7,
+            13.9,
+            13.2,
+            12.3
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "data": [
+            6.4,
+            6.1,
+            5.8,
+            5.5,
+            5.1
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            26,
+            25.9,
+            25,
+            24.8,
+            23.9
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            13.9,
+            17.4,
+            21.3,
+            25.4,
+            29.9
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "data": [
+            2.1,
+            2,
+            1.9,
+            1.8,
+            1.7
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            1,
+            0.9,
+            0.9,
+            0.9,
+            0.8
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            0.2,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          "stack": "NO_CO2"
+        }
+      ]
+    },
+    "peninsular": {
+      "mw": [
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "data": [
+            3522.925,
+            3223.165,
+            3223.165,
+            1819.975,
+            1258.09
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            561.885
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "data": [
+            7.95,
+            7.95,
+            7.95,
+            7.95,
+            7.95
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            24561.845,
+            24561.845,
+            24561.845,
+            24561.845,
+            24561.845
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            5592.631,
+            5577.342,
+            5569.269,
+            5532.525,
+            5202.058
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            406.619,
+            387.179,
+            387.179,
+            387.179,
+            378.241
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "data": [
+            17092.282,
+            17092.282,
+            17095.4,
+            17094.79,
+            17075.805
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "data": [
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            28107.885,
+            29540.67,
+            30172.1,
+            31476.762,
+            32593.202
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            15059.763,
+            19766.024,
+            25670.384,
+            32187.117,
+            40952.133
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "data": [
+            2302.223,
+            2302.223,
+            2302.223,
+            2302.223,
+            2300.823
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            1092.714,
+            1094.384,
+            1097.471,
+            1098.662,
+            1128.47
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            131.628,
+            131.628,
+            131.628,
+            131.628,
+            131.628
+          ],
+          "stack": "NO_CO2"
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "data": [
+            3.4,
+            2.9,
+            2.7,
+            1.5,
+            0.9
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            23.4,
+            22.2,
+            20.9,
+            19.9,
+            18.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            5.3,
+            5,
+            4.7,
+            4.5,
+            3.9
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            0.4,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "data": [
+            16.3,
+            15.4,
+            14.6,
+            13.8,
+            12.8
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "data": [
+            6.8,
+            6.4,
+            6.1,
+            5.8,
+            5.3
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            26.8,
+            26.7,
+            25.7,
+            25.4,
+            24.5
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            14.3,
+            17.8,
+            21.9,
+            26,
+            30.7
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "data": [
+            2.2,
+            2.1,
+            2,
+            1.9,
+            1.7
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            1,
+            1,
+            0.9,
+            0.9,
+            0.8
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          "stack": "NO_CO2"
+        }
+      ]
+    },
+    "baleares": {
+      "mw": [
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "data": [
+            241.2,
+            241.2,
+            241.2,
+            241.2,
+            241.2
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            139.4,
+            139.4,
+            139.4,
+            139.4,
+            139.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            603.1,
+            603.1,
+            603.1,
+            603.1,
+            591.6
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            822.9,
+            822.9,
+            822.9,
+            822.9,
+            822.9
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            11.523,
+            11.523,
+            11.523,
+            11.523,
+            10.523
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            37.4,
+            37.4,
+            37.4,
+            37.4,
+            37.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            3.608,
+            3.608,
+            3.568,
+            3.558,
+            3.558
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            152.018,
+            229.498,
+            340.673,
+            350.618,
+            375.673
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            6.076,
+            6.076,
+            6.076,
+            6.076,
+            7.916
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            37.4,
+            37.4,
+            37.4,
+            37.4,
+            37.4
+          ],
+          "stack": "NO_CO2"
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "data": [
+            11.7,
+            11.3,
+            10.8,
+            10.7,
+            10.6
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            6.8,
+            6.5,
+            6.2,
+            6.2,
+            6.1
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            29.4,
+            28.3,
+            26.9,
+            26.8,
+            26.1
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            40.1,
+            38.6,
+            36.7,
+            36.5,
+            36.3
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            0.6,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            1.8,
+            1.8,
+            1.7,
+            1.7,
+            1.6
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            7.4,
+            10.8,
+            15.2,
+            15.6,
+            16.6
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            1.8,
+            1.8,
+            1.7,
+            1.7,
+            1.6
+          ],
+          "stack": "NO_CO2"
+        }
+      ]
+    },
+    "canarias": {
+      "mw": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            487.64,
+            487.64,
+            487.64,
+            487.64,
+            487.64
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            520.75,
+            520.75,
+            520.75,
+            520.75,
+            520.75
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "data": [
+            482.64,
+            482.64,
+            482.64,
+            482.64,
+            482.64
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            865.4,
+            865.4,
+            865.4,
+            865.4,
+            865.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            38.2,
+            38.2,
+            38.2,
+            38.2,
+            38.2
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "data": [
+            1.52,
+            1.52,
+            1.52,
+            1.52,
+            0.763
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "data": [
+            11.32,
+            11.32,
+            11.32,
+            11.32,
+            11.32
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            555.99,
+            598.69,
+            643.16,
+            648.11,
+            677.435
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            180.56,
+            212.21,
+            235.21,
+            300.995,
+            332.225
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            3.696,
+            3.696,
+            8.806,
+            8.806,
+            8.806
+          ],
+          "stack": "NO_CO2"
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            15.5,
+            15.1,
+            14.8,
+            14.5,
+            14.2
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            16.5,
+            16.2,
+            15.8,
+            15.5,
+            15.2
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "data": [
+            15.3,
+            15,
+            14.6,
+            14.3,
+            14.1
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "data": [
+            27.5,
+            26.9,
+            26.3,
+            25.7,
+            25.3
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "data": [
+            1.2,
+            1.2,
+            1.2,
+            1.1,
+            1.1
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "data": [
+            0.4,
+            0.4,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "data": [
+            17.7,
+            18.6,
+            19.5,
+            19.3,
+            19.8
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            5.7,
+            6.6,
+            7.1,
+            8.9,
+            9.7
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            0.1,
+            0.1,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "stack": "NO_CO2"
+        }
+      ]
+    },
+    "ceuta": {
+      "mw": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            77.52,
+            77.52,
+            77.52,
+            77.52,
+            77.52
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3
+          ],
+          "stack": "CO2"
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            85.4,
+            85.4,
+            85.4,
+            85.4,
+            85.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "stack": "CO2"
+        }
+      ]
+    },
+    "melilla": {
+      "mw": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            64.11,
+            64.11,
+            64.11,
+            64.11,
+            64.11
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            11.5,
+            11.5,
+            11.5,
+            11.5,
+            11.5
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            1.084,
+            1.084,
+            1.084,
+            1.084,
+            1.084
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            0.06,
+            0.06,
+            0.06,
+            0.06,
+            0.06
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            1.084,
+            1.084,
+            1.084,
+            1.084,
+            1.084
+          ],
+          "stack": "NO_CO2"
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "data": [
+            82.4,
+            82.4,
+            82.4,
+            82.4,
+            82.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "data": [
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "data": [
+            1.4,
+            1.4,
+            1.4,
+            1.4,
+            1.4
+          ],
+          "stack": "CO2"
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "data": [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "stack": "NO_CO2"
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "data": [
+            1.4,
+            1.4,
+            1.4,
+            1.4,
+            1.4
+          ],
+          "stack": "NO_CO2"
+        }
+      ]
+    }
+  },
+  "graficoGeneracionEvolucionPotenciaInstaladaCO2_categories": [
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+  ],
+  "graficoGeneracionEvolucionPotenciaInstaladaCO2_texts": {
+    "titulo": "Evolución de la potencia instalada con/sin emisiones de CO2 eq.",
+    "categoria": "Año"
+  },
+  "graficoGeneracionEvolucionPotenciaInstaladaRenovable": {
+    "nacional": {
+      "mw": [
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            17093.802,
+            17093.802,
+            17096.92,
+            17096.31,
+            17076.568
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            11.32,
+            11.32,
+            11.32,
+            11.32,
+            11.32
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            28667.483,
+            30142.968,
+            30818.828,
+            32128.429,
+            33274.194
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            15392.401,
+            20207.791,
+            26246.327,
+            32838.789,
+            41660.091
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            2302.223,
+            2302.223,
+            2302.223,
+            2302.223,
+            2300.823
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1102.486,
+            1104.156,
+            1112.353,
+            1113.544,
+            1145.192
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            170.112,
+            170.112,
+            170.112,
+            170.112,
+            170.112
+          ]
+        },
+        {
+          "name": "Potencia renovable total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            64739.825,
+            71032.371,
+            77758.081,
+            85660.726,
+            95638.299
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            26.4,
+            24.1,
+            22,
+            20,
+            17.9
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            44.3,
+            42.4,
+            39.6,
+            37.5,
+            34.8
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            23.8,
+            28.4,
+            33.8,
+            38.3,
+            43.6
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            3.6,
+            3.2,
+            3,
+            2.7,
+            2.4
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1.7,
+            1.6,
+            1.4,
+            1.3,
+            1.2
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            0.3,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ]
+        }
+      ]
+    },
+    "peninsular": {
+      "mw": [
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            17092.28153,
+            17092.28153,
+            17095.39953,
+            17094.78953,
+            17075.80453
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            28107.885,
+            29540.67,
+            30172.1001,
+            31476.7615,
+            32593.2015
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            15059.7627,
+            19766.024,
+            25670.38371,
+            32187.1167,
+            40952.13335
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            2302.223,
+            2302.223,
+            2302.223,
+            2302.223,
+            2300.823
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1092.714,
+            1094.384,
+            1097.471,
+            1098.662,
+            1128.47
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            131.6275,
+            131.6275,
+            131.6275,
+            131.6275,
+            131.6275
+          ]
+        },
+        {
+          "name": "Potencia renovable total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            63786.49373,
+            69927.21003,
+            76469.20484,
+            84291.18023,
+            94182.05988
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            26.8,
+            24.4,
+            22.4,
+            20.3,
+            18.1
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            44.1,
+            42.2,
+            39.5,
+            37.3,
+            34.6
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            23.6,
+            28.3,
+            33.6,
+            38.2,
+            43.5
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            3.6,
+            3.3,
+            3,
+            2.7,
+            2.4
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1.7,
+            1.6,
+            1.4,
+            1.3,
+            1.2
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.1
+          ]
+        }
+      ]
+    },
+    "baleares": {
+      "mw": [
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            3.608,
+            3.608,
+            3.568,
+            3.558,
+            3.558
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            152.018,
+            229.498,
+            340.673,
+            350.618,
+            375.673
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            6.076,
+            6.076,
+            6.076,
+            6.076,
+            7.916
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            37.4,
+            37.4,
+            37.4,
+            37.4,
+            37.4
+          ]
+        },
+        {
+          "name": "Potencia renovable total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            199.102,
+            276.581,
+            387.717,
+            397.652,
+            424.547
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            1.8,
+            1.3,
+            0.9,
+            0.9,
+            0.8
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            76.4,
+            83,
+            87.9,
+            88.2,
+            88.5
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            3.1,
+            2.2,
+            1.6,
+            1.5,
+            1.9
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            18.8,
+            13.5,
+            9.6,
+            9.4,
+            8.8
+          ]
+        }
+      ]
+    },
+    "canarias": {
+      "mw": [
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            1.52,
+            1.52,
+            1.52,
+            1.52,
+            0.763
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            11.32,
+            11.32,
+            11.32,
+            11.32,
+            11.32
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            555.99,
+            598.69,
+            643.16,
+            648.11,
+            677.435
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            180.56,
+            212.21,
+            235.21,
+            300.995,
+            332.225
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            3.696,
+            3.696,
+            8.806,
+            8.806,
+            8.806
+          ]
+        },
+        {
+          "name": "Potencia renovable total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            753.086,
+            827.436,
+            900.016,
+            970.751,
+            1030.549
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.1
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            1.5,
+            1.4,
+            1.3,
+            1.2,
+            1.1
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            73.8,
+            72.4,
+            71.5,
+            66.8,
+            65.7
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            24,
+            25.6,
+            26.1,
+            31,
+            32.2
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            0.5,
+            0.4,
+            1,
+            0.9,
+            0.9
+          ]
+        }
+      ]
+    },
+    "ceuta": null,
+    "melilla": {
+      "mw": [
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            0.06,
+            0.06,
+            0.06,
+            0.06,
+            0.06
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            1.084,
+            1.084,
+            1.084,
+            1.084,
+            1.084
+          ]
+        },
+        {
+          "name": "Potencia renovable total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            1.144,
+            1.144,
+            1.144,
+            1.144,
+            1.144
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            5.2,
+            5.2,
+            5.2,
+            5.2,
+            5.2
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            94.8,
+            94.8,
+            94.8,
+            94.8,
+            94.8
+          ]
+        }
+      ]
+    }
+  },
+  "graficoGeneracionEvolucionPotenciaInstaladaRenovable_categories": [
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+  ],
+  "graficoGeneracionEvolucionPotenciaInstaladaRenovable_texts": {
+    "titulo": "Evolución de la potencia instalada renovable",
+    "categoria": "Año"
+  },
+  "graficoGeneracionEvolucionPotenciaInstalada": {
+    "nacional": {
+      "mw": [
+        {
+          "name": "Turbinación bombeo",
+          "color": "#007CF9",
+          "type": "column",
+          "data": [
+            3331.4,
+            3331.4,
+            3331.4,
+            3331.4,
+            3331.4
+          ]
+        },
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            3,
+            14.825,
+            24.252,
+            25.652,
+            95.72
+          ]
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            17093.802,
+            17093.802,
+            17096.92,
+            17096.31,
+            17076.568
+          ]
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "type": "column",
+          "data": [
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29
+          ]
+        },
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "type": "column",
+          "data": [
+            3764.125,
+            3464.365,
+            3464.365,
+            2061.175,
+            1499.29
+          ]
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            7.95,
+            7.95,
+            7.95,
+            7.95,
+            7.95
+          ]
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            768.67,
+            768.67,
+            768.67,
+            768.67,
+            768.67
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            1148.65,
+            1148.65,
+            1148.65,
+            1148.65,
+            1137.15
+          ]
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "type": "column",
+          "data": [
+            482.64,
+            482.64,
+            482.64,
+            482.64,
+            1044.525
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            26250.145,
+            26250.145,
+            26250.145,
+            26250.145,
+            26250.145
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            11.32,
+            11.32,
+            11.32,
+            11.32,
+            11.32
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            28667.483,
+            30142.968,
+            30818.828,
+            32128.429,
+            33274.194
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            15392.401,
+            20207.791,
+            26246.327,
+            32838.789,
+            41660.091
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            2302.223,
+            2302.223,
+            2302.223,
+            2302.223,
+            2300.823
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1102.486,
+            1104.156,
+            1112.353,
+            1113.544,
+            1145.192
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            5642.354,
+            5627.065,
+            5618.992,
+            5582.248,
+            5250.781
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            445.103,
+            425.663,
+            425.663,
+            425.663,
+            416.725
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            170.112,
+            170.112,
+            170.112,
+            170.112,
+            170.112
+          ]
+        },
+        {
+          "name": "Potencia total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            113701.152,
+            119671.034,
+            126398.098,
+            132862.208,
+            142557.945
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Turbinación bombeo",
+          "color": "#007CF9",
+          "type": "column",
+          "data": [
+            2.9,
+            2.8,
+            2.6,
+            2.5,
+            2.3
+          ]
+        },
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0.1
+          ]
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            15,
+            14.3,
+            13.5,
+            12.9,
+            12
+          ]
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "type": "column",
+          "data": [
+            6.3,
+            5.9,
+            5.6,
+            5.4,
+            5
+          ]
+        },
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "type": "column",
+          "data": [
+            3.3,
+            2.9,
+            2.7,
+            1.6,
+            1.1
+          ]
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            0.7,
+            0.6,
+            0.6,
+            0.6,
+            0.5
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            1,
+            1,
+            0.9,
+            0.9,
+            0.8
+          ]
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "type": "column",
+          "data": [
+            0.4,
+            0.4,
+            0.4,
+            0.4,
+            0.7
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            23.1,
+            21.9,
+            20.8,
+            19.8,
+            18.4
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            25.2,
+            25.2,
+            24.4,
+            24.2,
+            23.3
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            13.5,
+            16.9,
+            20.8,
+            24.7,
+            29.2
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            2,
+            1.9,
+            1.8,
+            1.7,
+            1.6
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1,
+            0.9,
+            0.9,
+            0.8,
+            0.8
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            5,
+            4.7,
+            4.4,
+            4.2,
+            3.7
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            0.4,
+            0.4,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ]
+        }
+      ]
+    },
+    "peninsular": {
+      "mw": [
+        {
+          "name": "Turbinación bombeo",
+          "color": "#007CF9",
+          "type": "column",
+          "data": [
+            3331.4,
+            3331.4,
+            3331.4,
+            3331.4,
+            3331.4
+          ]
+        },
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            3,
+            14.825,
+            23.052,
+            24.452,
+            89.44
+          ]
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            17092.282,
+            17092.282,
+            17095.4,
+            17094.79,
+            17075.805
+          ]
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "type": "column",
+          "data": [
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29,
+            7117.29
+          ]
+        },
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "type": "column",
+          "data": [
+            3522.925,
+            3223.165,
+            3223.165,
+            1819.975,
+            1258.09
+          ]
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            561.885
+          ]
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            7.95,
+            7.95,
+            7.95,
+            7.95,
+            7.95
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            24561.845,
+            24561.845,
+            24561.845,
+            24561.845,
+            24561.845
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            28107.885,
+            29540.67,
+            30172.1,
+            31476.762,
+            32593.202
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            15059.763,
+            19766.024,
+            25670.384,
+            32187.117,
+            40952.133
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            2302.223,
+            2302.223,
+            2302.223,
+            2302.223,
+            2300.823
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1092.714,
+            1094.384,
+            1097.471,
+            1098.662,
+            1128.47
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            5592.631,
+            5577.342,
+            5569.269,
+            5532.525,
+            5202.058
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            406.619,
+            387.179,
+            387.179,
+            387.179,
+            378.241
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            131.628,
+            131.628,
+            131.628,
+            131.628,
+            131.628
+          ]
+        },
+        {
+          "name": "Potencia total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            108330.153,
+            114148.206,
+            120690.354,
+            127073.795,
+            136690.258
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Turbinación bombeo",
+          "color": "#007CF9",
+          "type": "column",
+          "data": [
+            3.1,
+            2.9,
+            2.8,
+            2.6,
+            2.4
+          ]
+        },
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0.1
+          ]
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            15.8,
+            15,
+            14.2,
+            13.5,
+            12.5
+          ]
+        },
+        {
+          "name": "Nuclear",
+          "color": "#464394",
+          "type": "column",
+          "data": [
+            6.6,
+            6.2,
+            5.9,
+            5.6,
+            5.2
+          ]
+        },
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "type": "column",
+          "data": [
+            3.3,
+            2.8,
+            2.7,
+            1.4,
+            0.9
+          ]
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0.4
+          ]
+        },
+        {
+          "name": "Fuel",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            22.7,
+            21.5,
+            20.4,
+            19.3,
+            18
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            25.9,
+            25.9,
+            25,
+            24.8,
+            23.8
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            13.9,
+            17.3,
+            21.3,
+            25.3,
+            30
+          ]
+        },
+        {
+          "name": "Solar Térmica",
+          "color": "#FF0000",
+          "type": "column",
+          "data": [
+            2.1,
+            2,
+            1.9,
+            1.8,
+            1.7
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            1,
+            1,
+            0.9,
+            0.9,
+            0.8
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            5.2,
+            4.9,
+            4.6,
+            4.4,
+            3.8
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            0.4,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ]
+        }
+      ]
+    },
+    "baleares": {
+      "mw": [
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            1.2,
+            1.2,
+            1.2
+          ]
+        },
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "type": "column",
+          "data": [
+            241.2,
+            241.2,
+            241.2,
+            241.2,
+            241.2
+          ]
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            139.4,
+            139.4,
+            139.4,
+            139.4,
+            139.4
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            603.1,
+            603.1,
+            603.1,
+            603.1,
+            591.6
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            822.9,
+            822.9,
+            822.9,
+            822.9,
+            822.9
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            3.608,
+            3.608,
+            3.568,
+            3.558,
+            3.558
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            152.018,
+            229.498,
+            340.673,
+            350.618,
+            375.673
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            6.076,
+            6.076,
+            6.076,
+            6.076,
+            7.916
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            11.523,
+            11.523,
+            11.523,
+            11.523,
+            10.523
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            37.4,
+            37.4,
+            37.4,
+            37.4,
+            37.4
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            37.4,
+            37.4,
+            37.4,
+            37.4,
+            37.4
+          ]
+        },
+        {
+          "name": "Potencia total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            2054.625,
+            2132.104,
+            2244.44,
+            2254.375,
+            2268.77
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0.1,
+            0.1,
+            0.1
+          ]
+        },
+        {
+          "name": "Carbón",
+          "color": "#993300",
+          "type": "column",
+          "data": [
+            11.7,
+            11.3,
+            10.7,
+            10.7,
+            10.6
+          ]
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            6.8,
+            6.5,
+            6.2,
+            6.2,
+            6.1
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            29.4,
+            28.3,
+            26.9,
+            26.8,
+            26.1
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            40.1,
+            38.6,
+            36.7,
+            36.5,
+            36.3
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            7.4,
+            10.8,
+            15.2,
+            15.6,
+            16.6
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            0.6,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            1.8,
+            1.8,
+            1.7,
+            1.7,
+            1.6
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            1.8,
+            1.8,
+            1.7,
+            1.7,
+            1.6
+          ]
+        }
+      ]
+    },
+    "canarias": {
+      "mw": [
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            5.08
+          ]
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            1.52,
+            1.52,
+            1.52,
+            1.52,
+            0.763
+          ]
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            487.64,
+            487.64,
+            487.64,
+            487.64,
+            487.64
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            520.75,
+            520.75,
+            520.75,
+            520.75,
+            520.75
+          ]
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "type": "column",
+          "data": [
+            482.64,
+            482.64,
+            482.64,
+            482.64,
+            482.64
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            865.4,
+            865.4,
+            865.4,
+            865.4,
+            865.4
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            11.32,
+            11.32,
+            11.32,
+            11.32,
+            11.32
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            555.99,
+            598.69,
+            643.16,
+            648.11,
+            677.435
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            180.56,
+            212.21,
+            235.21,
+            300.995,
+            332.225
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            3.696,
+            3.696,
+            8.806,
+            8.806,
+            8.806
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            38.2,
+            38.2,
+            38.2,
+            38.2,
+            38.2
+          ]
+        },
+        {
+          "name": "Potencia total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            3147.716,
+            3222.066,
+            3294.646,
+            3365.381,
+            3430.259
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Baterías",
+          "color": "#03738B",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0.1
+          ]
+        },
+        {
+          "name": "Hidráulica",
+          "color": "#0090D1",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            15.5,
+            15.1,
+            14.8,
+            14.5,
+            14.2
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            16.5,
+            16.2,
+            15.8,
+            15.5,
+            15.2
+          ]
+        },
+        {
+          "name": "Turbina de Vapor",
+          "color": "#AF8E00",
+          "type": "column",
+          "data": [
+            15.3,
+            15,
+            14.6,
+            14.3,
+            14.1
+          ]
+        },
+        {
+          "name": "Ciclo Combinado",
+          "color": "#FFCC66",
+          "type": "column",
+          "data": [
+            27.5,
+            26.9,
+            26.3,
+            25.7,
+            25.2
+          ]
+        },
+        {
+          "name": "Hidroeólica",
+          "color": "#00FFFF",
+          "type": "column",
+          "data": [
+            0.4,
+            0.4,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        {
+          "name": "Eólica",
+          "color": "#6FB114",
+          "type": "column",
+          "data": [
+            17.7,
+            18.6,
+            19.5,
+            19.3,
+            19.7
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            5.7,
+            6.6,
+            7.1,
+            8.9,
+            9.7
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            0.1,
+            0.1,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        {
+          "name": "Cogeneración",
+          "color": "#CFA2CA",
+          "type": "column",
+          "data": [
+            1.2,
+            1.2,
+            1.2,
+            1.1,
+            1.1
+          ]
+        }
+      ]
+    },
+    "ceuta": {
+      "mw": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            77.52,
+            77.52,
+            77.52,
+            77.52,
+            77.52
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            13.3,
+            13.3,
+            13.3,
+            13.3,
+            13.3
+          ]
+        },
+        {
+          "name": "Potencia total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            90.82,
+            90.82,
+            90.82,
+            90.82,
+            90.82
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            85.4,
+            85.4,
+            85.4,
+            85.4,
+            85.4
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ]
+        }
+      ]
+    },
+    "melilla": {
+      "mw": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            64.11,
+            64.11,
+            64.11,
+            64.11,
+            64.11
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            11.5,
+            11.5,
+            11.5,
+            11.5,
+            11.5
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            0.06,
+            0.06,
+            0.06,
+            0.06,
+            0.06
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            1.084,
+            1.084,
+            1.084,
+            1.084,
+            1.084
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            1.084,
+            1.084,
+            1.084,
+            1.084,
+            1.084
+          ]
+        },
+        {
+          "name": "Potencia total",
+          "color": "#000",
+          "type": "spline",
+          "data": [
+            77.838,
+            77.838,
+            77.838,
+            77.838,
+            77.838
+          ]
+        }
+      ],
+      "porcentaje": [
+        {
+          "name": "Motor diésel",
+          "color": "#8DA69F",
+          "type": "column",
+          "data": [
+            82.4,
+            82.4,
+            82.4,
+            82.4,
+            82.4
+          ]
+        },
+        {
+          "name": "Turbina de Gas",
+          "color": "#BA0F16",
+          "type": "column",
+          "data": [
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ]
+        },
+        {
+          "name": "Solar Fotovoltaica",
+          "color": "#E48500",
+          "type": "column",
+          "data": [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ]
+        },
+        {
+          "name": "Otras Renovables",
+          "color": "#8C5DA2",
+          "type": "column",
+          "data": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Residuos no Renovables",
+          "color": "#666666",
+          "type": "column",
+          "data": [
+            1.4,
+            1.4,
+            1.4,
+            1.4,
+            1.4
+          ]
+        },
+        {
+          "name": "Residuos Renovables",
+          "color": "#A0A0A0",
+          "type": "column",
+          "data": [
+            1.4,
+            1.4,
+            1.4,
+            1.4,
+            1.4
+          ]
+        }
+      ]
+    }
+  },
+  "graficoGeneracionEvolucionPotenciaInstalada_categories": [
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+  ],
+  "graficoGeneracionEvolucionPotenciaInstalada_texts": {
+    "titulo": "Evolución de la estructura de potencia eléctrica instalada",
+    "categoria": "Año"
+  },
+  "grafica27": "27",
+  "GraficoGeneracionPotenciaInstalada_categories": [
+    "Hidráulica",
+    "Hidroeólica",
+    "Eólica",
+    "Solar fotovoltaica",
+    "Solar térmica",
+    "Otras renovables",
+    "Residuos renovables",
+    "Renovables",
+    "Nuclear",
+    "Carbón",
+    "Motor diésel",
+    "Turbina de gas",
+    "Turbina de vapor",
+    "Fuel",
+    "Ciclo combinado",
+    "Cogeneración",
+    "Residuos no renovables",
+    "No renovables",
+    "Generación",
+    "Turbinación bombeo",
+    "Baterías",
+    "Almacenamiento",
+    "Potencia total"
+  ],
+  "GraficoGeneracionPotenciaInstalada": [
+    {
+      "name": "MW",
+      "data": [
+        {
+          "y": 17076,
+          "className": "sindecimales"
+        },
+        {
+          "y": 0,
+          "className": "sindecimales"
+        },
+        {
+          "y": 32593,
+          "className": "sindecimales"
+        },
+        {
+          "y": 40952,
+          "className": "sindecimales"
+        },
+        {
+          "y": 2301,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1128,
+          "className": "sindecimales"
+        },
+        {
+          "y": 132,
+          "className": "sindecimales"
+        },
+        {
+          "y": 94182,
+          "className": "sindecimales"
+        },
+        {
+          "y": 7117,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1258,
+          "className": "sindecimales"
+        },
+        {
+          "y": 0,
+          "className": "sindecimales"
+        },
+        {
+          "y": 0,
+          "className": "sindecimales"
+        },
+        {
+          "y": 562,
+          "className": "sindecimales"
+        },
+        {
+          "y": 8,
+          "className": "sindecimales"
+        },
+        {
+          "y": 24562,
+          "className": "sindecimales"
+        },
+        {
+          "y": 5202,
+          "className": "sindecimales"
+        },
+        {
+          "y": 378,
+          "className": "sindecimales"
+        },
+        {
+          "y": 39087,
+          "className": "sindecimales"
+        },
+        {
+          "y": 133269,
+          "className": "sindecimales"
+        },
+        {
+          "y": 3331,
+          "className": "sindecimales"
+        },
+        {
+          "y": 89,
+          "className": "sindecimales"
+        },
+        {
+          "y": 3421,
+          "className": "sindecimales"
+        },
+        {
+          "y": 136690,
+          "className": "sindecimales"
+        }
+      ]
+    },
+    {
+      "name": "%25/241",
+      "data": [
+        {
+          "y": -0.1,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 3.5,
+          "className": "undecimal"
+        },
+        {
+          "y": 27.2,
+          "className": "undecimal"
+        },
+        {
+          "y": -0.1,
+          "className": "undecimal"
+        },
+        {
+          "y": 2.7,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 11.7,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -30.9,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -6,
+          "className": "undecimal"
+        },
+        {
+          "y": -2.3,
+          "className": "undecimal"
+        },
+        {
+          "y": -0.9,
+          "className": "undecimal"
+        },
+        {
+          "y": 7.7,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 265.8,
+          "className": "undecimal"
+        },
+        {
+          "y": 1.9,
+          "className": "undecimal"
+        },
+        {
+          "y": 7.6,
+          "className": "undecimal"
+        }
+      ]
+    },
+    {
+      "name": "MW",
+      "data": [
+        {
+          "y": 1,
+          "className": "sindecimales"
+        },
+        {
+          "y": 11,
+          "className": "sindecimales"
+        },
+        {
+          "y": 681,
+          "className": "sindecimales"
+        },
+        {
+          "y": 708,
+          "className": "sindecimales"
+        },
+        {
+          "y": 0,
+          "className": "sindecimales"
+        },
+        {
+          "y": 17,
+          "className": "sindecimales"
+        },
+        {
+          "y": 38,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1456,
+          "className": "sindecimales"
+        },
+        {
+          "y": 0,
+          "className": "sindecimales"
+        },
+        {
+          "y": 241,
+          "className": "sindecimales"
+        },
+        {
+          "y": 769,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1137,
+          "className": "sindecimales"
+        },
+        {
+          "y": 483,
+          "className": "sindecimales"
+        },
+        {
+          "y": 0,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1688,
+          "className": "sindecimales"
+        },
+        {
+          "y": 49,
+          "className": "sindecimales"
+        },
+        {
+          "y": 38,
+          "className": "sindecimales"
+        },
+        {
+          "y": 4405,
+          "className": "sindecimales"
+        },
+        {
+          "y": 5861,
+          "className": "sindecimales"
+        },
+        {
+          "y": 0,
+          "className": "sindecimales"
+        },
+        {
+          "y": 6,
+          "className": "sindecimales"
+        },
+        {
+          "y": 6,
+          "className": "sindecimales"
+        },
+        {
+          "y": 5868,
+          "className": "sindecimales"
+        }
+      ]
+    },
+    {
+      "name": "%25/242",
+      "data": [
+        {
+          "y": -49.8,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 4.5,
+          "className": "undecimal"
+        },
+        {
+          "y": 8.6,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 12.4,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 6.3,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -1,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -2,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -0.3,
+          "className": "undecimal"
+        },
+        {
+          "y": 1.3,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 423.3,
+          "className": "undecimal"
+        },
+        {
+          "y": 423.3,
+          "className": "undecimal"
+        },
+        {
+          "y": 1.4,
+          "className": "undecimal"
+        }
+      ]
+    },
+    {
+      "name": "MW",
+      "data": [
+        {
+          "y": 17077,
+          "className": "sindecimales"
+        },
+        {
+          "y": 11,
+          "className": "sindecimales"
+        },
+        {
+          "y": 33274,
+          "className": "sindecimales"
+        },
+        {
+          "y": 41660,
+          "className": "sindecimales"
+        },
+        {
+          "y": 2301,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1145,
+          "className": "sindecimales"
+        },
+        {
+          "y": 170,
+          "className": "sindecimales"
+        },
+        {
+          "y": 95638,
+          "className": "sindecimales"
+        },
+        {
+          "y": 7117,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1499,
+          "className": "sindecimales"
+        },
+        {
+          "y": 769,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1137,
+          "className": "sindecimales"
+        },
+        {
+          "y": 1045,
+          "className": "sindecimales"
+        },
+        {
+          "y": 8,
+          "className": "sindecimales"
+        },
+        {
+          "y": 26250,
+          "className": "sindecimales"
+        },
+        {
+          "y": 5251,
+          "className": "sindecimales"
+        },
+        {
+          "y": 417,
+          "className": "sindecimales"
+        },
+        {
+          "y": 43493,
+          "className": "sindecimales"
+        },
+        {
+          "y": 139131,
+          "className": "sindecimales"
+        },
+        {
+          "y": 3331,
+          "className": "sindecimales"
+        },
+        {
+          "y": 96,
+          "className": "sindecimales"
+        },
+        {
+          "y": 3427,
+          "className": "sindecimales"
+        },
+        {
+          "y": 142558,
+          "className": "sindecimales"
+        }
+      ]
+    },
+    {
+      "name": "%25/243",
+      "data": [
+        {
+          "y": -0.1,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 3.6,
+          "className": "undecimal"
+        },
+        {
+          "y": 26.9,
+          "className": "undecimal"
+        },
+        {
+          "y": -0.1,
+          "className": "undecimal"
+        },
+        {
+          "y": 2.8,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 11.6,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -27.3,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -1,
+          "className": "undecimal"
+        },
+        {
+          "y": 116.4,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": -5.9,
+          "className": "undecimal"
+        },
+        {
+          "y": -2.1,
+          "className": "undecimal"
+        },
+        {
+          "y": -0.8,
+          "className": "undecimal"
+        },
+        {
+          "y": 7.4,
+          "className": "undecimal"
+        },
+        {
+          "y": 0,
+          "className": "undecimal"
+        },
+        {
+          "y": 273.1,
+          "className": "undecimal"
+        },
+        {
+          "y": 2.1,
+          "className": "undecimal"
+        },
+        {
+          "y": 7.3,
+          "className": "undecimal"
+        }
+      ]
+    }
+  ],
+  "GraficoGeneracionPotenciaInstalada_texts": {
+    "titulo": "Potencia instalada a 31.12.2025",
+    "categoria": "Potencia",
+    "sistemaElectrico": "nacional"
+  }
+}

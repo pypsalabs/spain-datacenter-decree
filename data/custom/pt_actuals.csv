@@ -1,0 +1,7 @@
+country,year,carrier_or_metric,value,unit,source_id,note
+PT,2022,gen_onwind,13.25,TWh,ember_yearly_electricity_data,Portugal annual wind generation (Ember Yearly Electricity Data; for out-of-sample wind-bias estimation)
+PT,2023,gen_onwind,13.15,TWh,ember_yearly_electricity_data,Portugal annual wind generation (Ember Yearly Electricity Data)
+PT,2024,gen_onwind,14.34,TWh,ember_yearly_electricity_data,Portugal annual wind generation 2024 (Ember; REN-consistent; capacity 5.60 GW per Ember matches national_capacities.csv 5650 MW)
+PT,2025,gen_onwind,13.68,TWh,ember_yearly_electricity_data,Portugal annual wind generation 2025 (Ember)
+PT,2024,gen_hydro,14.89,TWh,ember_yearly_electricity_data,Portugal annual hydro generation 2024 (Ember; wet year — the upstream EIA inflow normalization data ends before 2024)
+PT,2024,gen_biomass_waste,3.75,TWh,ember_yearly_electricity_data,Portugal annual bioenergy generation 2024 (Ember; availability cap for fuel-limited biomass/waste)

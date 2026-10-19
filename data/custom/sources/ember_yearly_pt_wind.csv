@@ -1,0 +1,79 @@
+Area,ISO 3 code,Year,Area type,Continent,Ember region,EU,OECD,G20,G7,ASEAN,Category,Subcategory,Variable,Unit,Value,YoY absolute change,YoY % change
+Portugal,PRT,2000,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,0.08,,
+Portugal,PRT,2000,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,0.39,,
+Portugal,PRT,2000,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,0.17,,
+Portugal,PRT,2001,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,0.13,0.05,62.5
+Portugal,PRT,2001,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,0.56,,
+Portugal,PRT,2001,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,0.26,0.09,52.94
+Portugal,PRT,2002,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,0.19,0.06,46.15
+Portugal,PRT,2002,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,0.79,,
+Portugal,PRT,2002,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,0.36,0.1,38.46
+Portugal,PRT,2003,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,0.27,0.08,42.11
+Portugal,PRT,2003,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,1.08,,
+Portugal,PRT,2003,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,0.5,0.14,38.89
+Portugal,PRT,2004,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,0.55,0.28,103.7
+Portugal,PRT,2004,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,1.84,,
+Portugal,PRT,2004,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,0.82,0.32,64.0
+Portugal,PRT,2005,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,1.06,0.51,92.73
+Portugal,PRT,2005,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,3.85,,
+Portugal,PRT,2005,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,1.77,0.95,115.85
+Portugal,PRT,2006,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,1.68,0.62,58.49
+Portugal,PRT,2006,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,6.05,,
+Portugal,PRT,2006,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,2.93,1.16,65.54
+Portugal,PRT,2007,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,2.2,0.52,30.95
+Portugal,PRT,2007,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,8.65,,
+Portugal,PRT,2007,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,4.04,1.11,37.88
+Portugal,PRT,2008,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,2.86,0.66,30.0
+Portugal,PRT,2008,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,12.7,,
+Portugal,PRT,2008,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,5.76,1.72,42.57
+Portugal,PRT,2009,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,3.33,0.47,16.43
+Portugal,PRT,2009,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,15.35,,
+Portugal,PRT,2009,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,7.58,1.82,31.6
+Portugal,PRT,2010,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,3.8,0.47,14.11
+Portugal,PRT,2010,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,17.17,,
+Portugal,PRT,2010,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,9.18,1.6,21.11
+Portugal,PRT,2011,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,4.26,0.46,12.11
+Portugal,PRT,2011,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,17.69,,
+Portugal,PRT,2011,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,9.16,-0.02,-0.22
+Portugal,PRT,2012,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,4.41,0.15,3.52
+Portugal,PRT,2012,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,22.58,,
+Portugal,PRT,2012,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,10.26,1.1,12.01
+Portugal,PRT,2013,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,4.61,0.2,4.54
+Portugal,PRT,2013,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,23.85,,
+Portugal,PRT,2013,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,12.01,1.75,17.06
+Portugal,PRT,2014,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,4.86,0.25,5.42
+Portugal,PRT,2014,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,23.38,,
+Portugal,PRT,2014,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,12.11,0.1,0.83
+Portugal,PRT,2015,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,4.94,0.08,1.65
+Portugal,PRT,2015,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,22.68,,
+Portugal,PRT,2015,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,11.6,-0.51,-4.21
+Portugal,PRT,2016,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.12,0.18,3.64
+Portugal,PRT,2016,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,21.12,,
+Portugal,PRT,2016,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,12.47,0.87,7.5
+Portugal,PRT,2017,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.12,0.0,0.0
+Portugal,PRT,2017,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,21.27,,
+Portugal,PRT,2017,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,12.25,-0.22,-1.76
+Portugal,PRT,2018,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.17,0.05,0.98
+Portugal,PRT,2018,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,21.63,,
+Portugal,PRT,2018,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,12.62,0.37,3.02
+Portugal,PRT,2019,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.22,0.05,0.97
+Portugal,PRT,2019,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,26.49,,
+Portugal,PRT,2019,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,13.67,1.05,8.32
+Portugal,PRT,2020,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.12,-0.1,-1.92
+Portugal,PRT,2020,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,23.93,,
+Portugal,PRT,2020,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,12.3,-1.37,-10.02
+Portugal,PRT,2021,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.43,0.31,6.05
+Portugal,PRT,2021,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,26.84,,
+Portugal,PRT,2021,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,13.21,0.91,7.4
+Portugal,PRT,2022,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.54,0.11,2.03
+Portugal,PRT,2022,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,28.6,,
+Portugal,PRT,2022,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,13.25,0.04,0.3
+Portugal,PRT,2023,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.54,0.0,0.0
+Portugal,PRT,2023,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,28.5,,
+Portugal,PRT,2023,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,13.15,-0.1,-0.75
+Portugal,PRT,2024,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.6,0.06,1.08
+Portugal,PRT,2024,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,30.34,,
+Portugal,PRT,2024,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,14.34,1.19,9.05
+Portugal,PRT,2025,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Capacity,Fuel,Wind,GW,5.61,0.01,0.18
+Portugal,PRT,2025,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,%,26.75,,
+Portugal,PRT,2025,Country or economy,Europe,Europe,1.0,1.0,0.0,0.0,0.0,Electricity generation,Fuel,Wind,TWh,13.68,-0.66,-4.6

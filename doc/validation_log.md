@@ -39,7 +39,7 @@ principled part of the wind treatment; the factor below covers only the residual
 |---|---|---|
 | `boundary_flows` | FR external borders (GB, IT, CH, DE+BE) fixed to measured hourly 2024 flows; on in every variant (closure, not calibration) | RTE eCO2mix extract, vendored; −86.1 TWh net checks against RTE's ≈ −89 total minus ES |
 | `national_capacities` | Fleet totals per carrier and scope (ES peninsular / Balearics, PT, FR) set pro rata to published actuals; creates missing units with technology-data efficiency (ES coal, Balearic OCGT); zeroes the phantom lignite units; for 2024, wind/solar use **average operating capacity** (mean of year-end 2023/2024 — ~6 GW of PV commissioned during 2024) | `national_capacities.csv` (Redeia ISE, RTE, REN/Ember) |
-| `wind_correction` | ES and PT onwind profiles scaled so fleet availability matches cited annual generation; factors derived **at run time** (ES ×1.187, PT ×2.053), capped at 1.0; FR untouched. New-build PPA candidates inherit corrected profiles by construction | ES: Redeia; PT: `pt_actuals.csv` (Ember extract, vendored; capacity cross-checks Redeia/REN) |
+| `wind_correction` | ES and PT onwind profiles scaled for the residual ERA5 bias, capped at 1.0; FR untouched. In the 2024 back-cast the factor is derived **at run time** (cited generation / modelled fleet availability: ES ×1.187, PT ×2.053); case-study runs apply those factors as fixed cited constants from `wind_correction.csv`. New-build PPA candidates inherit corrected profiles by construction | ES: Redeia; PT: `pt_actuals.csv` (Ember extract, vendored; capacity cross-checks Redeia/REN); factors: `wind_correction.csv` |
 | `phs_split` | Pure PHS energy 120 GWh (Huclin et al.), pumping 3,306 MW, round-trip 0.75; mixed PHS stays inside reservoir hydro per Redeia convention | `national_capacities.csv` |
 | `chp_profile` | Cogeneration as a fixed profile: monthly shape derived at run time from the vendored Redeia monthly cogeneration CO2 series, scaled to published annual output (16.42 TWh, 0.366 tCO2/MWh_el), distributed by nodal load share. By construction | `chp.csv` + vendored REData JSON |
 | `csp` | 2.3 GW CSP, nodal solar profile rescaled to the realized 2024 CSP capacity factor. By construction (no storage dispatch modelled; stated assumption) | `national_capacities.csv`, `validation_2024_es.csv` |
@@ -96,9 +96,11 @@ Options on the table (user decision):
 
 ## 6. Known caveats to carry into the paper
 
-- Wind correction factors are **in-sample** (derived from 2024). Out-of-sample derivation
-  (train on 2022/23 profiles, test on 2024) is queued; PT actuals for 2022/23 are already
-  vendored, ES needs two more profile builds.
+- Wind correction factors are derived on the 2024 back-cast. On the wy2024 reference
+  weather year the case study uses them **in-sample by design**; applying them to the
+  planned wy2010/13/20 sensitivities is an out-of-sample transfer whose check is queued
+  (train on 2022/23 profiles, test on 2024; PT actuals for 2022/23 are already vendored,
+  ES needs two more profile builds).
 - Hydro inflow (validation year), CHP output and CSP output match actuals **by construction**;
   they are input choices, not validation successes, and are labelled as such above.
 - Coal and oil dispatch are not reproduced (non-market operation); their ≈ 2.9 Mt CO2 are

@@ -117,6 +117,11 @@ solving:
 
 spain_cfe:
   planning_years: [2025]
+  # Scenario suite collected by make_summary (run = weather year; wy2024 is the reference).
+  # dc_mw 500 is a placeholder size until the scenario grid is agreed.
+  suite:
+  - {run: wy2024, policy: no_dc, target: 0, dc_mw: 0, siting: spain_wide}
+  - {run: wy2024, policy: unmatched_dc, target: 0, dc_mw: 500, siting: spain_wide}
   # prepare_network.py patch engine: cited corrections, each individually switchable.
   # Philosophy: build fresh, validate, correct only what fails, cite every correction.
   patches:

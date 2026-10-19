@@ -88,9 +88,7 @@ def test_unmatched_delta_zero() -> None:
 
     for col in (
         "delta_unmatched_dc_emissions",
-        "emissions_delta_unmatched",
         "delta_unmatched_dc_system_cost",
-        "system_cost_delta_unmatched",
         "dc_co2_reduction_vs_unmatched_pct",
     ):
         assert np.allclose(unm_rows[col].to_numpy(), 0.0, atol=1e-12), (

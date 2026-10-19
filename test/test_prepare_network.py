@@ -1,16 +1,23 @@
 # SPDX-FileCopyrightText: 2026 Iegor Riepin
 #
 # SPDX-License-Identifier: MIT
-"""Unit tests for the prepare_network patch engine (boundary closure, freeze)."""
+"""Unit tests for the prepare_network patch engine (boundary closure, wind factors, freeze)."""
 
 from __future__ import annotations
+
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pypsa
 import pytest
 
-from scripts.prepare_network import attach_boundary_flows, freeze_fleet, prepare_network
+from scripts.prepare_network import (
+    _patch_wind_correction,
+    attach_boundary_flows,
+    freeze_fleet,
+    prepare_network,
+)
 
 
 def _toy_network(freq: str = "h", periods: int = 6) -> pypsa.Network:
@@ -103,3 +110,64 @@ def test_freeze_fleet_idempotent() -> None:
     freeze_fleet(n)
     freeze_fleet(n)
     assert not n.generators["p_nom_extendable"].any()
+
+
+def _wind_toy() -> pypsa.Network:
+    n = _toy_network()
+    n.add(
+        "Generator",
+        "ES0 0AC 0 onwind",
+        bus="ES0 0AC",
+        carrier="onwind",
+        p_nom=100.0,
+        p_max_pu=pd.Series(0.5, index=n.snapshots),
+    )
+    n.add(
+        "Generator",
+        "ES0 0AC 1 onwind",
+        bus="ES0 0AC",
+        carrier="onwind",
+        p_nom=100.0,
+        p_max_pu=pd.Series(0.9, index=n.snapshots),
+    )
+    return n
+
+
+def _factor_csv(tmp_path: Path, countries: tuple[str, ...] = ("ES", "PT")) -> Path:
+    rows = {"ES": 1.2, "PT": 2.0}
+    lines = ["country,year,carrier_or_metric,value,unit,source_id,note"]
+    lines += [
+        f"{c},2025,wind_correction_factor,{rows[c]},per_unit,study_wind_backcast_2024,test"
+        for c in countries
+    ]
+    (tmp_path / "wind_correction.csv").write_text("\n".join(lines) + "\n")
+    return tmp_path
+
+
+def test_wind_correction_applies_fixed_factor_capped(tmp_path: Path) -> None:
+    """Case-study runs scale onwind by the cited back-cast factor, capped at 1.0."""
+    n = _wind_toy()
+    ctx = {"custom_dir": _factor_csv(tmp_path), "data_year": 2025, "weather_year": 2024}
+    _patch_wind_correction(n, ctx)
+    assert np.allclose(n.generators_t.p_max_pu["ES0 0AC 0 onwind"], 0.6)
+    assert np.allclose(n.generators_t.p_max_pu["ES0 0AC 1 onwind"], 1.0)
+
+
+def test_wind_correction_missing_factor_raises(tmp_path: Path) -> None:
+    """A case-study run without a cited factor fails fast instead of silently skipping."""
+    n = _wind_toy()
+    ctx = {
+        "custom_dir": _factor_csv(tmp_path, countries=("PT",)),
+        "data_year": 2025,
+        "weather_year": 2024,
+    }
+    with pytest.raises(ValueError, match="No wind correction factor for ES"):
+        _patch_wind_correction(n, ctx)
+
+
+def test_wind_correction_backcast_requires_wy2024(tmp_path: Path) -> None:
+    """Deriving the factor on 2024 data under a different weather year is invalid."""
+    n = _wind_toy()
+    ctx = {"custom_dir": _factor_csv(tmp_path), "data_year": 2024, "weather_year": 2013}
+    with pytest.raises(ValueError, match="requires weather year 2024"):
+        _patch_wind_correction(n, ctx)

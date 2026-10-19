@@ -4,9 +4,9 @@ PyPSA study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for n
 centers: a 15-node ES/FR/PT electricity model built on PyPSA-Eur, with 24/7 CFE procurement
 accounting following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
 
-**Scope:** today's Spanish system (2025/26 fleet), dispatch under three weather years
-(2013 reference, 2010, 2020), validated against Redeia 2024 actuals. No capacity-expansion
-year in the current scope.
+**Scope:** today's Spanish system (2025/26 fleet), dispatch under the 2024 reference
+weather year, validated against Redeia 2024 actuals; weather-year sensitivities (2010,
+2013, 2020) planned. No capacity-expansion year in the current scope.
 
 ## Model
 
@@ -43,6 +43,24 @@ availability, prices, NTC caps, demand, hydro inflow, MA/AD exports) is defined 
 `config/config.spain.yaml` under `spain_cfe.patches`; what each patch does, why it
 exists and what it changed in the 2024 back-cast is documented in
 [doc/validation_log.md](doc/validation_log.md).
+
+## Study stages
+
+The `{year}` wildcard is the data vintage; the run is the weather year. Fleet, demand,
+price and NTC patches read rows for `{year}`, while weather-measurement closures (France
+border flows, hydro inflow, the wind-bias derivation) key on the run's weather year.
+
+| Stage | run (weather) | `{year}` (data) | variant | artifacts |
+|---|---|---|---|---|
+| (i) raw + validation | wy2024 | 2024 | raw | `base_2024_raw.nc` → `validation_raw` |
+| (ii) back-cast calibration + validation | wy2024 | 2024 | patched | `base_2024_patched.nc` → `validation_patched` |
+| (iii) case study | wy2024 | 2025 | patched | `base_2025_patched.nc` → DC + 24/7 CFE solves → `scenarios.csv` |
+| (iv) weather-year sensitivities | wy2010 / wy2013 / wy2020 | 2025 | patched | planned; the 2024-measured closures and the wind factor become out-of-sample transfers (stated caveat) |
+
+On the wy2024 reference the case study uses every weather-dependent closure in-sample:
+measured 2024 border flows with 2024 weather, observed 2024 hydro energy, and the
+wind-bias factor derived on the back-cast (stage ii) and applied as a fixed cited
+constant (`data/custom/wind_correction.csv`) in stage (iii).
 
 ## Layout
 
@@ -93,7 +111,7 @@ deliberately has no manifest of its own.)
    ship with the repo (`data/custom/fr_boundary_flows_2024.csv`, regenerable with
    `scripts/retrieve_fr_boundary_flows.py --download`):
    ```bash
-   snakemake resources/wy2024/networks/base_2025_raw.nc -j 4   # patch engine
+   snakemake resources/wy2024/networks/base_2024_raw.nc -j 4   # patch engine (back-cast)
    snakemake results/validation/validation_raw.csv -j 4        # no_dc solve + report
    ```
 3. **Scenarios, summary, figures**: `solve_network` targets per

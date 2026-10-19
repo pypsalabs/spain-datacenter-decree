@@ -44,10 +44,19 @@ wildcard_constraints:
 
 
 rule prepare_network:
-    """Applies the cited patches of a variant to the composed network and freezes the fleet."""
+    """Applies the cited patches of a variant to the composed network and freezes the fleet.
+
+    ``{year}`` is the data vintage (2024 = back-cast calibration, 2025 = case study);
+    the planning horizon of the composed network is fixed. Weather-measurement patches
+    (hydro inflow, wind-factor derivation) key on the run's weather year instead.
+    """
     input:
-        network="pypsa-eur/resources/{run}/networks/composed_{year}.nc",
-        costs="pypsa-eur/resources/{run}/costs_{year}_processed.csv",
+        network=lambda w: (
+            f"pypsa-eur/resources/{w.run}/networks/composed_{config['planning_horizons'][0]}.nc"
+        ),
+        costs=lambda w: (
+            f"pypsa-eur/resources/{w.run}/costs_{config['planning_horizons'][0]}_processed.csv"
+        ),
         boundary_flows="data/custom/fr_boundary_flows_2024.csv",
         custom_data=[
             "data/custom/national_capacities.csv",
@@ -57,6 +66,7 @@ rule prepare_network:
             "data/custom/annual_demand.csv",
             "data/custom/validation_2024_es.csv",
             "data/custom/pt_actuals.csv",
+            "data/custom/wind_correction.csv",
         ],
     output:
         network="resources/{run}/networks/base_{year}_{variant}.nc",
@@ -65,7 +75,7 @@ rule prepare_network:
         mem_mb=8000,
     params:
         patches=resolved_patches,
-        data_year=lambda w: "2024" if w.run == "wy2024" else w.year,
+        weather_year=lambda w: w.run.removeprefix("wy"),
     shell:
         """
         PYTHONPATH="{workflow.basedir}" python -m scripts.prepare_network \
@@ -74,7 +84,8 @@ rule prepare_network:
             --output "{output.network}" \
             --patches "{params.patches}" \
             --boundary-flows "{input.boundary_flows}" \
-            --data-year "{params.data_year}"
+            --data-year "{wildcards.year}" \
+            --weather-year "{params.weather_year}"
         """
 
 
@@ -82,7 +93,9 @@ rule solve_network:
     """Attaches the data center, adds the 24/7 CFE policy constraint and solves with HiGHS."""
     input:
         network="resources/{run}/networks/base_{year}_{variant}.nc",
-        costs="pypsa-eur/resources/{run}/costs_{year}_processed.csv",
+        costs=lambda w: (
+            f"pypsa-eur/resources/{w.run}/costs_{config['planning_horizons'][0]}_processed.csv"
+        ),
         r0_network=solve_r0_input,
     output:
         network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.nc",
@@ -126,7 +139,7 @@ rule solve_network:
 rule validate_network:
     """Compares the solved no-DC 2024 network with Redeia actuals in one report."""
     input:
-        network="results/wy2024/networks/solved_2025_{variant}_no_dc_t0_0mw_spain_wide.nc",
+        network="results/wy2024/networks/solved_2024_{variant}_no_dc_t0_0mw_spain_wide.nc",
         actuals="data/custom/validation_2024_es.csv",
     output:
         report="results/validation/validation_{variant}.csv",
@@ -144,15 +157,29 @@ rule validate_network:
         """
 
 
+def suite_kpis(wildcards):
+    """KPI files of every scenario in the configured suite."""
+    year = config["planning_horizons"][0]
+    return [
+        f"results/{s['run']}/kpis/kpi_{year}_{s.get('variant', 'patched')}_"
+        f"{s['policy']}_t{s['target']}_{s['dc_mw']}mw_{s['siting']}.csv"
+        for s in config["spain_cfe"]["suite"]
+    ]
+
+
 rule make_summary:
     """Collects all scenario KPI rows into one tidy table with baseline deltas."""
     input:
-        kpis=lambda w: [],  # filled by the scenario definition once suites are set
+        kpis=suite_kpis,
     output:
         summary="results/scenarios.csv",
     threads: 1
-    script:
-        "scripts/make_summary.py"
+    shell:
+        """
+        PYTHONPATH="{workflow.basedir}" python -m scripts.make_summary \
+            --kpis {input.kpis} \
+            --output "{output.summary}"
+        """
 
 
 rule plot_summary:

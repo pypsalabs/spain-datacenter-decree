@@ -1,0 +1,3 @@
+country,year,carrier_or_metric,value,unit,source_id,note
+ES,2025,wind_correction_factor,1.187,per_unit,study_wind_backcast_2024,Residual ERA5 onwind bias factor for Spain; derived on the 2024 back-cast (wy2024 weather with 2024 fleet after resource classes: 59.5 TWh cited Redeia generation / 50.1 TWh modelled fleet availability); applied multiplicatively and capped at 1.0. See doc/validation_log.md.
+PT,2025,wind_correction_factor,2.053,per_unit,study_wind_backcast_2024,Residual ERA5 onwind bias factor for Portugal (compounded by poor GEM plant coordinates); derived on the 2024 back-cast (14.3 TWh cited Ember generation / 7.0 TWh modelled fleet availability); applied multiplicatively and capped at 1.0. See doc/validation_log.md.

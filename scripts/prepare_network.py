@@ -12,6 +12,12 @@ The philosophy is: build fresh, validate, correct only what the validation repor
 demands, cite every correction (inputs in ``data/custom``, sources in
 ``doc/data_sources.md``).
 
+Two year dimensions: the **data year** (the ``{year}`` wildcard: 2024 rows for the
+back-cast calibration, 2025 rows for the case study) selects the cited data vintage
+for fleet, demand, prices and NTCs, while the **weather year** (from the run) keys
+the weather-measurement patches (``hydro_inflow``, and the back-cast derivation in
+``wind_correction``).
+
 Patches
 -------
 - ``boundary_flows``: France's external borders (BE, DE, CH, IT, GB) fixed to measured
@@ -20,8 +26,11 @@ Patches
   France. Model closure, not calibration: on in every variant.
 - ``national_capacities``: set national fleet totals per carrier to the published
   actuals in ``national_capacities.csv``, pro rata over the existing nodal
-  distribution. For the 2024 validation year, fast-growing carriers (wind, solar)
+  distribution. For the 2024 back-cast, fast-growing carriers (wind, solar)
   use the average operating capacity (mean of year-end 2023 and 2024).
+- ``wind_correction``: residual ERA5 wind-bias factor for ES and PT; derived at run
+  time on the 2024 back-cast, applied as the fixed cited factors from
+  ``wind_correction.csv`` in case-study runs.
 - ``phs_split``: pure pumped-storage energy, pumping capacity and round-trip
   efficiency per the cited sources; mixed pumped storage stays inside reservoir
   hydro per Redeia's convention (its capacity enters via ``national_capacities``).
@@ -37,8 +46,8 @@ Patches
   NTC values by scaling ``s_max_pu`` (lines) and ``p_max_pu`` (links); ``s_nom`` and
   impedances stay physical, so KVL is unaffected.
 - ``demand``: scale each country's load to the cited annual busbar demand.
-- ``hydro_inflow``: validation year only; scale Spanish reservoir inflow to the
-  observed 2024 hydro energy (the upstream EIA normalization data ends before 2024).
+- ``hydro_inflow``: wy2024 runs only; scale ES/PT reservoir inflow to the observed
+  2024 hydro energy (the upstream EIA normalization data ends before 2024).
 - ``ma_ad_exports``: fixed ES exports to Morocco and Andorra as flat loads at the
   nearest Spanish nodes.
 """
@@ -335,32 +344,31 @@ def _patch_national_capacities(n: pypsa.Network, ctx: Mapping[str, Any]) -> None
 
 def _patch_wind_correction(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     """
-    Scale ES and PT onshore wind profiles so fleet energy matches cited actuals.
+    Scale ES and PT onshore wind profiles for the residual ERA5 wind-speed bias.
 
     Applied after ``national_capacities`` and the resource-class spatial treatment:
     the remaining deficit is the ERA5 wind-speed bias in Iberian terrain (plus poor
-    GEM plant coordinates in Portugal). One multiplicative factor per country,
-    derived at run time from cited annual generation and the network's own fleet;
+    GEM plant coordinates in Portugal). One multiplicative factor per country;
     profiles are capped at 1.0. France is untouched (its fleet CF validates as is).
     New-build PPA candidates inherit the corrected profiles by construction.
+
+    In the 2024 back-cast (data year = weather year = 2024) the factor is derived
+    at run time: cited 2024 generation over the fleet's modelled availability.
+    Case-study runs (any other data year) apply the fixed factors recorded in
+    ``wind_correction.csv``, which were derived on that back-cast.
     """
     year = int(ctx["data_year"])
-    targets = {
-        "ES": _value(
-            _custom(ctx, "validation_2024_es.csv"),
-            "ES_mainland_baleares",
-            year,
-            "gen_onwind",
-        ),
-        "PT": _value(_custom(ctx, "pt_actuals.csv"), "PT", year, "gen_onwind"),
-    }
+    weather_year = int(ctx["weather_year"])
+    backcast = year == 2024
+    if backcast and weather_year != 2024:
+        raise ValueError(
+            "The 2024 back-cast derivation requires weather year 2024 "
+            f"(got wy{weather_year}); cited generation and modelled availability "
+            "must share the weather year."
+        )
+
     w = n.snapshot_weightings["generators"]
-    for prefix, target_twh in targets.items():
-        if target_twh is None:
-            logger.info(
-                "No cited wind generation for %s/%d; no correction.", prefix, year
-            )
-            continue
+    for prefix in ("ES", "PT"):
         gens = n.generators[
             (n.generators["carrier"] == "onwind")
             & n.generators["bus"].isin(set(_country_buses(n, prefix)))
@@ -376,7 +384,34 @@ def _patch_wind_correction(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
             )
             / 1e6
         )
-        factor = target_twh / avail_twh
+        if backcast:
+            targets = {
+                "ES": _value(
+                    _custom(ctx, "validation_2024_es.csv"),
+                    "ES_mainland_baleares",
+                    year,
+                    "gen_onwind",
+                ),
+                "PT": _value(_custom(ctx, "pt_actuals.csv"), "PT", year, "gen_onwind"),
+            }
+            target_twh = targets[prefix]
+            if target_twh is None:
+                raise ValueError(f"No cited {prefix} wind generation for {year}.")
+            factor = target_twh / avail_twh
+            source = f"derived from {target_twh:.1f} TWh cited"
+        else:
+            factor = _value(
+                _custom(ctx, "wind_correction.csv"),
+                prefix,
+                year,
+                "wind_correction_factor",
+            )
+            if factor is None:
+                raise ValueError(
+                    f"No wind correction factor for {prefix}/{year} in "
+                    "wind_correction.csv (derive it on the 2024 back-cast first)."
+                )
+            source = "fixed back-cast factor"
         scaled = n.generators_t.p_max_pu[cols] * factor
         n.generators_t.p_max_pu[cols] = scaled.where(scaled <= 1.0, 1.0)
         achieved = (
@@ -390,12 +425,12 @@ def _patch_wind_correction(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
             / 1e6
         )
         logger.info(
-            "%s onwind profiles scaled by %.3f: %.1f -> %.1f TWh available (target %.1f).",
+            "%s onwind profiles scaled by %.3f (%s): %.1f -> %.1f TWh available.",
             prefix,
             factor,
+            source,
             avail_twh,
             achieved,
-            target_twh,
         )
 
 
@@ -744,21 +779,30 @@ def _patch_demand(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
 
 
 def _patch_hydro_inflow(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
-    """Validation year only: scale ES reservoir inflow to the observed 2024 hydro energy."""
-    year = int(ctx["data_year"])
+    """
+    Scale ES/PT reservoir inflow to the hydro energy observed in the weather year.
+
+    A weather-measurement closure, keyed on the run's weather year (not the data
+    vintage): the upstream EIA inflow normalization ends before 2024, so wy2024 runs
+    are rescaled to the observed wet-2024 energy whatever fleet year they carry.
+    Other weather years are covered by EIA and are skipped.
+    """
+    weather_year = int(ctx["weather_year"])
     targets = {
         "ES": _value(
             _custom(ctx, "validation_2024_es.csv"),
             "ES_mainland_baleares",
-            year,
+            weather_year,
             "gen_hydro",
         ),
-        "PT": _value(_custom(ctx, "pt_actuals.csv"), "PT", year, "gen_hydro"),
+        "PT": _value(_custom(ctx, "pt_actuals.csv"), "PT", weather_year, "gen_hydro"),
     }
     w = n.snapshot_weightings["generators"]
     for prefix, target in targets.items():
         if target is None:
-            logger.info("No observed hydro energy for %s/%d; skipped.", prefix, year)
+            logger.info(
+                "No observed hydro energy for %s/wy%d; skipped.", prefix, weather_year
+            )
             continue
         buses = set(_country_buses(n, prefix))
         su = n.storage_units.index[
@@ -871,7 +915,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--data-year",
         type=int,
         default=2025,
-        help="Year of the cited data rows (2024 = validation).",
+        help="Vintage of the cited data rows (2024 = back-cast, 2025 = case study).",
+    )
+    parser.add_argument(
+        "--weather-year",
+        type=int,
+        default=2024,
+        help="Weather year of the run (keys the weather-measurement patches).",
     )
     return parser.parse_args(argv)
 
@@ -888,7 +938,8 @@ def main(argv: list[str] | None = None) -> None:
             "boundary_flows": Path(smk.input.boundary_flows),
             "custom_dir": Path(smk.params.custom_dir),
             "costs": Path(smk.input.costs),
-            "data_year": int(smk.params.data_year),
+            "data_year": int(smk.wildcards.year),
+            "weather_year": int(smk.params.weather_year),
         }
     else:
         args = _parse_args(argv)
@@ -900,6 +951,7 @@ def main(argv: list[str] | None = None) -> None:
             "custom_dir": args.custom_dir,
             "costs": args.costs,
             "data_year": args.data_year,
+            "weather_year": args.weather_year,
         }
 
     n = pypsa.Network(str(net_in))

@@ -10,6 +10,7 @@ This document catalogs every primary data source (`source_id`) cited across the 
 6. [`validation_2024_es.csv`](../data/custom/validation_2024_es.csv) — Complete 2024 Spanish electricity system validation benchmark: generation by technology (`TWh`), busbar demand (`TWh`), gross and net physical cross-border exchanges per border (`TWh`), power-sector $\text{CO}_2$ emissions by technology (`MtCO2`), and average day-ahead market price (`EUR/MWh`) across National (`ES`), Peninsular (`ES_peninsular`), Balearic (`ES_baleares`), and Modeled 2-Zone (`ES_mainland_baleares`) scopes.
 7. [`fr_boundary_flows_2024.csv`](../data/custom/fr_boundary_flows_2024.csv) — Measured hourly French external border flows (GB, IT, CH, DE+BE; MW, positive = import into France), derived from the vendored RTE eCO2mix extract via `scripts/retrieve_fr_boundary_flows.py`.
 8. [`pt_actuals.csv`](../data/custom/pt_actuals.csv) — Portuguese annual wind, hydro, and bioenergy generation (TWh) from the vendored Ember Yearly Electricity Data extract, used for the wind correction, hydro inflow, and biomass availability patches.
+9. [`wind_correction.csv`](../data/custom/wind_correction.csv) — Fixed residual ERA5 onwind bias factors for `ES` (`1.187`) and `PT` (`2.053`), derived on the 2024 back-cast and applied in case-study runs (any data year other than 2024).
 
 ---
 
@@ -58,6 +59,7 @@ This document catalogs every primary data source (`source_id`) cited across the 
 | `omie_2025_informe_anual` | *Evolución del mercado de electricidad — Informe anual 2025 (Precio medio aritmético mercado diario España)* | OMIE — Operador del Mercado Ibérico de Energía (Polo Español) | `https://www.omie.es/es/publicaciones/informe-anual` | 2026-04-20 | OMIE Public Market Data | — | — | `prices.csv` |
 | `pypsa_tech_data_v015_2025` | *PyPSA technology-data v0.15.0 — `costs_2025.csv` (2025 fuel cost assumptions in EUR_2020/MWh_th)* | PyPSA Contributors | `https://raw.githubusercontent.com/PyPSA/technology-data/v0.15.0/outputs/costs_2025.csv` | 2026-04-20 | MIT / CC BY 4.0 | `pypsa_technology_data_v0.15.0_costs_2025.csv` | `a4492c081545352d575474898c58524a4d5502c119fedefac7afe94f53afb683` | `prices.csv` |
 | `study_assumption_user_confirmed` | *Study carbon-price assumption (2025 = 70 EUR/tCO2)* | Study authors (see `doc/decision_log.md`) | — | 2026-04-20 | Internal Study Assumption | — | — | `prices.csv` |
+| `study_wind_backcast_2024` | *Residual ERA5 onwind bias factors (ES `1.187`, PT `2.053`), derived on the 2024 back-cast: cited 2024 generation over the modelled wy2024 fleet availability after resource classes* | Study authors (see `doc/validation_log.md`) | — | 2026-10-19 | Internal Study Derivation (reproducible via the wy2024 back-cast) | — | — | `wind_correction.csv` |
 
 ---
 

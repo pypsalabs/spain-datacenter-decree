@@ -68,8 +68,16 @@ cd spain-hourly-matching/pypsa-eur && pixi install && cd ..
 The study deliberately has no environment of its own: it runs entirely in the submodule's
 pixi environment (`pypsa-eur/pixi.toml` + lock file), so the upstream build and the study
 workflow always use exactly the package versions the pinned PyPSA-Eur release was tested
-with. The path must contain no spaces. All commands below use
-`PX="pixi run --manifest-path pypsa-eur/pixi.toml"`.
+with. The path must contain no spaces.
+
+All commands below assume the environment is activated from the repository root:
+
+```bash
+pixi shell --manifest-path pypsa-eur/pixi.toml
+```
+
+(`--manifest-path` points pixi at the submodule's environment, since this repository
+deliberately has no manifest of its own.)
 
 ## Workflow
 
@@ -85,8 +93,8 @@ with. The path must contain no spaces. All commands below use
    ship with the repo (`data/custom/fr_boundary_flows_2024.csv`, regenerable with
    `scripts/retrieve_fr_boundary_flows.py --download`):
    ```bash
-   $PX snakemake resources/wy2024/networks/base_2025_raw.nc -j 4   # patch engine
-   $PX snakemake results/validation/validation_raw.csv -j 4       # no_dc solve + report
+   snakemake resources/wy2024/networks/base_2025_raw.nc -j 4   # patch engine
+   snakemake results/validation/validation_raw.csv -j 4        # no_dc solve + report
    ```
 3. **Scenarios, summary, figures**: `solve_network` targets per
    (run, variant, policy, target, DC size, siting), collected by `make_summary` and
@@ -95,7 +103,7 @@ with. The path must contain no spaces. All commands below use
 ## Tests
 
 ```bash
-$PX pytest test -q
+pytest test -q
 ```
 
 ## Documentation

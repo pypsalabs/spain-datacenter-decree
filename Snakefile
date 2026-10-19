@@ -15,6 +15,41 @@ configfile: "pypsa-eur/config/config.default.yaml"
 configfile: "config/config.spain.yaml"
 
 
+HORIZON = config["planning_horizons"][0]
+
+
+rule all:
+    """Full case study: upstream build, scenario solves, summary, figures."""
+    default_target: True
+    input:
+        "results/scenarios.csv",
+        "results/plots/.done",
+
+
+rule validation:
+    """2024 back-cast and its validation reports (raw and patched variants)."""
+    input:
+        "results/validation/validation_raw.csv",
+        "results/validation/validation_patched.csv",
+
+
+rule build_upstream:
+    """Builds the composed network and processed costs inside the pypsa-eur submodule."""
+    output:
+        network=f"pypsa-eur/resources/{{run}}/networks/composed_{HORIZON}.nc",
+        costs=f"pypsa-eur/resources/{{run}}/costs_{HORIZON}_processed.csv",
+    threads: workflow.cores
+    params:
+        horizon=HORIZON,
+    shell:
+        """
+        cd pypsa-eur && snakemake \
+            resources/{wildcards.run}/networks/composed_{params.horizon}.nc \
+            resources/{wildcards.run}/costs_{params.horizon}_processed.csv \
+            -j {threads} --configfile ../config/config.spain.yaml
+        """
+
+
 def resolved_patches(wildcards):
     """Return the enabled patch names for a variant (config defaults + variant overrides)."""
     cfg = config.get("spain_cfe", {})
@@ -195,5 +230,9 @@ rule plot_summary:
     output:
         touch("results/plots/.done"),
     threads: 1
-    script:
-        "scripts/plot_summary.py"
+    shell:
+        """
+        PYTHONPATH="{workflow.basedir}" python -m scripts.plot_summary \
+            --summary "{input.summary}" \
+            --plots-dir "results/plots"
+        """

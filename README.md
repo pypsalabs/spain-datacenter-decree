@@ -50,8 +50,19 @@ vanilla PyPSA-Eur and see exactly what the study adds.
   2 in Portugal.
 - France's outer borders (BE, DE, CH, IT, GB, LU): fixed to measured hourly 2024
   flows (RTE/ENTSO-E).
-- Resolution and costs: electricity sector, 3-hourly averaged snapshots,
+- Temporal resolution: full year at 3-hourly resolution (2920 snapshots,
+  averaged from hourly inputs upstream; each
+  snapshot carries a weight of 3 hours in dispatch, storage and cost accounting).
+- Techno-economic assumptions:
   [technology-data v0.15.0](https://github.com/PyPSA/technology-data/tree/v0.15.0) in EUR2025.
+- Renewable resources: five
+  [resource classes](https://pypsa-eur.readthedocs.io/en/latest/configuration/#renewable)
+  per modelled region for onshore wind and utility solar PV (split into fixed optimally
+  tilted and single-axis tracking), each with its own profile and potential. Existing
+  plants are spatially joined to the class where they stand. The data center procurement model contracts renewable assets in merit order of their
+  generation profiles, subject to remaining land availability, with an optional switch between two
+  procurement scopes: `local_region` (contract only in the data center's own region) and
+  `spain_wide` (contract anywhere in Spain, letting the optimizer choose the locations).
 - Fleet: frozen background fleet, calibrated to cited national data
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
   center's PPA assets are extendable.
@@ -97,18 +108,6 @@ measured 2024 border flows with 2024 weather, observed 2024 hydro energy, and th
 wind-bias factor derived on the back-cast (stage ii) and applied as a fixed cited
 constant (`data/custom/wind_correction.csv`) in stage (iii).
 
-## Layout
-
-| Path | Content |
-|---|---|
-| `Snakefile` | Study workflow: prepare (patch engine), solve (DC + 24/7 CFE), validate, summarize, plot |
-| `config/` | PyPSA-Eur overlay (`config.spain.yaml`) and weather-year scenarios |
-| `scripts/` | Study code (patch engine, DC attach, CFE constraints, grid-share tracing, iteration, validation, summary) |
-| `data/custom/` | Cited calibration inputs and vendored primary sources |
-| `test/` | pytest suite |
-| `doc/` | Data sources, decision log, validation log |
-| `networks/`, `resources/`, `results/` | Build artifacts (gitignored) |
-
 ## Setup
 
 Install [pixi](https://pixi.sh), then:
@@ -141,6 +140,10 @@ France's measured border flows ship with the repository
 network, single scenario solve, report) stays addressable by its filename; see
 `Snakefile`. For interactive work, activate the environment once with
 `pixi shell --manifest-path pypsa-eur/pixi.toml`.
+
+## Validation preview
+
+*placeholder*
 
 ## License
 

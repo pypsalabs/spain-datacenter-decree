@@ -3,50 +3,33 @@ ES-FR,2024,ntc_es_to_fr,2800.0,MW,redeia_ise_2025_interconexiones,Commercial tra
 FR-ES,2024,ntc_fr_to_es,2800.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity France to Spain (2.8 GW symmetric nominal NTC).
 ES-FR,2025,ntc_es_to_fr,2800.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Spain to France 2025.
 FR-ES,2025,ntc_fr_to_es,2800.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity France to Spain 2025.
-ES-FR,2030,ntc_es_to_fr,5000.0,MW,entsoe_tyndp_2024_ntc,2030 Spain to France NTC after commissioning of 2x1000 MW Biscay Gulf HVDC link (Gatika-Cubnezais expected 2028; +2200 MW NTC to 5.0 GW).
-FR-ES,2030,ntc_fr_to_es,5000.0,MW,entsoe_tyndp_2024_ntc,2030 France to Spain NTC after commissioning of Biscay Gulf HVDC link (5.0 GW; rises to 8.0 GW post-2030 with Navarra-Landes and Aragon-Atlantic Pyrenees links).
 ES-PT,2024,ntc_es_to_pt,4200.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Spain to Portugal (4200 MW peak / ~3500 MW seasonal reference average after Fontefria-Ponte de Lima 400 kV line).
 PT-ES,2024,ntc_pt_to_es,3500.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Portugal to Spain (3500 MW peak / ~3200 MW seasonal reference average).
 ES-PT,2025,ntc_es_to_pt,4200.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Spain to Portugal 2025.
 PT-ES,2025,ntc_pt_to_es,3500.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Portugal to Spain 2025.
-ES-PT,2030,ntc_es_to_pt,4200.0,MW,entsoe_tyndp_2024_ntc,2030 Spain to Portugal commercial NTC (4200 MW baseline; up to 5000 MW with Beariz-Fontefria-Ponte de Lima internal reinforcements).
-PT-ES,2030,ntc_pt_to_es,3500.0,MW,entsoe_tyndp_2024_ntc,2030 Portugal to Spain commercial NTC (3500 MW baseline; up to 4200 MW with MIBEL reinforcements).
 ES-MA,2024,ntc_es_to_ma,900.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Spain to Morocco (900 MW commercial NTC; 1400 MW thermal rating across two 400 kV AC submarine cables Tarifa-Fardioua).
 MA-ES,2024,ntc_ma_to_es,600.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Morocco to Spain (600 MW commercial NTC).
 ES-MA,2025,ntc_es_to_ma,900.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Spain to Morocco 2025.
 MA-ES,2025,ntc_ma_to_es,600.0,MW,redeia_ise_2025_interconexiones,Commercial transfer capacity Morocco to Spain 2025.
-ES-MA,2030,ntc_es_to_ma,900.0,MW,entsoe_tyndp_2024_ntc,2030 Spain to Morocco commercial NTC (900 MW existing; rises to 1800 MW if proposed 3rd 900 MW cable is commissioned).
-MA-ES,2030,ntc_ma_to_es,600.0,MW,entsoe_tyndp_2024_ntc,2030 Morocco to Spain commercial NTC (600 MW existing; rises to 1500 MW if proposed 3rd cable is commissioned).
 ES1-ES4,2024,ntc_peninsula_to_baleares,400.0,MW,redata_2024_enlace_baleares,Romulo HVDC submarine link (Morvedre-Santa Ponca 3x133 MW = 400 MW bidirectional).
 ES1-ES4,2025,ntc_peninsula_to_baleares,400.0,MW,redata_2024_enlace_baleares,Romulo HVDC submarine link (400 MW bidirectional).
-ES1-ES4,2030,ntc_peninsula_to_baleares,800.0,MW,miteco_pniec_2023_2030,Romulo HVDC link (400 MW) + Second Mainland-Balearic HVDC link (400 MW Fadrell-Lloseta scheduled by 2029/2030) = 800 MW total.
 FR-BE,2024,ntc_fr_to_be,4300.0,MW,entsoe_tyndp_2024_ntc,France to Belgium reference commercial transfer capacity (RTE / ENTSO-E TYNDP 2024).
 BE-FR,2024,ntc_be_to_fr,2800.0,MW,entsoe_tyndp_2024_ntc,Belgium to France reference commercial transfer capacity (RTE / ENTSO-E TYNDP 2024).
 FR-BE,2025,ntc_fr_to_be,4300.0,MW,entsoe_tyndp_2024_ntc,France to Belgium reference commercial transfer capacity 2025.
 BE-FR,2025,ntc_be_to_fr,2800.0,MW,entsoe_tyndp_2024_ntc,Belgium to France reference commercial transfer capacity 2025.
-FR-BE,2030,ntc_fr_to_be,4300.0,MW,entsoe_tyndp_2024_ntc,2030 France to Belgium reference NTC (4300-5300 MW with Avelin-Avelgem / Lonny-Gramme reinforcements).
-BE-FR,2030,ntc_be_to_fr,3800.0,MW,entsoe_tyndp_2024_ntc,2030 Belgium to France reference NTC (TYNDP 2024).
 FR-DE,2024,ntc_fr_to_de,3000.0,MW,entsoe_tyndp_2024_ntc,France to Germany reference commercial transfer capacity (Core FBMC / TYNDP 2024).
 DE-FR,2024,ntc_de_to_fr,3200.0,MW,entsoe_tyndp_2024_ntc,Germany to France reference commercial transfer capacity (Core FBMC / TYNDP 2024).
 FR-DE,2025,ntc_fr_to_de,3000.0,MW,entsoe_tyndp_2024_ntc,France to Germany reference commercial transfer capacity 2025.
 DE-FR,2025,ntc_de_to_fr,3200.0,MW,entsoe_tyndp_2024_ntc,Germany to France reference commercial transfer capacity 2025.
-FR-DE,2030,ntc_fr_to_de,4800.0,MW,entsoe_tyndp_2024_ntc,2030 France to Germany reference NTC after Rhine cross-border upgrades (TYNDP 2024).
-DE-FR,2030,ntc_de_to_fr,4800.0,MW,entsoe_tyndp_2024_ntc,2030 Germany to France reference NTC after Rhine cross-border upgrades (TYNDP 2024).
 FR-CH,2024,ntc_fr_to_ch,3700.0,MW,entsoe_tyndp_2024_ntc,France to Switzerland reference commercial transfer capacity (RTE / Swissgrid / TYNDP 2024).
 CH-FR,2024,ntc_ch_to_fr,1400.0,MW,entsoe_tyndp_2024_ntc,Switzerland to France reference commercial transfer capacity (1400-2000 MW seasonal range; TYNDP 2024).
 FR-CH,2025,ntc_fr_to_ch,3700.0,MW,entsoe_tyndp_2024_ntc,France to Switzerland reference commercial transfer capacity 2025.
 CH-FR,2025,ntc_ch_to_fr,1400.0,MW,entsoe_tyndp_2024_ntc,Switzerland to France reference commercial transfer capacity 2025.
-FR-CH,2030,ntc_fr_to_ch,3700.0,MW,entsoe_tyndp_2024_ntc,2030 France to Switzerland reference NTC (TYNDP 2024).
-CH-FR,2030,ntc_ch_to_fr,2200.0,MW,entsoe_tyndp_2024_ntc,2030 Switzerland to France reference NTC (TYNDP 2024).
 FR-IT,2024,ntc_fr_to_it,4350.0,MW,entsoe_tyndp_2024_ntc,France to Italy commercial transfer capacity including Savoie-Piemont 2x600 MW HVDC link (3150 MW prior to full HVDC ramp-up; 4350 MW full capacity).
 IT-FR,2024,ntc_it_to_fr,2160.0,MW,entsoe_tyndp_2024_ntc,Italy to France commercial transfer capacity including Savoie-Piemont HVDC link (1160 MW prior to HVDC; 2160 MW full capacity).
 FR-IT,2025,ntc_fr_to_it,4350.0,MW,entsoe_tyndp_2024_ntc,France to Italy commercial transfer capacity 2025 with Savoie-Piemont HVDC link.
 IT-FR,2025,ntc_it_to_fr,2160.0,MW,entsoe_tyndp_2024_ntc,Italy to France commercial transfer capacity 2025 with Savoie-Piemont HVDC link.
-FR-IT,2030,ntc_fr_to_it,4350.0,MW,entsoe_tyndp_2024_ntc,2030 France to Italy reference NTC (TYNDP 2024).
-IT-FR,2030,ntc_it_to_fr,2160.0,MW,entsoe_tyndp_2024_ntc,2030 Italy to France reference NTC (TYNDP 2024).
 FR-GB,2024,ntc_fr_to_gb,4000.0,MW,entsoe_tyndp_2024_ntc,France to Great Britain HVDC transfer capacity: IFA (2000 MW) + IFA2 (1000 MW) + ElecLink (1000 MW) = 4000 MW.
 GB-FR,2024,ntc_gb_to_fr,4000.0,MW,entsoe_tyndp_2024_ntc,Great Britain to France HVDC transfer capacity: IFA (2000 MW) + IFA2 (1000 MW) + ElecLink (1000 MW) = 4000 MW.
 FR-GB,2025,ntc_fr_to_gb,4000.0,MW,entsoe_tyndp_2024_ntc,France to Great Britain HVDC transfer capacity 2025 (4000 MW).
 GB-FR,2025,ntc_gb_to_fr,4000.0,MW,entsoe_tyndp_2024_ntc,Great Britain to France HVDC transfer capacity 2025 (4000 MW).
-FR-GB,2030,ntc_fr_to_gb,5400.0,MW,entsoe_tyndp_2024_ntc,2030 France to Great Britain HVDC transfer capacity (4000 MW existing + 1400 MW FAB Link / GridLink in TYNDP 2024).
-GB-FR,2030,ntc_gb_to_fr,5400.0,MW,entsoe_tyndp_2024_ntc,2030 Great Britain to France HVDC transfer capacity (4000 MW existing + 1400 MW FAB Link / GridLink in TYNDP 2024).

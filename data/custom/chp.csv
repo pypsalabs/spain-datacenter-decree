@@ -41,6 +41,3 @@ ES_baleares,2025,chp_co2_mt,0.015369,MtCO2,redata_2025_emisiones_co2_baleares_me
 ES_mainland_baleares,2025,chp_co2_mt,5.675110,MtCO2,redata_2025_emisiones_co2_mensual,Combined Mainland + Balearic (ES1+ES4) annual cogeneration CO2 emissions in 2025
 ES,2025,chp_capacity_factor,0.336024,per_unit,redeia_ise_2025_evolucion_demanda,Realized 2025 national cogeneration capacity factor (15456.031 GWh / (5250.781 MW * 8760 h))
 ES,2025,chp_emission_factor,0.367178,tCO2/MWh_el,redata_2025_emisiones_co2_mensual,Realized 2025 national cogeneration specific CO2 intensity (5.675110 MtCO2 / 15.456031 TWh)
-ES,2030,chp_capacity_mw,3784.000,MW,miteco_pniec_2023_2030,PNIEC 2023-2030 (RD 986/2024) Table 2.9 2030 installed capacity target for Cogeneracion (down from 4068 MW indicative 2025)
-ES,2030,chp_generation_twh,11.131910,TWh,miteco_pniec_2023_2030,2030 projected cogeneration output scaling PNIEC 3784 MW target at realized 2024-2025 utilization (33.58% CF)
-ES,2030,chp_co2_mt,4.070520,MtCO2,miteco_pniec_2023_2030,2030 projected cogeneration CO2 at 11.131910 TWh and 2024 emission intensity (0.365662 tCO2/MWh_el)

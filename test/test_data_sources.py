@@ -128,6 +128,6 @@ def test_vendored_files_sha256_match() -> None:
             )
             verified_count += 1
 
-    assert verified_count >= 35, (
-        f"Expected >=35 verified vendored file entries, got {verified_count}"
+    assert verified_count >= 33, (
+        f"Expected >=33 verified vendored file entries, got {verified_count}"
     )

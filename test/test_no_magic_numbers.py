@@ -60,7 +60,6 @@ GLOBAL_ALLOW_LIST: set[float | int] = {
     2023,
     2024,
     2025,
-    2030,
 }
 
 # Documented inline fallback defaults or diagnostic/plotting literals in existing scripts

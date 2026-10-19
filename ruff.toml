@@ -1,1 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)
+#
+# SPDX-License-Identifier: MIT
+
 extend = "pypsa-eur/ruff.toml"

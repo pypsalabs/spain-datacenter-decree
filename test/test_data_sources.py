@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)
+#
+# SPDX-License-Identifier: MIT
+
 """
 Guard tests for the data provenance registry (doc/data_sources.md).
 

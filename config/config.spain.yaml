@@ -1,5 +1,4 @@
-# yaml-language-server: $schema=../pypsa-eur/config/schema.default.json
-# SPDX-FileCopyrightText: : 2026 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)
 #
 # SPDX-License-Identifier: MIT
 

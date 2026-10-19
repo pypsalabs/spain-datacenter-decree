@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)
+#
+# SPDX-License-Identifier: MIT
+
 """Snakemake workflow for the Spain 80% hourly matching study.
 
 The upstream PyPSA-Eur network build runs inside the ``pypsa-eur/`` submodule with

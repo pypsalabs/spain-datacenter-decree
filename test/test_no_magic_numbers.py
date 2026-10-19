@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)
+#
+# SPDX-License-Identifier: MIT
+
 """AST guard test preventing undocumented magic numbers in scripts/*.py."""
 
 from __future__ import annotations

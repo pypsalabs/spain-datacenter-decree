@@ -99,3 +99,9 @@ Scope and architecture decisions are recorded in [doc/decision_log.md](doc/decis
 the 2024 validation story (raw findings, every applied correction with its cited source,
 gate results and open items) in [doc/validation_log.md](doc/validation_log.md); every input
 number's provenance in [doc/data_sources.md](doc/data_sources.md).
+
+## License
+
+MIT (see [LICENSES/](LICENSES/)), [REUSE](https://reuse.software/)-compliant. Vendored
+third-party primary sources under `data/custom/sources/` keep their providers' licences,
+registered per file in [doc/data_sources.md](doc/data_sources.md).

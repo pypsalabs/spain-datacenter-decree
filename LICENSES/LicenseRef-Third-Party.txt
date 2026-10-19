@@ -1,0 +1,9 @@
+Vendored third-party primary sources.
+
+The files under data/custom/sources/ are unmodified copies of primary data
+published by third parties (Redeia/REE, MITECO, RTE, Ember, JRC, Foro Nuclear,
+PyPSA technology-data, and others). They are vendored for reproducibility only
+and remain under their providers' own licences and terms of use.
+
+The origin, retrieval date, licence and SHA-256 checksum of every vendored file
+is registered in doc/data_sources.md.

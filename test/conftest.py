@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2026 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)
 #
 # SPDX-License-Identifier: MIT
 """Pytest configuration ensuring the project root is first on ``sys.path``."""

@@ -1,0 +1,26 @@
+version = 1
+SPDX-PackageName = "spain-hourly-matching"
+SPDX-PackageSupplier = "Iegor Riepin <iegor.riepin@pypsalabs.org>"
+
+[[annotations]]
+path = [
+    "README.md",
+    "doc/*.md",
+    "data/custom/*.csv",
+    "resources/**",
+    "results/**",
+]
+SPDX-FileCopyrightText = "2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = [".gitignore", ".gitmodules"]
+SPDX-FileCopyrightText = "2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Vendored primary sources keep their providers' licences; every file's origin,
+# licence and sha256 is registered in doc/data_sources.md.
+[[annotations]]
+path = ["data/custom/sources/**"]
+SPDX-FileCopyrightText = "The respective data providers (see doc/data_sources.md)"
+SPDX-License-Identifier = "LicenseRef-Third-Party"

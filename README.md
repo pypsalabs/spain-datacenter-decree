@@ -58,12 +58,17 @@ exists and what it changed in the 2024 back-cast is documented in
 
 ## Setup
 
+Install [pixi](https://pixi.sh), then:
+
 ```bash
 git clone --recursive <this-repo>
 cd spain-hourly-matching/pypsa-eur && pixi install && cd ..
 ```
 
-The path must contain no spaces. All commands below use
+The study deliberately has no environment of its own: it runs entirely in the submodule's
+pixi environment (`pypsa-eur/pixi.toml` + lock file), so the upstream build and the study
+workflow always use exactly the package versions the pinned PyPSA-Eur release was tested
+with. The path must contain no spaces. All commands below use
 `PX="pixi run --manifest-path pypsa-eur/pixi.toml"`.
 
 ## Workflow

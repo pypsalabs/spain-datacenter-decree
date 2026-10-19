@@ -111,7 +111,7 @@ def test_converges_toy() -> None:
         add_dc_cfe_constraints(
             n=net,
             dc_cfg={"prefix": "DC"},
-            r=r_iter,
+            cfe_t=r_iter,
             policy="hourly_80_grid_credit",
             target=target,
             excess_share=0.20,
@@ -164,7 +164,7 @@ def test_damping_and_validation() -> None:
         add_dc_cfe_constraints(
             n=net,
             dc_cfg={"prefix": "DC"},
-            r=r_iter,
+            cfe_t=r_iter,
             policy="hourly_80_grid_credit",
             target=0.80,
         )

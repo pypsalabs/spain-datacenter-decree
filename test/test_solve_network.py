@@ -93,6 +93,8 @@ def test_resolve_target_from_policy_names() -> None:
     assert resolve_target("hourly_80_ppa_only") == pytest.approx(0.80)
     assert resolve_target("strict_hourly_90_grid_credit") == pytest.approx(0.90)
     assert resolve_target("annual_100_res") == pytest.approx(1.0)
+    assert resolve_target("annual_80_res") == pytest.approx(0.80)
+    assert resolve_target("annual_res") == pytest.approx(1.0)
     assert resolve_target("hourly_80_grid_credit", 60.0) == pytest.approx(0.60)
 
 

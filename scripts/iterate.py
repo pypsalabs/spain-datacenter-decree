@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 """
-Fixed-point iteration loop for endogenous grid CFE share ``r_t``.
+Fixed-point iteration loop for the endogenous grid CFE factor ``CFE_t``.
 
 Resolves the bilinear coupling between the data center's grid import ``m_t``
-and the background grid clean share ``r_t`` by iteratively building the
+and the background grid CFE factor ``CFE_t`` by iteratively building the
 Linopy model with ``r^(k)``, solving with HiGHS Simplex, and recomputing
 ``r^(k+1)`` from the solved dispatch (excluding DC assets) until
 ``max_t |r_new - r| < tol``.
@@ -67,7 +67,7 @@ def solve_with_grid_iteration(
     grid_share_fn: Callable[[pypsa.Network], pd.Series] | None = None,
 ) -> tuple[pypsa.Network, pd.DataFrame]:
     """
-    Run the fixed-point iteration loop for ``r_t`` with HiGHS Simplex.
+    Run the fixed-point iteration loop for ``CFE_t`` with HiGHS Simplex.
 
     Parameters
     ----------

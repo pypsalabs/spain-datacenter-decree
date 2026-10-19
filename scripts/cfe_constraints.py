@@ -4,15 +4,37 @@
 r"""
 Linopy constraints and primal KPI extraction for 24/7 CFE procurement.
 
-Implements the virtual data center energy balance per snapshot ``t``:
+Notation follows Riepin & Brown (2023), "System-level impacts of 24/7
+carbon-free electricity procurement in Europe" (247-procurement-paper):
+demand :math:`d_t`, contracted generation :math:`g_{r,t}` for
+:math:`r \in CFE`, storage discharge/charge
+:math:`\bar{g}_{s,t} / \underline{g}_{s,t}`, grid imports :math:`im_t`,
+excess sold to the grid :math:`ex_t`, hourly grid CFE factor :math:`CFE_t`,
+and matching target :math:`x`.
+
+Consumer energy balance per snapshot (``DC-virtual-balance``):
 
 .. math::
-    \\sum_i G_{i,t} + \\eta_d d_t - c_t + m_t - x_t = L_t, \\quad m_t, x_t \\ge 0
+    \sum_{r \in CFE} g_{r,t} + \sum_{s \in STO} (\bar{g}_{s,t} -
+    \underline{g}_{s,t}) - ex_t + im_t = d_t, \quad im_t, ex_t \ge 0
 
-and policy constraints (``annual_res``, ``hourly``, ``strict_hourly``) plus the
-annual excess export cap. Battery grid-charging enters through ``c_t`` in the
-virtual balance and increases ``m_t``, so no post-processing clipping is ever
-performed.
+Policy constraints:
+
+- ``hourly`` (24/7 CFE score):
+  :math:`\sum_{r,t} g_{r,t} + \sum_{s,t} (\bar{g}_{s,t} -
+  \underline{g}_{s,t}) - \sum_t ex_t + \sum_t CFE_t \cdot im_t
+  \ge x \sum_t d_t`
+- ``strict_hourly``: the same left-hand side per snapshot,
+  :math:`\ge x \cdot d_t \; \forall t` (the draft royal decree's Art. 9).
+- ``annual_res``: :math:`\sum_{r,t} g_{r,t} \ge x \sum_t d_t`
+  (volumetric matching; the residual load is bought from the grid).
+
+PPA-only policies set :math:`CFE_t \equiv 0`; grid-credit policies take the
+hourly grid CFE factor from ``calculate_grid_res`` (iterated to a fixed
+point in ``iterate``). The optional excess cap limits annual sales to the
+grid: :math:`\sum_t ex_t \le \sigma \sum_t d_t`. Battery grid-charging
+enters through :math:`\underline{g}_{s,t}` in the balance and increases
+:math:`im_t`, so no post-processing clipping is ever performed.
 """
 
 import logging
@@ -142,35 +164,35 @@ def _resolve_dc_components(
     }
 
 
-def _effective_grid_share(
+def _effective_cfe_factor(
     n: pypsa.Network,
-    r: pd.Series | float | None,
+    cfe_t: pd.Series | float | None,
     policy: str,
 ) -> pd.Series:
-    """Return effective hourly grid clean share ``r_t`` (zeros for PPA-only policies)."""
+    """Return the effective hourly grid CFE factor ``CFE_t`` (zeros for PPA-only policies)."""
     snapshots = n.snapshots
     policy_norm = policy.strip().lower()
-    if "ppa_only" in policy_norm or "ppa-only" in policy_norm or r is None:
-        eff_r = pd.Series(0.0, index=snapshots, dtype=float)
-    elif isinstance(r, (int, float)):
-        eff_r = pd.Series(float(r), index=snapshots, dtype=float)
+    if "ppa_only" in policy_norm or "ppa-only" in policy_norm or cfe_t is None:
+        cfe = pd.Series(0.0, index=snapshots, dtype=float)
+    elif isinstance(cfe_t, (int, float)):
+        cfe = pd.Series(float(cfe_t), index=snapshots, dtype=float)
     else:
-        eff_r = r.reindex(snapshots).fillna(0.0).astype(float)
-    eff_r.index = snapshots
-    eff_r.index.name = snapshots.name
-    return eff_r
+        cfe = cfe_t.reindex(snapshots).fillna(0.0).astype(float)
+    cfe.index = snapshots
+    cfe.index.name = snapshots.name
+    return cfe
 
 
 def add_dc_cfe_constraints(
     n: pypsa.Network,
     dc_cfg: Mapping[str, Any] | None,
-    r: pd.Series | float | None,
+    cfe_t: pd.Series | float | None,
     policy: str,
     target: float,
     excess_share: float | None = None,
 ) -> None:
     """
-    Add virtual DC energy balance, CFE/RES policy constraint, and excess cap to ``n.model``.
+    Add the consumer energy balance, the CFE/RES policy constraint, and the sales cap.
 
     Parameters
     ----------
@@ -179,19 +201,20 @@ def add_dc_cfe_constraints(
     dc_cfg : Mapping[str, Any] | None
         Configuration dictionary identifying DC PPA generators, battery chargers/
         dischargers, and DC loads (or prefix ``"DC"``).
-    r : pd.Series | float | None
-        Hourly grid clean share ``r_t`` indexed by ``n.snapshots``. Overridden to
-        ``0.0`` when ``policy`` specifies PPA-only.
+    cfe_t : pd.Series | float | None
+        Hourly grid CFE factor ``CFE_t`` indexed by ``n.snapshots``. Overridden
+        to ``0.0`` when ``policy`` specifies PPA-only.
     policy : str
         Procurement policy: ``'annual_res'``, ``'hourly'``, ``'strict_hourly'``,
         or scenario variants (e.g. ``'hourly_80_ppa_only'``,
         ``'hourly_80_grid_credit'``, ``'strict_hourly_80_ppa_only'``,
-        ``'strict_hourly_80_grid_credit'``, ``'annual_100_res'``,
-        ``'unmatched_dc'``, ``'no_dc'``).
+        ``'annual_100_res'``, ``'annual_80_res'``, ``'unmatched_dc'``,
+        ``'no_dc'``).
     target : float
-        Volumetric or hourly matching target fraction in ``[0, 1]``.
+        The matching target ``x`` as a fraction in ``[0, 1]``.
     excess_share : float | None, optional
-        Maximum allowed annual export share relative to total DC load.
+        Cap ``sigma`` on annual sales to the grid relative to total DC demand,
+        ``sum_t ex_t <= sigma * sum_t d_t``; ``None`` leaves sales unlimited.
     """
     if not hasattr(n, "model") or n.model is None:
         n.optimize.create_model()
@@ -200,81 +223,84 @@ def add_dc_cfe_constraints(
     dc_gens: list[str] = comp["generators"]
     chargers: list[str] = comp["chargers"]
     dischargers: list[str] = comp["dischargers"]
-    load_series: pd.Series = comp["load_series"]
+    d: pd.Series = comp["load_series"]
     annual_equality: bool = comp["annual_equality"]
 
     snapshots = n.snapshots.rename("snapshot")
     weights = n.snapshot_weightings["generators"].copy()
     weights.index = snapshots
 
-    eff_r = _effective_grid_share(n, r, policy)
-    eff_r.index = snapshots
-    load_series = load_series.copy()
-    load_series.index = snapshots
+    cfe = _effective_cfe_factor(n, cfe_t, policy)
+    cfe.index = snapshots
+    d = d.copy()
+    d.index = snapshots
 
-    m = n.model.add_variables(lower=0.0, coords=[snapshots], name="DC-import")
-    x = n.model.add_variables(lower=0.0, coords=[snapshots], name="DC-export")
+    im = n.model.add_variables(lower=0.0, coords=[snapshots], name="DC-im")
+    ex = n.model.add_variables(lower=0.0, coords=[snapshots], name="DC-ex")
 
-    lhs_balance = m - x
+    # Consumer balance: sum_r g_{r,t} + (dis - cha) - ex_t + im_t = d_t
+    lhs_balance = im - ex
     if dc_gens:
         gen_var = n.model["Generator-p"].loc[:, dc_gens]
         gen_dim = "name" if "name" in gen_var.dims else "Generator"
-        g_expr = gen_var.sum(gen_dim)
-        lhs_balance = lhs_balance + g_expr
+        g = gen_var.sum(gen_dim)
+        lhs_balance = lhs_balance + g
     else:
-        g_expr = None
+        g = None
 
     if dischargers:
         link_var_d = n.model["Link-p"].loc[:, dischargers]
         link_dim_d = "name" if "name" in link_var_d.dims else "Link"
-        eff_dis = n.links.loc[dischargers, "efficiency"].rename_axis(link_dim_d)
-        d_expr = (link_var_d * eff_dis).sum(link_dim_d)
-        lhs_balance = lhs_balance + d_expr
+        eta_dis = n.links.loc[dischargers, "efficiency"].rename_axis(link_dim_d)
+        g_dis = (link_var_d * eta_dis).sum(link_dim_d)
+        lhs_balance = lhs_balance + g_dis
 
     if chargers:
         link_var_c = n.model["Link-p"].loc[:, chargers]
         link_dim_c = "name" if "name" in link_var_c.dims else "Link"
-        c_expr = link_var_c.sum(link_dim_c)
-        lhs_balance = lhs_balance - c_expr
+        g_cha = link_var_c.sum(link_dim_c)
+        lhs_balance = lhs_balance - g_cha
 
-    n.model.add_constraints(lhs_balance == load_series, name="DC-virtual-balance")
+    n.model.add_constraints(lhs_balance == d, name="DC-virtual-balance")
 
-    total_weighted_load = float((weights * load_series).sum())
+    total_demand = float((weights * d).sum())
     policy_norm = policy.strip().lower()
 
-    hourly_lhs_per_t = load_series - (1.0 - eff_r) * m
-    hourly_lhs_total = (weights * hourly_lhs_per_t).sum()
+    # Matched energy per snapshot: d_t - (1 - CFE_t) * im_t
+    # (by the balance: g + dis - cha - ex + CFE_t * im)
+    matched_t = d - (1.0 - cfe) * im
+    matched_total = (weights * matched_t).sum()
 
     if policy_norm in {"no_dc", "unmatched_dc", "ref", "none"}:
         logger.info(
             f"Added DC virtual balance with no CFE target for policy='{policy}'."
         )
     elif policy_norm.startswith("annual"):
-        if g_expr is None:
+        if g is None:
             raise ValueError(
                 "Policy 'annual_res' requires at least one DC PPA generator."
             )
-        annual_lhs = (weights * g_expr).sum()
-        annual_rhs = float(target) * total_weighted_load
+        annual_lhs = (weights * g).sum()
+        annual_rhs = float(target) * total_demand
         if annual_equality:
             n.model.add_constraints(annual_lhs == annual_rhs, name="DC-annual-res")
         else:
             n.model.add_constraints(annual_lhs >= annual_rhs, name="DC-annual-res")
         logger.info(
-            f"Added DC annual RES constraint (equality={annual_equality}, target={target:.3f})."
+            f"Added DC annual RES constraint (equality={annual_equality}, x={target:.3f})."
         )
     elif policy_norm.startswith("strict"):
         n.model.add_constraints(
-            hourly_lhs_per_t >= float(target) * load_series,
+            matched_t >= float(target) * d,
             name="DC-strict-hourly-cfe",
         )
-        logger.info(f"Added DC strict hourly CFE constraint (target={target:.3f}).")
+        logger.info(f"Added DC strict hourly CFE constraint (x={target:.3f}).")
     elif policy_norm.startswith("hourly") or policy_norm == "cfe":
         n.model.add_constraints(
-            hourly_lhs_total >= float(target) * total_weighted_load,
+            matched_total >= float(target) * total_demand,
             name="DC-hourly-cfe",
         )
-        logger.info(f"Added DC hourly CFE constraint (target={target:.3f}).")
+        logger.info(f"Added DC hourly CFE constraint (x={target:.3f}).")
     else:
         raise ValueError(
             f"Unsupported policy '{policy}'. Expected one of 'annual_res', 'hourly', "
@@ -282,19 +308,19 @@ def add_dc_cfe_constraints(
         )
 
     if excess_share is not None:
-        excess_lhs = (weights * x).sum()
-        excess_rhs = float(excess_share) * total_weighted_load
+        excess_lhs = (weights * ex).sum()
+        excess_rhs = float(excess_share) * total_demand
         n.model.add_constraints(excess_lhs <= excess_rhs, name="DC-excess")
-        logger.info(f"Added DC excess constraint (excess_share={excess_share:.3f}).")
+        logger.info(f"Added DC sales cap (excess_share={excess_share:.3f}).")
 
     n._dc_cfe_meta = {
         "dc_cfg": dict(dc_cfg) if dc_cfg is not None else {},
-        "r": eff_r,
+        "cfe_t": cfe,
         "policy": policy,
         "target": float(target),
         "excess_share": float(excess_share) if excess_share is not None else None,
-        "hourly_lhs_expr": hourly_lhs_total,
-        "hourly_lhs_per_t_expr": hourly_lhs_per_t,
+        "matched_expr": matched_total,
+        "matched_per_t_expr": matched_t,
     }
 
 
@@ -304,87 +330,81 @@ add_cfe_constraints = add_dc_cfe_constraints
 def dc_kpis(
     n: pypsa.Network,
     dc_cfg: Mapping[str, Any] | None = None,
-    r: pd.Series | float | None = None,
+    cfe_t: pd.Series | float | None = None,
     policy: str | None = None,
 ) -> dict[str, Any]:
     """
     Compute DC CFE KPIs from solved primal values using the exact constraint LHS.
 
-    Never applies ``.clip`` to any time series. Both ``L_t - (1 - r_t) * m_t``
-    and ``G_t + eta_d * d_t - c_t - x_t + r_t * m_t`` are evaluated and verified
+    Never applies ``.clip`` to any time series. Both ``d_t - (1 - CFE_t) * im_t``
+    and ``g_t + dis_t - cha_t - ex_t + CFE_t * im_t`` are evaluated and verified
     to match the solved Linopy constraint LHS expression.
     """
     meta: dict[str, Any] = getattr(n, "_dc_cfe_meta", {})
     eff_cfg = dc_cfg if dc_cfg is not None else meta.get("dc_cfg", {})
     eff_policy = policy if policy is not None else str(meta.get("policy", "hourly"))
 
-    if r is None and "r" in meta:
-        r_series = meta["r"].reindex(n.snapshots).fillna(0.0).astype(float)
+    if cfe_t is None and "cfe_t" in meta:
+        cfe_s = meta["cfe_t"].reindex(n.snapshots).fillna(0.0).astype(float)
     else:
-        r_series = _effective_grid_share(n, r, eff_policy)
+        cfe_s = _effective_cfe_factor(n, cfe_t, eff_policy)
 
     comp = _resolve_dc_components(n, eff_cfg)
     dc_gens: list[str] = comp["generators"]
     chargers: list[str] = comp["chargers"]
     dischargers: list[str] = comp["dischargers"]
-    load_series: pd.Series = comp["load_series"]
+    d_s: pd.Series = comp["load_series"]
 
     snapshots = n.snapshots
     weights = n.snapshot_weightings["generators"].copy()
     weights.index = snapshots
 
-    # Solved primal variables m_t and x_t
-    if hasattr(n, "model") and n.model is not None and "DC-import" in n.model.solution:
-        m_series = (
-            n.model.solution["DC-import"].to_pandas().reindex(snapshots).astype(float)
-        )
-        x_series = (
-            n.model.solution["DC-export"].to_pandas().reindex(snapshots).astype(float)
-        )
+    # Solved primal variables im_t and ex_t
+    if hasattr(n, "model") and n.model is not None and "DC-im" in n.model.solution:
+        im_s = n.model.solution["DC-im"].to_pandas().reindex(snapshots).astype(float)
+        ex_s = n.model.solution["DC-ex"].to_pandas().reindex(snapshots).astype(float)
     else:
         raise RuntimeError(
-            "Solved primal variables 'DC-import' and 'DC-export' not found in n.model.solution."
+            "Solved primal variables 'DC-im' and 'DC-ex' not found in n.model.solution."
         )
 
-    # Solved primal G_t, d_t, c_t
+    # Solved primal g_t, dis_t, cha_t
     if dc_gens and not n.generators_t.p.empty:
-        g_series = n.generators_t.p[dc_gens].sum(axis=1).reindex(snapshots).fillna(0.0)
+        g_s = n.generators_t.p[dc_gens].sum(axis=1).reindex(snapshots).fillna(0.0)
     else:
-        g_series = pd.Series(0.0, index=snapshots, dtype=float)
+        g_s = pd.Series(0.0, index=snapshots, dtype=float)
 
     if dischargers and not n.links_t.p0.empty:
-        eff_dis = n.links.loc[dischargers, "efficiency"]
-        d_series = (
-            (n.links_t.p0[dischargers] * eff_dis)
+        eta_dis = n.links.loc[dischargers, "efficiency"]
+        dis_s = (
+            (n.links_t.p0[dischargers] * eta_dis)
             .sum(axis=1)
             .reindex(snapshots)
             .fillna(0.0)
         )
     else:
-        d_series = pd.Series(0.0, index=snapshots, dtype=float)
+        dis_s = pd.Series(0.0, index=snapshots, dtype=float)
 
     if chargers and not n.links_t.p0.empty:
-        c_series = n.links_t.p0[chargers].sum(axis=1).reindex(snapshots).fillna(0.0)
+        cha_s = n.links_t.p0[chargers].sum(axis=1).reindex(snapshots).fillna(0.0)
     else:
-        c_series = pd.Series(0.0, index=snapshots, dtype=float)
+        cha_s = pd.Series(0.0, index=snapshots, dtype=float)
 
     # Exact constraint LHS expression per snapshot (no clipping)
-    lhs_per_t = load_series - (1.0 - r_series) * m_series
-    lhs_from_balance_per_t = (
-        g_series + d_series - c_series - x_series + r_series * m_series
-    )
-    ppa_only_per_t = load_series - m_series
+    matched_t = d_s - (1.0 - cfe_s) * im_s
+    matched_from_balance_t = g_s + dis_s - cha_s - ex_s + cfe_s * im_s
+    ppa_only_t = d_s - im_s
 
-    total_load_mwh = float((weights * load_series).sum())
-    constraint_lhs = float((weights * lhs_per_t).sum())
-    constraint_lhs_from_balance = float((weights * lhs_from_balance_per_t).sum())
-    ppa_only_lhs = float((weights * ppa_only_per_t).sum())
-    ppa_gen_mwh = float((weights * g_series).sum())
+    total_load_mwh = float((weights * d_s).sum())
+    constraint_lhs = float((weights * matched_t).sum())
+    constraint_lhs_from_balance = float((weights * matched_from_balance_t).sum())
+    ppa_only_lhs = float((weights * ppa_only_t).sum())
+    ppa_gen_mwh = float((weights * g_s).sum())
 
-    if "hourly_lhs_expr" in meta and hasattr(meta["hourly_lhs_expr"], "solution"):
-        # Re-evaluate with r_series if r matches meta['r'], else use formula
-        if (r_series - meta["r"]).abs().max() <= 1e-12:
-            model_constraint_lhs = float(meta["hourly_lhs_expr"].solution.item())
+    if "matched_expr" in meta and hasattr(meta["matched_expr"], "solution"):
+        # Re-evaluate with cfe_s if it matches meta['cfe_t'], else use formula
+        if (cfe_s - meta["cfe_t"]).abs().max() <= 1e-12:
+            model_constraint_lhs = float(meta["matched_expr"].solution.item())
         else:
             model_constraint_lhs = constraint_lhs
     else:
@@ -393,7 +413,7 @@ def dc_kpis(
     cfe_score = constraint_lhs / total_load_mwh if total_load_mwh > 0.0 else 0.0
     ppa_only_score = ppa_only_lhs / total_load_mwh if total_load_mwh > 0.0 else 0.0
     annual_res_score = ppa_gen_mwh / total_load_mwh if total_load_mwh > 0.0 else 0.0
-    export_mwh = float((weights * x_series).sum())
+    export_mwh = float((weights * ex_s).sum())
 
     return {
         "cfe_score": cfe_score,
@@ -403,14 +423,14 @@ def dc_kpis(
         "constraint_lhs": constraint_lhs,
         "constraint_lhs_from_balance": constraint_lhs_from_balance,
         "model_constraint_lhs": model_constraint_lhs,
-        "constraint_lhs_per_t": lhs_per_t,
-        "hourly_matched_mwh": lhs_per_t,
+        "constraint_lhs_per_t": matched_t,
+        "hourly_matched_mwh": matched_t,
         "total_load_mwh": total_load_mwh,
         "ppa_generation_mwh": ppa_gen_mwh,
-        "battery_discharge_mwh": float((weights * d_series).sum()),
-        "battery_charge_mwh": float((weights * c_series).sum()),
-        "grid_import_mwh": float((weights * m_series).sum()),
-        "grid_clean_import_mwh": float((weights * r_series * m_series).sum()),
+        "battery_discharge_mwh": float((weights * dis_s).sum()),
+        "battery_charge_mwh": float((weights * cha_s).sum()),
+        "grid_import_mwh": float((weights * im_s).sum()),
+        "grid_clean_import_mwh": float((weights * cfe_s * im_s).sum()),
         "export_mwh": export_mwh,
         "excess_mwh": export_mwh,
         "excess_share": export_mwh / total_load_mwh if total_load_mwh > 0.0 else 0.0,

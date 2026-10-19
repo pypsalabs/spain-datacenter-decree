@@ -383,7 +383,7 @@ def calculate_grid_share(
     accounting_cfg: Mapping[str, Any] | None = None,
 ) -> pd.Series:
     """
-    Compute the import-traced hourly clean share ``r_t`` of grid supply for ``country``.
+    Compute the import-traced hourly grid CFE factor ``CFE_t`` for ``country``.
 
     Parameters
     ----------
@@ -409,7 +409,7 @@ def calculate_grid_share(
     Returns
     -------
     pd.Series
-        Hourly clean share ``r_t`` indexed by ``n.snapshots`` in ``[0, 1]``.
+        Hourly grid CFE factor ``CFE_t`` indexed by ``n.snapshots`` in ``[0, 1]``.
     """
     clean_set = _normalize_clean_carriers(clean_carriers, accounting_cfg)
     excluded_set = (

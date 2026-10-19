@@ -15,6 +15,8 @@ configfile: "pypsa-eur/config/config.default.yaml"
 configfile: "config/config.spain.yaml"
 
 
+import re
+
 HORIZON = config["planning_horizons"][0]
 
 
@@ -72,7 +74,7 @@ wildcard_constraints:
     run=r"wy\d{4}",
     year=r"\d{4}",
     variant=r"[a-z0-9_]+",
-    policy=r"no_dc|unmatched_dc|annual_100_res|(?:strict_)?hourly_\d+_(?:ppa_only|grid_credit)(?:_cfe)?",
+    policy=r"no_dc|unmatched_dc|annual_\d+_res|(?:strict_)?hourly_\d+_(?:ppa_only|grid_credit)(?:_cfe)?",
     target=r"\d+(?:\.\d+)?",
     dc_mw=r"\d+(?:\.\d+)?",
     siting=r"spain_wide|local_region",
@@ -140,7 +142,11 @@ rule solve_network:
     resources:
         mem_mb=8000,
     params:
-        excess_share=lambda w: config["spain_cfe"]["accounting"]["excess_cap"],
+        excess_share=lambda w: (
+            "none"
+            if config["spain_cfe"]["accounting"]["excess_cap"] is None
+            else config["spain_cfe"]["accounting"]["excess_cap"]
+        ),
         max_iter=lambda w: config["spain_cfe"]["iteration"]["max_iter"],
         tol=lambda w: config["spain_cfe"]["iteration"]["tol"],
         damping=lambda w: config["spain_cfe"]["iteration"]["damping"],
@@ -198,14 +204,32 @@ rule validate_network:
         """
 
 
+def policy_target(policy):
+    """Matching target embedded in the policy name (0 for untargeted policies)."""
+    digits = re.search(r"(\d+)", policy)
+    return int(digits.group(1)) if digits else 0
+
+
 def suite_kpis(wildcards):
-    """KPI files of every scenario in the configured suite."""
+    """KPI files of the selected suite: its cross product plus a no_dc row per run."""
     year = config["planning_horizons"][0]
-    return [
-        f"results/{s['run']}/kpis/kpi_{year}_{s.get('variant', 'patched')}_"
-        f"{s['policy']}_t{s['target']}_{s['dc_mw']}mw_{s['siting']}.csv"
-        for s in config["spain_cfe"]["suite"]
+    suite = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
+
+    def kpi(run, policy, target, dc_mw, siting):
+        return (
+            f"results/{run}/kpis/kpi_{year}_patched_"
+            f"{policy}_t{target}_{dc_mw}mw_{siting}.csv"
+        )
+
+    files = [kpi(run, "no_dc", 0, 0, "spain_wide") for run in suite["runs"]]
+    files += [
+        kpi(run, policy, policy_target(policy), dc_mw, siting)
+        for run in suite["runs"]
+        for policy in suite["policies"]
+        for dc_mw in suite["dc_mw"]
+        for siting in suite["siting"]
     ]
+    return files
 
 
 rule make_summary:

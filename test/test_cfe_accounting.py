@@ -154,7 +154,7 @@ def test_kpi_equals_constraint_lhs() -> None:
     add_dc_cfe_constraints(
         n=n,
         dc_cfg={"prefix": "DC"},
-        r=r,
+        cfe_t=r,
         policy="hourly_80_grid_credit",
         target=target,
         excess_share=0.20,
@@ -178,7 +178,7 @@ def test_kpi_equals_constraint_lhs() -> None:
     )
 
     # During night hours with c_t > 0 and G_t = d_t = 0, virtual balance forces m_t = L_t + c_t > L_t
-    m_sol = n.model.solution["DC-import"].to_pandas()
+    m_sol = n.model.solution["DC-im"].to_pandas()
     assert (m_sol.iloc[0:8] > 100.0 - 1e-6).any()
 
     # Exact equality between primal formula, balance formula, and Linopy constraint LHS
@@ -213,7 +213,7 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     add_dc_cfe_constraints(
         n=n_ppa,
         dc_cfg={"prefix": "DC"},
-        r=r,
+        cfe_t=r,
         policy="hourly_80_ppa_only",
         target=0.60,
         excess_share=0.10,
@@ -233,7 +233,7 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     add_dc_cfe_constraints(
         n=n_strict,
         dc_cfg={"prefix": "DC"},
-        r=r_strict,
+        cfe_t=r_strict,
         policy="strict_hourly_80_grid_credit",
         target=0.50,
     )
@@ -249,7 +249,7 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     add_dc_cfe_constraints(
         n=n_ann,
         dc_cfg={"prefix": "DC", "annual_equality": True},
-        r=r,
+        cfe_t=r,
         policy="annual_res",
         target=1.00,
     )

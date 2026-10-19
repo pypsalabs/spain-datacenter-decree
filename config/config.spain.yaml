@@ -122,13 +122,30 @@ solving:
 
 spain_cfe:
   planning_years: [2025]
-  # Scenario suite collected by make_summary (run = weather year; wy2024 is the reference).
-  # dc_mw 500 is a placeholder size until the scenario grid is agreed.
-  suite:
-  - {run: wy2024, policy: no_dc, target: 0, dc_mw: 0, siting: spain_wide}
-  - {run: wy2024, policy: unmatched_dc, target: 0, dc_mw: 500, siting: spain_wide}
+  # Scenario suites (cross products; make_summary collects the suite named by `suite`).
+  # Policy set (agreed 2026-10-19): unmatched_dc = no-policy counterfactual;
+  # annual_80/100_res = volumetric matching (Art. 8 alone / voluntary practice);
+  # hourly_80_ppa_only = 24/7 CFE score; strict_hourly_80_ppa_only = the decree's
+  # Art. 9 (every hour); hourly_80_grid_credit = beyond-decree design alternative.
+  # The _cfe (nuclear-as-clean) variants stay out of the matrix: the decree is
+  # renewable-only. Target sweep (90/100) is pre-built via the policy names.
+  # A no_dc baseline row is added automatically for every run in the suite.
+  suite: core
+  suites:
+    # Working subset: the 2024 reference weather year, one DC size, all policies.
+    core:
+      runs: [wy2024]
+      policies: [unmatched_dc, annual_80_res, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+      dc_mw: [500]
+      siting: [spain_wide]
+    # Full matrix: all policies x all DC sizes x all weather years. The non-2024
+    # weather years need their upstream builds first (study stage iv).
+    full:
+      runs: [wy2024, wy2010, wy2013, wy2020]
+      policies: [unmatched_dc, annual_80_res, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+      dc_mw: [500, 1000, 2000, 4000, 6000]
+      siting: [spain_wide]
   # prepare_network.py patch engine: cited corrections, each individually switchable.
-  # Philosophy: build fresh, validate, correct only what fails, cite every correction.
   patches:
     boundary_flows: true        # FR border closure from measured 2024 flows (model closure, always on)
     national_capacities: false  # fleet totals per carrier from published actuals (pro rata nodal)
@@ -188,6 +205,12 @@ spain_cfe:
     carriers: [onwind, solar, solar-hsat]
     storage: [battery]
   accounting:
+    # Cap sigma on annual electricity sales back to the grid:
+    # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2023 convention).
+    # Study default: 0.20. Pre-built option, excluded from our runs: 0.0 = no sales
+    # possible (surplus must be stored or curtailed). Unlimited sales are deliberately
+    # not offered: the optimizer would overbuild at the DC node to sell into a
+    # background system that is not in equilibrium.
     excess_cap: 0.20
     res_carriers: [onwind, offwind-ac, offwind-dc, offwind-float, solar, solar-hsat, ror, hydro, biomass, csp]
     cfe_extra_carriers: [nuclear]

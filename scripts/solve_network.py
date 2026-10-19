@@ -107,12 +107,12 @@ def resolve_target(policy: str, target: float | str | None = None) -> float:
     if target is not None and float(target) > 0.0:
         val = float(target)
         return val / 100.0 if val > 1.0 else val
-    if policy_norm.startswith("annual"):
-        return 1.0
     m = re.search(r"(\d+(?:\.\d+)?)", policy_norm)
     if m:
         val = float(m.group(1))
         return val / 100.0 if val > 1.0 else val
+    if policy_norm.startswith("annual"):
+        return 1.0
     return DEFAULT_TARGET
 
 
@@ -223,7 +223,7 @@ def solve_network(
     n: pypsa.Network,
     policy: str,
     target: float | None = None,
-    excess_share: float = DEFAULT_EXCESS_SHARE,
+    excess_share: float | None = None,
     r0_source: str | Path | pd.Series | float | None = None,
     clean_carriers: str = "res",
     max_iter: int = DEFAULT_MAX_ITER,
@@ -241,7 +241,12 @@ def solve_network(
 
     policy_norm = str(policy).strip().lower()
     tau = resolve_target(policy_norm, target)
-    sigma = 0.0 if policy_norm in NO_TARGET_POLICIES else float(excess_share)
+    # Sales cap sigma: None = unlimited sales (study default); for policies without
+    # a target the DC has no PPA assets, so ex_t is pinned to zero for clean KPIs.
+    if policy_norm in NO_TARGET_POLICIES:
+        sigma: float | None = 0.0
+    else:
+        sigma = None if excess_share is None else float(excess_share)
     constraint_policy = (
         "annual_res" if policy_norm.startswith("annual") else policy_norm
     )
@@ -259,7 +264,7 @@ def solve_network(
             add_dc_cfe_constraints(
                 n=net,
                 dc_cfg=dc_cfg,
-                r=r_iter,
+                cfe_t=r_iter,
                 policy=constraint_policy,
                 target=tau,
                 excess_share=sigma,
@@ -292,7 +297,7 @@ def solve_network(
             add_dc_cfe_constraints(
                 n=net,
                 dc_cfg=dc_cfg,
-                r=r_single,
+                cfe_t=r_single,
                 policy=constraint_policy,
                 target=tau,
                 excess_share=sigma,
@@ -371,7 +376,12 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         choices=["spain_wide", "local_region"],
     )
     parser.add_argument("--r0-network", type=Path, default=None)
-    parser.add_argument("--excess-share", type=float, default=DEFAULT_EXCESS_SHARE)
+    parser.add_argument(
+        "--excess-share",
+        type=str,
+        default="",
+        help="Sales cap sigma (sum ex_t <= sigma * sum d_t); empty or 'none' = unlimited.",
+    )
     parser.add_argument("--max-iter", type=int, default=DEFAULT_MAX_ITER)
     parser.add_argument("--tol", type=float, default=DEFAULT_TOL)
     parser.add_argument("--damping", type=float, default=DEFAULT_DAMPING)
@@ -418,7 +428,13 @@ def main(argv: list[str] | None = None) -> None:
         meta["dc_mw"] = dc_mw
         meta["siting"] = siting
         cfg = {
-            "accounting": {"excess_cap": args.excess_share},
+            "accounting": {
+                "excess_cap": (
+                    None
+                    if str(args.excess_share).strip().lower() in {"", "none", "null"}
+                    else float(args.excess_share)
+                ),
+            },
             "iteration": {
                 "max_iter": args.max_iter,
                 "tol": args.tol,
@@ -450,8 +466,10 @@ def main(argv: list[str] | None = None) -> None:
         n,
         policy=policy,
         target=target,
-        excess_share=float(
-            cfg.get("accounting", {}).get("excess_cap", DEFAULT_EXCESS_SHARE)
+        excess_share=(
+            None
+            if cfg.get("accounting", {}).get("excess_cap") is None
+            else float(cfg["accounting"]["excess_cap"])
         ),
         r0_source=r0_in,
         clean_carriers="cfe" if policy.endswith("_cfe") else "res",

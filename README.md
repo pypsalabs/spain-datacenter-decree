@@ -48,7 +48,7 @@ exists and what it changed in the 2024 back-cast is documented in
 
 | Path | Content |
 |---|---|
-| `Snakefile`, `rules/` | Study workflow: calibration, audit, DC preparation, CFE solve |
+| `Snakefile` | Study workflow: prepare (patch engine), solve (DC + 24/7 CFE), validate, summarize, plot |
 | `config/` | PyPSA-Eur overlay (`config.spain.yaml`) and weather-year scenarios |
 | `scripts/` | Study code (calibration, audit, CFE constraints, grid-share tracing, iteration, validation) |
 | `data/custom/` | Cited calibration inputs and vendored primary sources |
@@ -85,7 +85,7 @@ The path must contain no spaces. All commands below use
    ```
 3. **Scenarios, summary, figures**: `solve_network` targets per
    (run, variant, policy, target, DC size, siting), collected by `make_summary` and
-   plotted by `plot_summary` (see `rules/study.smk`).
+   plotted by `plot_summary` (see `Snakefile`).
 
 ## Tests
 

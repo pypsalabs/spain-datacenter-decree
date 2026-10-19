@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH)
+# SPDX-FileCopyrightText: 2026 Iegor Riepin
 #
 # SPDX-License-Identifier: MIT
 """Unit tests for the fixed-point grid-CFE iteration loop."""

@@ -102,6 +102,7 @@ number's provenance in [doc/data_sources.md](doc/data_sources.md).
 
 ## License
 
-MIT (see [LICENSES/](LICENSES/)), [REUSE](https://reuse.software/)-compliant. Vendored
+MIT, © 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH); see [LICENSES/](LICENSES/),
+[REUSE](https://reuse.software/)-compliant. Vendored
 third-party primary sources under `data/custom/sources/` keep their providers' licences,
 registered per file in [doc/data_sources.md](doc/data_sources.md).

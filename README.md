@@ -1,12 +1,9 @@
 # Spain Hourly Matching
 
-PyPSA study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
-centers: a 15-node ES/FR/PT electricity model built on PyPSA-Eur, with 24/7 CFE procurement
-accounting following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
-
-**Scope:** today's Spanish system (2025/26 fleet), dispatch under the 2024 reference
-weather year, validated against Redeia 2024 actuals; weather-year sensitivities (2010,
-2013, 2020) planned. No capacity-expansion year in the current scope.
+A study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
+centers: a 15-node ES/FR/PT dispatch model of today's Spanish system (2025/26 fleet),
+built on [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with datacenter PPA & 24/7-CFE procurement
+model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
 
 ## Why this study?
 
@@ -25,8 +22,13 @@ gas margin: higher emissions, deeper gas import dependency, higher consumer pric
 data centers exposed to every price swing. Bad for Spanish society, and bad for the data
 center operators themselves.
 
-This study provides a transparent, quantitative assessment of the policy impact. This repository contains the dispatch model of  today's Spanish electiricity system, validated against actual data, in which a new data center procures 24/7 carbon-free energy under the proposed 80% hourly matching rule. It measures system costs, emissions, prices and the procurement portfolio against an unmatched baseline, so that both the Spanish government and the data center industry can
-see what the policy does before it takes effect.
+This study provides a transparent, quantitative assessment of the policy's impact. The
+repository contains a dispatch model of today's Spanish electricity system, validated
+against actual data, in which a new data center procures 24/7 carbon-free energy under
+the proposed 80% hourly matching rule. It measures system costs, emissions, prices and
+the procurement portfolio against an unmatched baseline, so that both the Spanish
+government and the data center industry can see what the policy does before it takes
+effect.
 
 We do this work in the open, for the public record. Every input number is cited and its
 primary source vendored in this repository; every correction to the model is documented,
@@ -36,14 +38,21 @@ group, can check the numbers, challenge them, and build on them.
 
 ## Model
 
-- **PyPSA-Eur v2026.09.0** as a git submodule; zero upstream files modified, everything is
-  overlaid via `config/` and the rules in this repository.
-- 15 nodes: ES 9 (8 mainland + Balearics) / FR 4 / PT 2. France's external borders (BE, DE,
-  CH, IT, GB, LU) are fixed to measured hourly flows (RTE/ENTSO-E, 2024); no pan-European
-  model. A neighbour's clean share in the import tracing is its domestic generation mix.
-- Electricity-only, 3-hourly averaged snapshots, technology-data v0.15.0 (EUR2025).
-- Background fleet frozen and calibrated to cited national data (`data/custom/*.csv`, every
-  number sourced in `doc/data_sources.md`); only the data center's PPA assets are extendable.
+Every modelling choice favors verifiability: anyone can diff this repository against
+vanilla PyPSA-Eur and see exactly what the study adds.
+
+- Base model: PyPSA-Eur v2026.09.0 as a pinned git submodule. No upstream file is
+  modified; every study choice lives in the `config/` overlay and this repository.
+- Geography: 15 nodes, with 9 in Spain (8 mainland + Balearics), 4 in France and
+  2 in Portugal.
+- France's outer borders (BE, DE, CH, IT, GB, LU): fixed to measured hourly 2024
+  flows (RTE/ENTSO-E) instead of a pan-European model. In the import tracing, a
+  neighbour's clean share is its domestic generation mix.
+- Resolution and costs: electricity-only, 3-hourly averaged snapshots,
+  technology-data v0.15.0 in EUR2025.
+- Fleet: frozen background fleet, calibrated to cited national data
+  (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
+  center's PPA assets are extendable.
 - Solver: HiGHS dual simplex. No commercial solver required.
 
 ## Workflow architecture
@@ -72,9 +81,10 @@ exists and what it changed in the 2024 back-cast is documented in
 
 ## Study stages
 
-The `{year}` wildcard is the data vintage; the run is the weather year. Fleet, demand,
-price and NTC patches read rows for `{year}`, while weather-measurement closures (France
-border flows, hydro inflow, the wind-bias derivation) key on the run's weather year.
+The study keeps what we measure strictly separate from what we assume. The `{year}`
+wildcard is the data vintage; the run is the weather year. Fleet, demand, price and NTC
+patches read rows for `{year}`, while weather-measurement closures (France border flows,
+hydro inflow, the wind-bias derivation) key on the run's weather year.
 
 | Stage | run (weather) | `{year}` (data) | variant | artifacts |
 |---|---|---|---|---|
@@ -94,7 +104,7 @@ constant (`data/custom/wind_correction.csv`) in stage (iii).
 |---|---|
 | `Snakefile` | Study workflow: prepare (patch engine), solve (DC + 24/7 CFE), validate, summarize, plot |
 | `config/` | PyPSA-Eur overlay (`config.spain.yaml`) and weather-year scenarios |
-| `scripts/` | Study code (calibration, audit, CFE constraints, grid-share tracing, iteration, validation) |
+| `scripts/` | Study code (patch engine, DC attach, CFE constraints, grid-share tracing, iteration, validation, summary) |
 | `data/custom/` | Cited calibration inputs and vendored primary sources |
 | `test/` | pytest suite |
 | `doc/` | Data sources, decision log, validation log |
@@ -106,7 +116,7 @@ Install [pixi](https://pixi.sh), then:
 
 ```bash
 git clone --recursive <this-repo>
-cd spain-hourly-matching/pypsa-eur && pixi install && cd ..
+cd spain-hourly-matching
 ```
 
 The study deliberately has no environment of its own: it runs entirely in the submodule's
@@ -114,52 +124,28 @@ pixi environment (`pypsa-eur/pixi.toml` + lock file), so the upstream build and 
 workflow always use exactly the package versions the pinned PyPSA-Eur release was tested
 with. The path must contain no spaces.
 
-All commands below assume the environment is activated from the repository root:
-
-```bash
-pixi shell --manifest-path pypsa-eur/pixi.toml
-```
-
-(`--manifest-path` points pixi at the submodule's environment, since this repository
-deliberately has no manifest of its own.)
-
 ## Workflow
 
-1. **Upstream network build** (inside the submodule; validation year first):
-   ```bash
-   cd pypsa-eur
-   pixi run snakemake resources/wy2024/networks/composed_2025.nc -j 12 \
-     --configfile ../config/config.spain.yaml
-   cd ..
-   # then wy2013 (reference); wy2010, wy2020 after validation passes
-   ```
-2. **Prepare, solve, validate** from the repository root. France's measured border flows
-   ship with the repo (`data/custom/fr_boundary_flows_2024.csv`, regenerable with
-   `scripts/retrieve_fr_boundary_flows.py --download`):
-   ```bash
-   snakemake resources/wy2024/networks/base_2024_raw.nc -j 4   # patch engine (back-cast)
-   snakemake results/validation/validation_raw.csv -j 4        # no_dc solve + report
-   ```
-3. **Scenarios, summary, figures**: `solve_network` targets per
-   (run, variant, policy, target, DC size, siting), collected by `make_summary` and
-   plotted by `plot_summary` (see `Snakefile`).
-
-## Tests
+Two commands run everything. The first invocation also installs the pinned environment.
 
 ```bash
-pytest test -q
+# full case study: upstream build, scenario solves, summary, figures
+pixi run --manifest-path pypsa-eur/pixi.toml snakemake -c all
+
+# 2024 back-cast and its validation reports (not needed for the case study)
+pixi run --manifest-path pypsa-eur/pixi.toml snakemake validation -c all
 ```
 
-## Documentation
-
-Scope and architecture decisions are recorded in [doc/decision_log.md](doc/decision_log.md);
-the 2024 validation story (raw findings, every applied correction with its cited source,
-gate results and open items) in [doc/validation_log.md](doc/validation_log.md); every input
-number's provenance in [doc/data_sources.md](doc/data_sources.md).
+France's measured border flows ship with the repository
+(`data/custom/fr_boundary_flows_2024.csv`, regenerable with
+`scripts/retrieve_fr_boundary_flows.py --download`). Every intermediate target (prepared
+network, single scenario solve, report) stays addressable by its filename; see
+`Snakefile`. For interactive work, activate the environment once with
+`pixi shell --manifest-path pypsa-eur/pixi.toml`.
 
 ## License
 
-MIT, © 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH); see [LICENSES/](LICENSES/),
+MIT © 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH); see [LICENSES/](LICENSES/),
 [REUSE](https://reuse.software/)-compliant. Vendored
 third-party primary sources under `data/custom/sources/` keep their providers' licences,
 registered per file in [doc/data_sources.md](doc/data_sources.md).

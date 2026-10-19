@@ -44,7 +44,11 @@ GEN_CARRIERS: dict[str, tuple[str, ...]] = {
     "gen_biomass_waste": ("biomass", "waste"),
 }
 # Redeia metrics summed into the model's single biomass+waste bucket
-BIOMASS_WASTE_ACTUALS = ("gen_other_renewables", "gen_renewable_waste", "gen_nonrenewable_waste")
+BIOMASS_WASTE_ACTUALS = (
+    "gen_other_renewables",
+    "gen_renewable_waste",
+    "gen_nonrenewable_waste",
+)
 
 # (metric, relative tolerance) headline gates; net exports additionally checks the sign
 GATES: dict[str, float] = {
@@ -62,7 +66,9 @@ GATES: dict[str, float] = {
 def _es_generation_twh(n: pypsa.Network) -> dict[str, float]:
     """Return annual ES generation per Redeia metric (TWh) from generators and storage units."""
     w = n.snapshot_weightings["generators"]
-    es_buses = n.buses.index[(n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")]
+    es_buses = n.buses.index[
+        (n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")
+    ]
     out: dict[str, float] = {}
 
     gen = n.generators[n.generators["bus"].isin(es_buses)]
@@ -76,8 +82,14 @@ def _es_generation_twh(n: pypsa.Network) -> dict[str, float]:
     )
     su = n.storage_units[n.storage_units["bus"].isin(es_buses)]
     su_p = n.storage_units_t.p[su.index.intersection(n.storage_units_t.p.columns)]
-    su_supply_twh = su_p.where(su_p > 0.0, 0.0).mul(w, axis=0).sum().groupby(su["carrier"]).sum() / 1e6
-    su_withdraw_twh = su_p.where(su_p < 0.0, 0.0).mul(w, axis=0).sum().groupby(su["carrier"]).sum() / 1e6
+    su_supply_twh = (
+        su_p.where(su_p > 0.0, 0.0).mul(w, axis=0).sum().groupby(su["carrier"]).sum()
+        / 1e6
+    )
+    su_withdraw_twh = (
+        su_p.where(su_p < 0.0, 0.0).mul(w, axis=0).sum().groupby(su["carrier"]).sum()
+        / 1e6
+    )
     supply = gen_twh.add(su_supply_twh, fill_value=0.0)
 
     for metric, carriers in GEN_CARRIERS.items():
@@ -106,7 +118,9 @@ def _es_co2_mt(n: pypsa.Network) -> float:
 def _es_demand_twh(n: pypsa.Network) -> float:
     """Annual busbar demand of ES loads (TWh), excluding fixed boundary export loads."""
     w = n.snapshot_weightings["generators"]
-    es_buses = n.buses.index[(n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")]
+    es_buses = n.buses.index[
+        (n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")
+    ]
     loads = n.loads.index[
         n.loads["bus"].isin(es_buses) & (n.loads["carrier"] != "boundary")
     ].intersection(n.loads_t.p_set.columns)
@@ -137,7 +151,9 @@ def _net_exports_twh(n: pypsa.Network) -> dict[str, float]:
 
 def _es_mean_price(n: pypsa.Network) -> float:
     """Load-weighted mean Spanish electricity price (EUR/MWh)."""
-    es_buses = n.buses.index[(n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")]
+    es_buses = n.buses.index[
+        (n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")
+    ]
     loads = n.loads.index[
         n.loads["bus"].isin(es_buses) & (n.loads["carrier"] != "boundary")
     ].intersection(n.loads_t.p_set.columns)
@@ -151,13 +167,19 @@ def _wind_solar_cf(n: pypsa.Network) -> dict[str, float]:
     w = n.snapshot_weightings["generators"]
     hours = float(w.sum())
     out = {}
-    for name, carriers in (("cf_onwind", ("onwind",)), ("cf_solar_pv", ("solar", "solar-hsat"))):
+    for name, carriers in (
+        ("cf_onwind", ("onwind",)),
+        ("cf_solar_pv", ("solar", "solar-hsat")),
+    ):
         gens = n.generators[
-            n.generators["bus"].str.startswith("ES") & n.generators["carrier"].isin(carriers)
+            n.generators["bus"].str.startswith("ES")
+            & n.generators["carrier"].isin(carriers)
         ]
         cols = gens.index.intersection(n.generators_t.p_max_pu.columns)
         p_nom = gens.loc[cols, "p_nom"]
-        avail_mwh = float(n.generators_t.p_max_pu[cols].mul(p_nom, axis=1).mul(w, axis=0).sum().sum())
+        avail_mwh = float(
+            n.generators_t.p_max_pu[cols].mul(p_nom, axis=1).mul(w, axis=0).sum().sum()
+        )
         out[name] = avail_mwh / (float(p_nom.sum()) * hours) if p_nom.sum() > 0 else 0.0
     return out
 
@@ -178,7 +200,9 @@ def validate(n: pypsa.Network, actuals: pd.DataFrame) -> pd.DataFrame:
     model["day_ahead_price_omie_avg"] = _es_mean_price(n)
     model.update(_wind_solar_cf(n))
     model["load_shedding_share"] = (
-        model.pop("load_shedding") / model["demand_b_c"] if model["demand_b_c"] > 0 else 0.0
+        model.pop("load_shedding") / model["demand_b_c"]
+        if model["demand_b_c"] > 0
+        else 0.0
     )
 
     actual: dict[str, float] = {}
@@ -188,8 +212,14 @@ def validate(n: pypsa.Network, actuals: pd.DataFrame) -> pd.DataFrame:
         elif metric == "gen_ccgt_plus_chp":
             actual[metric] = float(act.get("gen_ccgt", 0.0) + act.get("gen_chp", 0.0))
         elif metric in ("net_export_ma_ad",):
-            actual[metric] = float(act_nat.get("net_export_ma", 0.0) + act_nat.get("net_export_ad", 0.0))
-        elif metric in ("gen_phs_turbining", "demand_phs_pumping", "day_ahead_price_omie_avg"):
+            actual[metric] = float(
+                act_nat.get("net_export_ma", 0.0) + act_nat.get("net_export_ad", 0.0)
+            )
+        elif metric in (
+            "gen_phs_turbining",
+            "demand_phs_pumping",
+            "day_ahead_price_omie_avg",
+        ):
             actual[metric] = float(act_nat.get(metric, float("nan")))
         else:
             actual[metric] = float(act.get(metric, act_nat.get(metric, float("nan"))))
@@ -237,7 +267,9 @@ def main(argv: list[str] | None = None) -> None:
     else:
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument("--network", type=Path, required=True)
-        parser.add_argument("--actuals", type=Path, default=Path("data/custom/validation_2024_es.csv"))
+        parser.add_argument(
+            "--actuals", type=Path, default=Path("data/custom/validation_2024_es.csv")
+        )
         parser.add_argument("--output-report", type=Path, required=True)
         parser.add_argument("--output-gates", type=Path, required=True)
         args = parser.parse_args(argv)
@@ -256,13 +288,18 @@ def main(argv: list[str] | None = None) -> None:
         "gates_passed": int((gated["status"] == "PASS").sum()),
         "gates_total": int(len(gated)),
         "failed": {
-            r["metric"]: f"model {r['model']} vs actual {r['actual']} ({r['pct_diff']:+.1f}%)"
+            r[
+                "metric"
+            ]: f"model {r['model']} vs actual {r['actual']} ({r['pct_diff']:+.1f}%)"
             for _, r in gated[gated["status"] == "FAIL"].iterrows()
         },
     }
     gates_out.write_text(yaml.safe_dump(summary, sort_keys=False))
     logger.info(
-        "Validation: %d/%d gates pass -> %s", summary["gates_passed"], summary["gates_total"], report_out
+        "Validation: %d/%d gates pass -> %s",
+        summary["gates_passed"],
+        summary["gates_total"],
+        report_out,
     )
     print(report.to_string(index=False))
 

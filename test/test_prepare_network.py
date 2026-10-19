@@ -21,13 +21,23 @@ def _toy_network(freq: str = "h", periods: int = 6) -> pypsa.Network:
     n.add("Bus", "FR0 0AC", carrier="AC", country="FR", x=-1.0, y=47.0)
     n.add("Bus", "FR0 1AC", carrier="AC", country="FR", x=6.0, y=49.0)
     n.add("Bus", "ES0 0AC", carrier="AC", country="ES", x=-3.7, y=40.4)
-    n.add("Generator", "ES0 0AC gas", bus="ES0 0AC", carrier="CCGT", p_nom=100.0, p_nom_extendable=True)
+    n.add(
+        "Generator",
+        "ES0 0AC gas",
+        bus="ES0 0AC",
+        carrier="CCGT",
+        p_nom=100.0,
+        p_nom_extendable=True,
+    )
     return n
 
 
 def _flows(snapshots: pd.DatetimeIndex) -> pd.DataFrame:
     rows = []
-    for nb, values in {"GB": [500.0] * 3 + [-300.0] * 3, "DE_BE": [-1000.0] * 6}.items():
+    for nb, values in {
+        "GB": [500.0] * 3 + [-300.0] * 3,
+        "DE_BE": [-1000.0] * 6,
+    }.items():
         for ts, v in zip(snapshots, values):
             rows.append({"snapshot": ts, "neighbour": nb, "flow_mw_into_FR": v})
     return pd.DataFrame(rows)
@@ -78,7 +88,9 @@ def test_attach_boundary_flows_rejects_gaps() -> None:
 def test_prepare_network_freezes_and_rejects_unknown_patch() -> None:
     """prepare_network applies patches, freezes the fleet, and fails fast on unknown names."""
     n = _toy_network()
-    prepare_network(n, patches={"boundary_flows": True}, ctx={"boundary_flows": _flows(n.snapshots)})
+    prepare_network(
+        n, patches={"boundary_flows": True}, ctx={"boundary_flows": _flows(n.snapshots)}
+    )
     assert not n.generators["p_nom_extendable"].any()
 
     with pytest.raises(ValueError, match="Unknown patches"):

@@ -46,7 +46,9 @@ def download_raw(year: int, raw_path: Path) -> None:
     """Fetch the eCO2mix exchange columns for ``year`` from the ODRE API."""
     params = urlencode(
         {
-            "select": "date_heure," + ",".join(EXCHANGE_COLUMNS) + ",ech_comm_espagne,ech_physiques",
+            "select": "date_heure,"
+            + ",".join(EXCHANGE_COLUMNS)
+            + ",ech_comm_espagne,ech_physiques",
             "where": f"date_heure >= date'{year}-01-01' AND date_heure < date'{year + 1}-01-01'",
             "order_by": "date_heure",
         }
@@ -71,9 +73,16 @@ def tidy_boundary_flows(raw_path: Path, year: int) -> pd.DataFrame:
     if ex.isna().any().any():
         raise ValueError("Gaps longer than 6 h in the eCO2mix exchange data.")
     net_twh = ex.sum().sum() / 1e6
-    logger.info("FR net flow over %d borders in %d: %.2f TWh (negative = export).", len(ex.columns), year, net_twh)
-    long = ex.rename_axis("snapshot").reset_index().melt(
-        id_vars="snapshot", var_name="neighbour", value_name="flow_mw_into_FR"
+    logger.info(
+        "FR net flow over %d borders in %d: %.2f TWh (negative = export).",
+        len(ex.columns),
+        year,
+        net_twh,
+    )
+    long = (
+        ex.rename_axis("snapshot")
+        .reset_index()
+        .melt(id_vars="snapshot", var_name="neighbour", value_name="flow_mw_into_FR")
     )
     return long.sort_values(["neighbour", "snapshot"], ignore_index=True)
 
@@ -83,11 +92,19 @@ def main(argv: list[str] | None = None) -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--year", type=int, default=2024)
-    parser.add_argument("--download", action="store_true", help="Fetch the raw extract first.")
+    parser.add_argument(
+        "--download", action="store_true", help="Fetch the raw extract first."
+    )
     args = parser.parse_args(argv)
 
     root = Path(__file__).resolve().parents[1]
-    raw_path = root / "data" / "custom" / "sources" / f"eco2mix_national_cons_def_{args.year}_exchanges.csv"
+    raw_path = (
+        root
+        / "data"
+        / "custom"
+        / "sources"
+        / f"eco2mix_national_cons_def_{args.year}_exchanges.csv"
+    )
     out_path = root / "data" / "custom" / f"fr_boundary_flows_{args.year}.csv"
 
     if args.download:

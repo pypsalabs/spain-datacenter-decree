@@ -94,7 +94,9 @@ def ensure_load_shedding(
         p_nom=1.0e6,
         p_nom_extendable=False,
     )
-    logger.info("Added load shedding on %d AC buses (%.0f EUR/MWh).", len(missing), cost)
+    logger.info(
+        "Added load shedding on %d AC buses (%.0f EUR/MWh).", len(missing), cost
+    )
 
 
 def resolve_target(policy: str, target: float | str | None = None) -> float:
@@ -148,7 +150,9 @@ def _dc_portfolio_metrics(n: pypsa.Network, total_load_mwh: float) -> dict[str, 
         m[f"dc_ppa_{carrier}_mw"] = float(grp["p_nom_opt"].sum())
     m["dc_ppa_total_mw"] = float(n.generators.loc[dc_gens, "p_nom_opt"].sum())
     for g in dc_gens:
-        cap_cost += float(n.generators.at[g, "p_nom_opt"] * n.generators.at[g, "capital_cost"])
+        cap_cost += float(
+            n.generators.at[g, "p_nom_opt"] * n.generators.at[g, "capital_cost"]
+        )
         if g in n.generators_t.p.columns:
             marg_cost += float(
                 (n.generators_t.p[g] * w).sum() * n.generators.at[g, "marginal_cost"]
@@ -157,13 +161,18 @@ def _dc_portfolio_metrics(n: pypsa.Network, total_load_mwh: float) -> dict[str, 
     dc_stores = n.stores.index[n.stores.index.astype(str).str.startswith("DC")]
     m["dc_battery_mwh"] = float(n.stores.loc[dc_stores, "e_nom_opt"].sum())
     cap_cost += float(
-        (n.stores.loc[dc_stores, "e_nom_opt"] * n.stores.loc[dc_stores, "capital_cost"]).sum()
+        (
+            n.stores.loc[dc_stores, "e_nom_opt"]
+            * n.stores.loc[dc_stores, "capital_cost"]
+        ).sum()
     )
     dc_links = n.links.index[n.links.index.astype(str).str.startswith("DC")]
     chargers = [lk for lk in dc_links if "charger" in lk and "discharger" not in lk]
     m["dc_battery_mw"] = float(n.links.loc[chargers, "p_nom_opt"].sum())
     cap_cost += float(
-        (n.links.loc[dc_links, "p_nom_opt"] * n.links.loc[dc_links, "capital_cost"]).sum()
+        (
+            n.links.loc[dc_links, "p_nom_opt"] * n.links.loc[dc_links, "capital_cost"]
+        ).sum()
     )
 
     m["dc_capital_cost_eur"] = cap_cost
@@ -193,16 +202,15 @@ def _dc_portfolio_metrics(n: pypsa.Network, total_load_mwh: float) -> dict[str, 
     m["es_load_shedding_mwh"] = float(shed_mwh.loc[es_shed].sum()) if es_shed else 0.0
 
     # Load-weighted Spanish electricity price
-    es_buses = n.buses.index[(n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")]
+    es_buses = n.buses.index[
+        (n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")
+    ]
     load_cols = n.loads.index[
         n.loads["bus"].isin(es_buses) & (n.loads["carrier"] != "boundary")
     ].intersection(n.loads_t.p_set.columns)
     if not load_cols.empty and not n.buses_t.marginal_price.empty:
         load_per_bus = (
-            n.loads_t.p_set[load_cols]
-            .T.groupby(n.loads.loc[load_cols, "bus"])
-            .sum()
-            .T
+            n.loads_t.p_set[load_cols].T.groupby(n.loads.loc[load_cols, "bus"]).sum().T
         )
         prices = n.buses_t.marginal_price[load_per_bus.columns]
         m["es_mean_price_eur_mwh"] = float(
@@ -234,7 +242,9 @@ def solve_network(
     policy_norm = str(policy).strip().lower()
     tau = resolve_target(policy_norm, target)
     sigma = 0.0 if policy_norm in NO_TARGET_POLICIES else float(excess_share)
-    constraint_policy = "annual_res" if policy_norm.startswith("annual") else policy_norm
+    constraint_policy = (
+        "annual_res" if policy_norm.startswith("annual") else policy_norm
+    )
     dc_cfg = {"prefix": "DC"}
 
     opts = dict(DEFAULT_SOLVER_OPTIONS)
@@ -247,16 +257,31 @@ def solve_network(
         def build_fn(net: pypsa.Network, r_iter: pd.Series) -> None:
             add_battery_constraints(net)
             add_dc_cfe_constraints(
-                n=net, dc_cfg=dc_cfg, r=r_iter, policy=constraint_policy,
-                target=tau, excess_share=sigma,
+                n=net,
+                dc_cfg=dc_cfg,
+                r=r_iter,
+                policy=constraint_policy,
+                target=tau,
+                excess_share=sigma,
             )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             bas = Path(tmpdir) / "highs_iter.bas"
-            iter_opts = {"io_api": "direct", "basis_fn": bas, "warmstart_fn": bas, **opts}
+            iter_opts = {
+                "io_api": "direct",
+                "basis_fn": bas,
+                "warmstart_fn": bas,
+                **opts,
+            }
             n, convergence_df = solve_with_grid_iteration(
-                n=n, build_fn=build_fn, r0=r0_series, max_iter=max_iter, tol=tol,
-                damping=damping, solver_options=iter_opts, country="ES",
+                n=n,
+                build_fn=build_fn,
+                r0=r0_series,
+                max_iter=max_iter,
+                tol=tol,
+                damping=damping,
+                solver_options=iter_opts,
+                country="ES",
                 clean_carriers=clean_carriers,
             )
     else:
@@ -265,8 +290,12 @@ def solve_network(
         def extra_functionality(net: pypsa.Network, snapshots: pd.Index) -> None:
             add_battery_constraints(net)
             add_dc_cfe_constraints(
-                n=net, dc_cfg=dc_cfg, r=r_single, policy=constraint_policy,
-                target=tau, excess_share=sigma,
+                n=net,
+                dc_cfg=dc_cfg,
+                r=r_single,
+                policy=constraint_policy,
+                target=tau,
+                excess_share=sigma,
             )
 
         status, condition = n.optimize(
@@ -282,9 +311,16 @@ def solve_network(
         r_out = calculate_grid_share(n, country="ES", clean_carriers=clean_carriers)
         n._grid_share = r_out
         convergence_df = pd.DataFrame(
-            [{"iteration": 0, "max_delta": 0.0, "objective": float(n.objective),
-              "mean_r_in": float(np.mean(r_single)), "mean_r_out": float(r_out.mean()),
-              "converged": True}]
+            [
+                {
+                    "iteration": 0,
+                    "max_delta": 0.0,
+                    "objective": float(n.objective),
+                    "mean_r_in": float(np.mean(r_single)),
+                    "mean_r_out": float(r_out.mean()),
+                    "converged": True,
+                }
+            ]
         )
     solve_time_s = time.perf_counter() - t_start
 
@@ -310,8 +346,12 @@ def solve_network(
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--network", type=Path, required=True, help="Base network (.nc).")
-    parser.add_argument("--costs", type=Path, required=True, help="Processed costs CSV.")
+    parser.add_argument(
+        "--network", type=Path, required=True, help="Base network (.nc)."
+    )
+    parser.add_argument(
+        "--costs", type=Path, required=True, help="Processed costs CSV."
+    )
     parser.add_argument("--output-network", type=Path, required=True)
     parser.add_argument("--output-kpis", type=Path, required=True)
     parser.add_argument("--output-convergence", type=Path, required=True)
@@ -324,7 +364,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-iter", type=int, default=DEFAULT_MAX_ITER)
     parser.add_argument("--tol", type=float, default=DEFAULT_TOL)
     parser.add_argument("--damping", type=float, default=DEFAULT_DAMPING)
-    parser.add_argument("--meta", type=str, default="", help="key=value,... appended to the KPI row.")
+    parser.add_argument(
+        "--meta", type=str, default="", help="key=value,... appended to the KPI row."
+    )
     return parser.parse_args(argv)
 
 
@@ -361,7 +403,11 @@ def main(argv: list[str] | None = None) -> None:
         meta["siting"] = siting
         cfg = {
             "accounting": {"excess_cap": args.excess_share},
-            "iteration": {"max_iter": args.max_iter, "tol": args.tol, "damping": args.damping},
+            "iteration": {
+                "max_iter": args.max_iter,
+                "tol": args.tol,
+                "damping": args.damping,
+            },
         }
 
     iter_cfg = cfg.get("iteration", {})
@@ -383,7 +429,9 @@ def main(argv: list[str] | None = None) -> None:
         n,
         policy=policy,
         target=target,
-        excess_share=float(cfg.get("accounting", {}).get("excess_cap", DEFAULT_EXCESS_SHARE)),
+        excess_share=float(
+            cfg.get("accounting", {}).get("excess_cap", DEFAULT_EXCESS_SHARE)
+        ),
         r0_source=r0_in,
         clean_carriers="cfe" if policy.endswith("_cfe") else "res",
         max_iter=int(iter_cfg.get("max_iter", DEFAULT_MAX_ITER)),
@@ -397,7 +445,9 @@ def main(argv: list[str] | None = None) -> None:
     n.export_to_netcdf(str(net_out))
     pd.DataFrame([kpi_row]).to_csv(kpi_out, index=False)
     conv_df.to_csv(conv_out, index=False)
-    logger.info("Solved %s: objective %.4e, KPIs -> %s", policy, float(n.objective), kpi_out)
+    logger.info(
+        "Solved %s: objective %.4e, KPIs -> %s", policy, float(n.objective), kpi_out
+    )
 
 
 if __name__ == "__main__":

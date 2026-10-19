@@ -59,7 +59,9 @@ def _make_import_tracing_network() -> pypsa.Network:
     n.add("Line", "line_FR_to_ES", bus0="FR0", bus1="ES0", x=0.1, s_nom=2000.0)
     n.add("Line", "line_ES_to_PT", bus0="ES0", bus1="PT0", x=0.1, s_nom=2000.0)
     n.add("Link", "link_FR_to_ES", bus0="FR0", bus1="ES0", carrier="DC", p_nom=2000.0)
-    n.add("Link", "link_ES_to_FR_rev", bus0="ES0", bus1="FR0", carrier="DC", p_nom=2000.0)
+    n.add(
+        "Link", "link_ES_to_FR_rev", bus0="ES0", bus1="FR0", carrier="DC", p_nom=2000.0
+    )
 
     # Populate hourly dispatch (4 snapshots)
     # ES domestic:
@@ -206,7 +208,13 @@ def test_storage_excluded() -> None:
     n.add("StorageUnit", "ES_phs", bus="ES0", carrier="PHS")
     n.add("StorageUnit", "ES_batt_su", bus="ES0", carrier="battery")
     n.add("Bus", "ES_batt_bus", carrier="battery", country="ES")
-    n.add("Link", "ES_batt_discharger", bus0="ES_batt_bus", bus1="ES0", carrier="battery discharger")
+    n.add(
+        "Link",
+        "ES_batt_discharger",
+        bus0="ES_batt_bus",
+        bus1="ES0",
+        carrier="battery discharger",
+    )
 
     n.storage_units_t.p["ES_phs"] = [500.0, -300.0, 800.0, 400.0]
     n.storage_units_t.p["ES_batt_su"] = [300.0, 200.0, -100.0, 600.0]
@@ -214,7 +222,9 @@ def test_storage_excluded() -> None:
     n.links_t.p1["ES_batt_discharger"] = [-240.0, -240.0, -240.0, -240.0]
 
     with_storage_res = calculate_grid_res(n, country="ES", clean_carriers="res")
-    pd.testing.assert_series_equal(with_storage_res, baseline_res, check_names=False, atol=1e-12)
+    pd.testing.assert_series_equal(
+        with_storage_res, baseline_res, check_names=False, atol=1e-12
+    )
 
 
 def test_dc_assets_excluded() -> None:
@@ -229,7 +239,9 @@ def test_dc_assets_excluded() -> None:
     n.generators_t.p["DC_ES0_solar"] = [700.0, 700.0, 700.0, 700.0]
 
     with_dc_res = calculate_grid_res(n, country="ES", clean_carriers="res")
-    pd.testing.assert_series_equal(with_dc_res, baseline_res, check_names=False, atol=1e-12)
+    pd.testing.assert_series_equal(
+        with_dc_res, baseline_res, check_names=False, atol=1e-12
+    )
 
 
 def test_boundary_carrier_excluded() -> None:

@@ -85,7 +85,9 @@ def _scan_script_for_magic_numbers(py_path: Path) -> list[tuple[int, float | int
             for sub in ast.walk(stmt):
                 module_constant_nodes.add(sub)
 
-    script_allow = GLOBAL_ALLOW_LIST | SCRIPT_DOCUMENTED_LITERALS.get(py_path.name, set())
+    script_allow = GLOBAL_ALLOW_LIST | SCRIPT_DOCUMENTED_LITERALS.get(
+        py_path.name, set()
+    )
     violations: list[tuple[int, float | int, str]] = []
 
     for node in ast.walk(tree):
@@ -98,7 +100,11 @@ def _scan_script_for_magic_numbers(py_path: Path) -> list[tuple[int, float | int
         ):
             val = node.value
             if val not in script_allow and abs(val) not in script_allow:
-                line_str = lines[node.lineno - 1].strip() if 1 <= node.lineno <= len(lines) else ""
+                line_str = (
+                    lines[node.lineno - 1].strip()
+                    if 1 <= node.lineno <= len(lines)
+                    else ""
+                )
                 violations.append((node.lineno, val, line_str))
     return sorted(violations)
 

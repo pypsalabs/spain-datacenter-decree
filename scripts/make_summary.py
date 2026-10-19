@@ -56,7 +56,9 @@ def _resolve_key_columns(df: pd.DataFrame) -> tuple[list[str], list[str], str]:
     no_dc_keys = [k for k in NO_DC_BASELINE_KEYS if k in df.columns]
     if len(no_dc_keys) != len(NO_DC_BASELINE_KEYS):
         missing = set(NO_DC_BASELINE_KEYS) - set(no_dc_keys)
-        raise KeyError(f"DataFrame is missing required no_dc key columns: {sorted(missing)}")
+        raise KeyError(
+            f"DataFrame is missing required no_dc key columns: {sorted(missing)}"
+        )
 
     dc_mw_col = "dc_mw" if "dc_mw" in df.columns else "dc_load_mw"
     if dc_mw_col not in df.columns:
@@ -135,7 +137,9 @@ def attach_baseline_deltas(
     co2_candidates = ("emissions", "es_total_co2_mt", "co2_mt", "co2_emissions")
     for co2_col in co2_candidates:
         if co2_col in metric_cols:
-            base_no_dc_co2 = no_dc_df[co2_col].reindex(row_no_dc_idx).to_numpy(dtype=float)
+            base_no_dc_co2 = (
+                no_dc_df[co2_col].reindex(row_no_dc_idx).to_numpy(dtype=float)
+            )
             base_unm_co2 = unm_df[co2_col].reindex(row_unm_idx).to_numpy(dtype=float)
             vals_co2 = out[co2_col].to_numpy(dtype=float)
 

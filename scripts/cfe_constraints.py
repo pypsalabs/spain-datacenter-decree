@@ -47,7 +47,8 @@ def _resolve_dc_components(
             g
             for g in n.generators.index
             if str(g).startswith(prefix)
-            and str(n.generators.at[g, "carrier"]) not in {"load", "virtual_link", "dsm"}
+            and str(n.generators.at[g, "carrier"])
+            not in {"load", "virtual_link", "dsm"}
         ]
 
     # 2. Battery chargers & dischargers
@@ -119,13 +120,13 @@ def _resolve_dc_components(
                 break
         if load_series is None:
             if dc_loads is None:
-                dc_loads = [
-                    ld for ld in n.loads.index if str(ld).startswith(prefix)
-                ]
+                dc_loads = [ld for ld in n.loads.index if str(ld).startswith(prefix)]
             load_series = pd.Series(0.0, index=snapshots, dtype=float)
             for ld in dc_loads:
                 if not n.loads_t.p_set.empty and ld in n.loads_t.p_set.columns:
-                    load_series = load_series + n.loads_t.p_set[ld].reindex(snapshots).fillna(0.0)
+                    load_series = load_series + n.loads_t.p_set[ld].reindex(
+                        snapshots
+                    ).fillna(0.0)
                 elif "p_set" in n.loads.columns:
                     load_series = load_series + float(n.loads.at[ld, "p_set"])
 
@@ -245,10 +246,14 @@ def add_dc_cfe_constraints(
     hourly_lhs_total = (weights * hourly_lhs_per_t).sum()
 
     if policy_norm in {"no_dc", "unmatched_dc", "ref", "none"}:
-        logger.info(f"Added DC virtual balance with no CFE target for policy='{policy}'.")
+        logger.info(
+            f"Added DC virtual balance with no CFE target for policy='{policy}'."
+        )
     elif policy_norm.startswith("annual"):
         if g_expr is None:
-            raise ValueError("Policy 'annual_res' requires at least one DC PPA generator.")
+            raise ValueError(
+                "Policy 'annual_res' requires at least one DC PPA generator."
+            )
         annual_lhs = (weights * g_expr).sum()
         annual_rhs = float(target) * total_weighted_load
         if annual_equality:
@@ -330,8 +335,12 @@ def dc_kpis(
 
     # Solved primal variables m_t and x_t
     if hasattr(n, "model") and n.model is not None and "DC-import" in n.model.solution:
-        m_series = n.model.solution["DC-import"].to_pandas().reindex(snapshots).astype(float)
-        x_series = n.model.solution["DC-export"].to_pandas().reindex(snapshots).astype(float)
+        m_series = (
+            n.model.solution["DC-import"].to_pandas().reindex(snapshots).astype(float)
+        )
+        x_series = (
+            n.model.solution["DC-export"].to_pandas().reindex(snapshots).astype(float)
+        )
     else:
         raise RuntimeError(
             "Solved primal variables 'DC-import' and 'DC-export' not found in n.model.solution."
@@ -361,7 +370,9 @@ def dc_kpis(
 
     # Exact constraint LHS expression per snapshot (no clipping)
     lhs_per_t = load_series - (1.0 - r_series) * m_series
-    lhs_from_balance_per_t = g_series + d_series - c_series - x_series + r_series * m_series
+    lhs_from_balance_per_t = (
+        g_series + d_series - c_series - x_series + r_series * m_series
+    )
     ppa_only_per_t = load_series - m_series
 
     total_load_mwh = float((weights * load_series).sum())

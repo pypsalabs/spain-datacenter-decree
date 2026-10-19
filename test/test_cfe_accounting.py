@@ -39,8 +39,22 @@ def _build_toy_3bus_network() -> tuple[pypsa.Network, pd.Series]:
         n.add("Bus", bus, carrier="AC", country="ES")
     n.add("Bus", "DC_Madrid_battery_bus", carrier="battery", country="ES")
 
-    n.add("Line", "line_Madrid_Aragon", bus0="ES_Madrid", bus1="ES_Aragon", x=0.01, s_nom=5000.0)
-    n.add("Line", "line_Madrid_South", bus0="ES_Madrid", bus1="ES_South", x=0.01, s_nom=5000.0)
+    n.add(
+        "Line",
+        "line_Madrid_Aragon",
+        bus0="ES_Madrid",
+        bus1="ES_Aragon",
+        x=0.01,
+        s_nom=5000.0,
+    )
+    n.add(
+        "Line",
+        "line_Madrid_South",
+        bus0="ES_Madrid",
+        bus1="ES_South",
+        x=0.01,
+        s_nom=5000.0,
+    )
 
     # Background grid load and dispatchable generators
     n.add("Load", "grid_load_Madrid", bus="ES_Madrid", p_set=200.0)
@@ -153,18 +167,27 @@ def test_kpi_equals_constraint_lhs() -> None:
     # Confirm the battery actually charged from the grid during night hours (0..7) when PPA gen is 0
     night_charge = n.links_t.p0["DC Madrid battery charger"].iloc[0:8].sum()
     night_ppa_gen = (
-        n.generators_t.p[["DC ES_South solar", "DC ES_Aragon onwind"]].iloc[0:8].sum().sum()
+        n.generators_t.p[["DC ES_South solar", "DC ES_Aragon onwind"]]
+        .iloc[0:8]
+        .sum()
+        .sum()
     )
     assert night_ppa_gen == pytest.approx(0.0, abs=1e-7)
-    assert night_charge > 10.0, "Expected DC battery to charge from cheap night grid power"
+    assert night_charge > 10.0, (
+        "Expected DC battery to charge from cheap night grid power"
+    )
 
     # During night hours with c_t > 0 and G_t = d_t = 0, virtual balance forces m_t = L_t + c_t > L_t
     m_sol = n.model.solution["DC-import"].to_pandas()
     assert (m_sol.iloc[0:8] > 100.0 - 1e-6).any()
 
     # Exact equality between primal formula, balance formula, and Linopy constraint LHS
-    assert kpis["constraint_lhs"] == pytest.approx(kpis["model_constraint_lhs"], abs=1e-6)
-    assert kpis["constraint_lhs"] == pytest.approx(kpis["constraint_lhs_from_balance"], abs=1e-6)
+    assert kpis["constraint_lhs"] == pytest.approx(
+        kpis["model_constraint_lhs"], abs=1e-6
+    )
+    assert kpis["constraint_lhs"] == pytest.approx(
+        kpis["constraint_lhs_from_balance"], abs=1e-6
+    )
     assert kpis["cfe_score"] == pytest.approx(
         kpis["constraint_lhs"] / kpis["total_load_mwh"], abs=1e-6
     )
@@ -173,7 +196,9 @@ def test_kpi_equals_constraint_lhs() -> None:
     # Contrast with a naive clipped calculation that ignores grid-charging subtraction:
     # Unclipped PPA-only matched energy subtracts battery grid-charging c_t, whereas a
     # naive clipped formula min(G_t + d_t, L_t) counts grid-charged battery discharge as clean.
-    ppa_gen_t = n.generators_t.p[["DC ES_South solar", "DC ES_Aragon onwind"]].sum(axis=1)
+    ppa_gen_t = n.generators_t.p[["DC ES_South solar", "DC ES_Aragon onwind"]].sum(
+        axis=1
+    )
     dis_t = n.links_t.p0["DC Madrid battery discharger"] * 0.95
     naive_clipped_ppa_mwh = float(np.minimum(ppa_gen_t + dis_t, 100.0).sum())
     unclipped_ppa_mwh = kpis["ppa_only_score"] * kpis["total_load_mwh"]

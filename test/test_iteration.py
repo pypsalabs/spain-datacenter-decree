@@ -137,12 +137,16 @@ def test_converges_toy() -> None:
         "converged",
     }
     assert expected_cols.issubset(set(conv_df.columns))
-    assert len(conv_df) >= 2, "Expected at least 2 iterations when starting from r0 = 0.0"
+    assert len(conv_df) >= 2, (
+        "Expected at least 2 iterations when starting from r0 = 0.0"
+    )
     assert bool(conv_df["converged"].iloc[-1]) is True
     assert float(conv_df["max_delta"].iloc[-1]) < 1e-4
 
     # Verify convergence to the exact analytical fixed point r* = 0.60 and G* = 50.0 MW
-    assert float(conv_df["mean_r_out"].iloc[-1]) == pytest.approx(expected_r_star, abs=1e-4)
+    assert float(conv_df["mean_r_out"].iloc[-1]) == pytest.approx(
+        expected_r_star, abs=1e-4
+    )
     assert float(solved_n.generators.at["DC ES0 onwind", "p_nom_opt"]) == pytest.approx(
         expected_g_star, abs=1e-2
     )
@@ -176,7 +180,9 @@ def test_damping_and_validation() -> None:
         clean_carriers="res",
     )
     assert bool(conv_df["converged"].iloc[-1]) is True
-    assert float(conv_df["mean_r_out"].iloc[-1]) == pytest.approx(expected_r_star, abs=1e-3)
+    assert float(conv_df["mean_r_out"].iloc[-1]) == pytest.approx(
+        expected_r_star, abs=1e-3
+    )
 
     with pytest.raises(ValueError, match="max_iter"):
         solve_with_grid_iteration(n=n, build_fn=build_fn, max_iter=0)

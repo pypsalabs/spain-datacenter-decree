@@ -25,6 +25,8 @@ BASE_2025_PATH = (
 COSTS_2025_PATH = (
     REPO_ROOT / "pypsa-eur" / "resources" / "wy2013" / "costs_2025_processed.csv"
 )
+
+
 @pytest.fixture(scope="module")
 def base_sliced_network() -> pypsa.Network:
     """Load a 24-hour slice of the wy2013 patched base network once per module."""
@@ -39,7 +41,9 @@ def base_sliced_network() -> pypsa.Network:
 def costs_2025() -> pd.DataFrame:
     """Load processed 2025 v0.15.0 technology costs."""
     if not COSTS_2025_PATH.exists():
-        pytest.skip(f"Missing processed costs (run the workflow first): {COSTS_2025_PATH}")
+        pytest.skip(
+            f"Missing processed costs (run the workflow first): {COSTS_2025_PATH}"
+        )
     return load_costs(COSTS_2025_PATH)
 
 
@@ -101,10 +105,12 @@ def test_unmatched_dc_adds_loads_only(
 
     # Background loads at the hub buses remain untouched (DC load is additional)
     bg_loads_madrid_after = n.loads[
-        (n.loads["bus"] == "ES0 6AC") & (~n.loads.index.astype(str).str.startswith("DC"))
+        (n.loads["bus"] == "ES0 6AC")
+        & (~n.loads.index.astype(str).str.startswith("DC"))
     ]
     bg_loads_aragon_after = n.loads[
-        (n.loads["bus"] == "ES0 7AC") & (~n.loads.index.astype(str).str.startswith("DC"))
+        (n.loads["bus"] == "ES0 7AC")
+        & (~n.loads.index.astype(str).str.startswith("DC"))
     ]
     assert np.isclose(float(bg_loads_madrid_after["p_set"].sum()), bg_load_madrid)
     assert np.isclose(float(bg_loads_aragon_after["p_set"].sum()), bg_load_aragon)
@@ -253,7 +259,9 @@ def test_capital_costs_match_v015_annuity_formula(
     }
     for (car, row_key), exp_lt in expected_lifetimes.items():
         actual_lt = float(costs_2025.at[row_key, "lifetime"])
-        assert np.isclose(actual_lt, exp_lt), f"Lifetime mismatch for {car}: {actual_lt} != {exp_lt}"
+        assert np.isclose(actual_lt, exp_lt), (
+            f"Lifetime mismatch for {car}: {actual_lt} != {exp_lt}"
+        )
 
     # Verify PPA generator capital_cost = (annuity(lifetime, r) + FOM/100) * investment
     for car, row_key in (
@@ -281,7 +289,9 @@ def test_capital_costs_match_v015_annuity_formula(
     inv_store = float(costs_2025.at["battery storage", "investment"])
     fom_store = float(costs_2025.at["battery storage", "FOM"])
     lt_store = float(costs_2025.at["battery storage", "lifetime"])
-    exp_store_cap = (calculate_annuity(lt_store, discount_rate) + fom_store / 100.0) * inv_store
+    exp_store_cap = (
+        calculate_annuity(lt_store, discount_rate) + fom_store / 100.0
+    ) * inv_store
     assert np.isclose(
         float(n.stores.at["DC ES0 6AC battery", "capital_cost"]),
         exp_store_cap,
@@ -291,7 +301,9 @@ def test_capital_costs_match_v015_annuity_formula(
     inv_link = float(costs_2025.at["battery inverter", "investment"])
     fom_link = float(costs_2025.at["battery inverter", "FOM"])
     lt_link = float(costs_2025.at["battery inverter", "lifetime"])
-    exp_link_cap = (calculate_annuity(lt_link, discount_rate) + fom_link / 100.0) * inv_link
+    exp_link_cap = (
+        calculate_annuity(lt_link, discount_rate) + fom_link / 100.0
+    ) * inv_link
     assert np.isclose(
         float(n.links.at["DC ES0 6AC battery charger", "capital_cost"]),
         exp_link_cap,
@@ -313,4 +325,3 @@ def test_capital_costs_match_v015_annuity_formula(
         np.sqrt(eta_rt),
         rtol=1e-6,
     )
-

@@ -21,12 +21,12 @@ run:
 foresight: overnight
 
 planning_horizons:
-  - 2025
+- 2025
 
 countries:
-  - ES
-  - FR
-  - PT
+- ES
+- FR
+- PT
 
 snapshots:
   start: "2013-01-01"
@@ -39,20 +39,20 @@ enable:
 co2_budget:
   emissions_scope: CO2
   relative: false
-  upper: null
-  lower: null
+  upper:
+  lower:
 
 electricity:
   base_network: osm
   transmission_limit: v1.0
   renewable_carriers:
-    - solar
-    - solar-hsat
-    - onwind
-    - offwind-ac
-    - offwind-dc
-    - offwind-float
-    - hydro
+  - solar
+  - solar-hsat
+  - onwind
+  - offwind-ac
+  - offwind-dc
+  - offwind-float
+  - hydro
   extendable_carriers:
     Generator: []
     StorageUnit: []
@@ -95,7 +95,7 @@ sector:
   enabled: false
 
 costs:
-  year: null
+  year:
 
 data:
   costs:

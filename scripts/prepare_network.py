@@ -149,7 +149,9 @@ def _custom(ctx: Mapping[str, Any], name: str) -> pd.DataFrame:
 
 def _value(df: pd.DataFrame, country: str, year: int, metric: str) -> float | None:
     """Return the value of one (country, year, carrier_or_metric) row, or None."""
-    sel = df.query("country == @country and year == @year and carrier_or_metric == @metric")
+    sel = df.query(
+        "country == @country and year == @year and carrier_or_metric == @metric"
+    )
     return float(sel["value"].iloc[0]) if len(sel) else None
 
 
@@ -286,7 +288,13 @@ def _patch_national_capacities(n: pypsa.Network, ctx: Mapping[str, Any]) -> None
                 load_cols = n.loads.index[n.loads["bus"].isin(buses)].intersection(
                     n.loads_t.p_set.columns
                 )
-                bus = n.loads_t.p_set[load_cols].mean().groupby(n.loads["bus"]).sum().idxmax()
+                bus = (
+                    n.loads_t.p_set[load_cols]
+                    .mean()
+                    .groupby(n.loads["bus"])
+                    .sum()
+                    .idxmax()
+                )
                 _ensure_carrier(n, carriers[0])
                 costs = pd.read_csv(ctx["costs"], index_col=0)
                 eta = (
@@ -339,14 +347,19 @@ def _patch_wind_correction(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     year = int(ctx["data_year"])
     targets = {
         "ES": _value(
-            _custom(ctx, "validation_2024_es.csv"), "ES_mainland_baleares", year, "gen_onwind"
+            _custom(ctx, "validation_2024_es.csv"),
+            "ES_mainland_baleares",
+            year,
+            "gen_onwind",
         ),
         "PT": _value(_custom(ctx, "pt_actuals.csv"), "PT", year, "gen_onwind"),
     }
     w = n.snapshot_weightings["generators"]
     for prefix, target_twh in targets.items():
         if target_twh is None:
-            logger.info("No cited wind generation for %s/%d; no correction.", prefix, year)
+            logger.info(
+                "No cited wind generation for %s/%d; no correction.", prefix, year
+            )
             continue
         gens = n.generators[
             (n.generators["carrier"] == "onwind")
@@ -354,14 +367,26 @@ def _patch_wind_correction(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
         ]
         cols = gens.index.intersection(n.generators_t.p_max_pu.columns)
         avail_twh = (
-            float(n.generators_t.p_max_pu[cols].mul(gens.loc[cols, "p_nom"], axis=1).mul(w, axis=0).sum().sum())
+            float(
+                n.generators_t.p_max_pu[cols]
+                .mul(gens.loc[cols, "p_nom"], axis=1)
+                .mul(w, axis=0)
+                .sum()
+                .sum()
+            )
             / 1e6
         )
         factor = target_twh / avail_twh
         scaled = n.generators_t.p_max_pu[cols] * factor
         n.generators_t.p_max_pu[cols] = scaled.where(scaled <= 1.0, 1.0)
         achieved = (
-            float(n.generators_t.p_max_pu[cols].mul(gens.loc[cols, "p_nom"], axis=1).mul(w, axis=0).sum().sum())
+            float(
+                n.generators_t.p_max_pu[cols]
+                .mul(gens.loc[cols, "p_nom"], axis=1)
+                .mul(w, axis=0)
+                .sum()
+                .sum()
+            )
             / 1e6
         )
         logger.info(
@@ -383,7 +408,9 @@ def _patch_phs_split(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     pumping_mw = _value(df, scope, year, "pumped hydro (pure) pumping")
     rt_eff = _value(df, scope, year, "pumped hydro round-trip efficiency")
     if None in (energy_gwh, pumping_mw, rt_eff):
-        raise ValueError(f"Missing pure-PHS rows for {scope}/{year} in national_capacities.csv")
+        raise ValueError(
+            f"Missing pure-PHS rows for {scope}/{year} in national_capacities.csv"
+        )
 
     sel = n.storage_units.index[
         (n.storage_units["carrier"] == "PHS")
@@ -407,7 +434,9 @@ def _patch_phs_split(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
 
 def _monthly_chp_shape(ctx: Mapping[str, Any]) -> dict[int, float]:
     """Monthly CHP shape (mean 1.0) from the vendored Redeia monthly cogeneration CO2 series."""
-    path = Path(ctx["custom_dir"]) / "sources" / "redata_2024_emisiones_co2_mensual.json"
+    path = (
+        Path(ctx["custom_dir"]) / "sources" / "redata_2024_emisiones_co2_mensual.json"
+    )
     data = json.loads(path.read_text())
     series = next(
         item
@@ -416,7 +445,8 @@ def _monthly_chp_shape(ctx: Mapping[str, Any]) -> dict[int, float]:
     )["attributes"]["values"]
     total = sum(v["value"] for v in series)
     return {
-        pd.Timestamp(v["datetime"].split("T")[0]).month: v["value"] / (total / len(series))
+        pd.Timestamp(v["datetime"].split("T")[0]).month: v["value"]
+        / (total / len(series))
         for v in series
     }
 
@@ -437,7 +467,9 @@ def _patch_chp_profile(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     shape = pd.Series([monthly[ts.month] for ts in n.snapshots], index=n.snapshots)
     profile = shape * (gen_twh * 1e6 / cap_mw / float((shape * w).sum()))
     if float(profile.max()) >= 1.0:
-        raise ValueError("CHP profile exceeds 1.0; check capacity and generation inputs.")
+        raise ValueError(
+            "CHP profile exceeds 1.0; check capacity and generation inputs."
+        )
 
     _ensure_carrier(n, "CHP", co2=em_factor)
     load_cols = n.loads.index[
@@ -495,7 +527,8 @@ def _patch_csp(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
         for bus in shares.index
     }
     avail_mwh = sum(
-        float((profiles[bus] * w).sum()) * cap_mw * share for bus, share in shares.items()
+        float((profiles[bus] * w).sum()) * cap_mw * share
+        for bus, share in shares.items()
     )
     k = target_twh * 1e6 / avail_mwh
     for bus, share in shares.items():
@@ -512,7 +545,9 @@ def _patch_csp(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
         scaled = profiles[bus] * k
         n.generators_t.p_max_pu[name] = scaled.where(scaled <= 1.0, 1.0)
     logger.info(
-        "Attached %.0f MW CSP, solar-shaped profile, %.2f TWh/yr target.", cap_mw, target_twh
+        "Attached %.0f MW CSP, solar-shaped profile, %.2f TWh/yr target.",
+        cap_mw,
+        target_twh,
     )
 
 
@@ -529,7 +564,11 @@ def _patch_biomass_availability(n: pypsa.Network, ctx: Mapping[str, Any]) -> Non
     val = _custom(ctx, "validation_2024_es.csv")
     es_gen = sum(
         _value(val, "ES_mainland_baleares", 2024, m) or 0.0
-        for m in ("gen_other_renewables", "gen_renewable_waste", "gen_nonrenewable_waste")
+        for m in (
+            "gen_other_renewables",
+            "gen_renewable_waste",
+            "gen_nonrenewable_waste",
+        )
     )
     cases = {
         "ES": (_value(natcap, "ES_mainland_baleares", year, "biomass/waste"), es_gen),
@@ -588,7 +627,11 @@ def _patch_prices(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
         if sel.empty:
             continue
         eta = n.generators.loc[sel, "efficiency"].replace(0.0, 1.0)
-        vom = float(costs.at[VOM_TECH[carrier], "VOM"]) if VOM_TECH[carrier] in costs.index else 0.0
+        vom = (
+            float(costs.at[VOM_TECH[carrier], "VOM"])
+            if VOM_TECH[carrier] in costs.index
+            else 0.0
+        )
         n.generators.loc[sel, "marginal_cost"] = (
             vom + (fuel[fuel_key] + ets * float(co2.get(carrier, 0.0))) / eta
         )
@@ -627,14 +670,21 @@ def _cap_corridor(
     factor = ntc_mw / capability
     if factor >= 1.0:
         logger.info(
-            "Corridor %s capability %.0f MW <= NTC %.0f MW; no cap.", label, capability, ntc_mw
+            "Corridor %s capability %.0f MW <= NTC %.0f MW; no cap.",
+            label,
+            capability,
+            ntc_mw,
         )
         return
     n.lines.loc[lines, "s_max_pu"] *= factor
     n.links.loc[links, "p_max_pu"] *= factor
     n.links.loc[links, "p_min_pu"] *= factor
     logger.info(
-        "Corridor %s capped: %.0f -> %.0f MW (factor %.3f).", label, capability, ntc_mw, factor
+        "Corridor %s capped: %.0f -> %.0f MW (factor %.3f).",
+        label,
+        capability,
+        ntc_mw,
+        factor,
     )
 
 
@@ -644,8 +694,18 @@ def _patch_ntc_caps(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     year = int(ctx["data_year"])
     es0 = set(_country_buses(n, "ES0"))
     corridors = [
-        (es0, set(_country_buses(n, "FR")), _value(df, "ES-FR", year, "ntc_es_to_fr"), "ES-FR"),
-        (es0, set(_country_buses(n, "PT")), _value(df, "ES-PT", year, "ntc_es_to_pt"), "ES-PT"),
+        (
+            es0,
+            set(_country_buses(n, "FR")),
+            _value(df, "ES-FR", year, "ntc_es_to_fr"),
+            "ES-FR",
+        ),
+        (
+            es0,
+            set(_country_buses(n, "PT")),
+            _value(df, "ES-PT", year, "ntc_es_to_pt"),
+            "ES-PT",
+        ),
         (
             es0,
             set(_country_buses(n, "ES1")),
@@ -671,7 +731,9 @@ def _patch_demand(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     w = n.snapshot_weightings["generators"]
     for prefix, target_twh in targets.items():
         if target_twh is None:
-            raise ValueError(f"Missing demand row for {prefix}/{year} in annual_demand.csv")
+            raise ValueError(
+                f"Missing demand row for {prefix}/{year} in annual_demand.csv"
+            )
         cols = n.loads.index[
             n.loads["bus"].isin(set(_country_buses(n, prefix)))
             & (n.loads["carrier"] != "boundary")
@@ -686,7 +748,10 @@ def _patch_hydro_inflow(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
     year = int(ctx["data_year"])
     targets = {
         "ES": _value(
-            _custom(ctx, "validation_2024_es.csv"), "ES_mainland_baleares", year, "gen_hydro"
+            _custom(ctx, "validation_2024_es.csv"),
+            "ES_mainland_baleares",
+            year,
+            "gen_hydro",
         ),
         "PT": _value(_custom(ctx, "pt_actuals.csv"), "PT", year, "gen_hydro"),
     }
@@ -699,13 +764,17 @@ def _patch_hydro_inflow(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
         su = n.storage_units.index[
             (n.storage_units["carrier"] == "hydro") & n.storage_units["bus"].isin(buses)
         ].intersection(n.storage_units_t.inflow.columns)
-        inflow_twh = float(n.storage_units_t.inflow[su].mul(w, axis=0).sum().sum()) / 1e6
+        inflow_twh = (
+            float(n.storage_units_t.inflow[su].mul(w, axis=0).sum().sum()) / 1e6
+        )
         ror = n.generators[
             (n.generators["carrier"] == "ror") & n.generators["bus"].isin(buses)
         ]
         ror_twh = (
             float(
-                n.generators_t.p_max_pu[ror.index.intersection(n.generators_t.p_max_pu.columns)]
+                n.generators_t.p_max_pu[
+                    ror.index.intersection(n.generators_t.p_max_pu.columns)
+                ]
                 .mul(ror["p_nom"], axis=1)
                 .mul(w, axis=0)
                 .sum()
@@ -776,8 +845,12 @@ def prepare_network(
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--network", type=Path, required=True, help="Composed network (.nc).")
-    parser.add_argument("--output", type=Path, required=True, help="Base network output (.nc).")
+    parser.add_argument(
+        "--network", type=Path, required=True, help="Composed network (.nc)."
+    )
+    parser.add_argument(
+        "--output", type=Path, required=True, help="Base network output (.nc)."
+    )
     parser.add_argument(
         "--patches",
         type=str,
@@ -791,7 +864,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Measured FR border flows CSV.",
     )
     parser.add_argument("--custom-dir", type=Path, default=Path("data/custom"))
-    parser.add_argument("--costs", type=Path, default=None, help="Processed technology costs CSV.")
+    parser.add_argument(
+        "--costs", type=Path, default=None, help="Processed technology costs CSV."
+    )
     parser.add_argument(
         "--data-year",
         type=int,

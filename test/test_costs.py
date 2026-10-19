@@ -30,10 +30,18 @@ from scripts.data_center import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 RAW_COSTS_2025 = (
-    REPO_ROOT / "data" / "custom" / "sources" / "pypsa_technology_data_v0.15.0_costs_2025.csv"
+    REPO_ROOT
+    / "data"
+    / "custom"
+    / "sources"
+    / "pypsa_technology_data_v0.15.0_costs_2025.csv"
 )
 RAW_COSTS_2030 = (
-    REPO_ROOT / "data" / "custom" / "sources" / "pypsa_technology_data_v0.15.0_costs_2030.csv"
+    REPO_ROOT
+    / "data"
+    / "custom"
+    / "sources"
+    / "pypsa_technology_data_v0.15.0_costs_2030.csv"
 )
 PROCESSED_COSTS_2025 = (
     REPO_ROOT / "pypsa-eur" / "resources" / "wy2013" / "costs_2025_processed.csv"
@@ -86,20 +94,31 @@ def test_costs_match_v015_csv() -> None:
 
     for year, raw_df in [(2025, raw_2025), (2030, raw_2030)]:
         for proc_tech, (raw_tech, inv_kw, fom, vom) in expected[year].items():
-            assert _raw_param(raw_df, raw_tech, "investment") == pytest.approx(inv_kw, rel=1e-5)
+            assert _raw_param(raw_df, raw_tech, "investment") == pytest.approx(
+                inv_kw, rel=1e-5
+            )
             if fom > 0:
-                assert _raw_param(raw_df, raw_tech, "FOM") == pytest.approx(fom, rel=1e-4)
+                assert _raw_param(raw_df, raw_tech, "FOM") == pytest.approx(
+                    fom, rel=1e-4
+                )
             if vom > 0:
-                assert _raw_param(raw_df, raw_tech, "VOM") == pytest.approx(vom, rel=1e-4)
+                assert _raw_param(raw_df, raw_tech, "VOM") == pytest.approx(
+                    vom, rel=1e-4
+                )
 
     if PROCESSED_COSTS_2025.exists() and PROCESSED_COSTS_2030.exists():
-        for year, proc_path in [(2025, PROCESSED_COSTS_2025), (2030, PROCESSED_COSTS_2030)]:
+        for year, proc_path in [
+            (2025, PROCESSED_COSTS_2025),
+            (2030, PROCESSED_COSTS_2030),
+        ]:
             proc_df = pd.read_csv(proc_path, index_col=0)
             assert _resolve_cost_row(proc_df, "solar") == "solar-utility"
             assert _resolve_cost_row(proc_df, "solar-hsat") == "solar-hsat"
             for proc_tech, (_, inv_kw, fom, _) in expected[year].items():
                 row = proc_df.loc[proc_tech]
-                assert float(row["investment"]) == pytest.approx(inv_kw * 1000.0, rel=1e-5)
+                assert float(row["investment"]) == pytest.approx(
+                    inv_kw * 1000.0, rel=1e-5
+                )
                 assert float(row["FOM"]) == pytest.approx(fom, abs=1e-4)
 
             # Verify data_center._compute_tech_costs uses solar-utility for 'solar'
@@ -109,7 +128,9 @@ def test_costs_match_v015_csv() -> None:
                 calculate_annuity(float(solar_util_row["lifetime"]), 0.07)
                 + float(solar_util_row["FOM"]) / 100.0
             )
-            assert solar_costs["capital_cost"] == pytest.approx(expected_solar_cap, rel=1e-6)
+            assert solar_costs["capital_cost"] == pytest.approx(
+                expected_solar_cap, rel=1e-6
+            )
             mixed_solar_inv = float(proc_df.loc["solar", "investment"])
             assert float(solar_util_row["investment"]) < mixed_solar_inv
 
@@ -160,7 +181,13 @@ def test_monotone_2025_2030() -> None:
     if PROCESSED_COSTS_2025.exists() and PROCESSED_COSTS_2030.exists():
         p25 = pd.read_csv(PROCESSED_COSTS_2025, index_col=0)
         p30 = pd.read_csv(PROCESSED_COSTS_2030, index_col=0)
-        for carrier in ("onwind", "solar", "solar-hsat", "battery storage", "battery inverter"):
+        for carrier in (
+            "onwind",
+            "solar",
+            "solar-hsat",
+            "battery storage",
+            "battery inverter",
+        ):
             c25 = _compute_tech_costs(p25, carrier, discount_rate=0.07)
             c30 = _compute_tech_costs(p30, carrier, discount_rate=0.07)
             assert c30["capital_cost"] < c25["capital_cost"], (
@@ -233,4 +260,6 @@ def test_checksum() -> None:
     for csv_path in (RAW_COSTS_2025, RAW_COSTS_2030):
         assert csv_path.exists(), f"Missing vendored cost file: {csv_path}"
         digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
-        assert digest in doc_text, f"SHA-256 {digest} for {csv_path.name} not found in doc/data_sources.md"
+        assert digest in doc_text, (
+            f"SHA-256 {digest} for {csv_path.name} not found in doc/data_sources.md"
+        )

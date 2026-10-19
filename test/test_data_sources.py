@@ -59,7 +59,9 @@ def test_every_custom_csv_has_source() -> None:
     """Every row in data/custom/*.csv has a valid source_id registered in doc/data_sources.md."""
     assert DATA_SOURCES_DOC.exists(), f"Missing {DATA_SOURCES_DOC}"
     registry = _parse_data_sources_table(DATA_SOURCES_DOC)
-    assert len(registry) >= 30, f"Expected >=30 source_ids in doc/data_sources.md, got {len(registry)}"
+    assert len(registry) >= 30, (
+        f"Expected >=30 source_ids in doc/data_sources.md, got {len(registry)}"
+    )
 
     target_csvs = [
         "annual_demand.csv",
@@ -73,8 +75,12 @@ def test_every_custom_csv_has_source() -> None:
         csv_path = CUSTOM_DATA_DIR / csv_name
         assert csv_path.exists(), f"Missing custom CSV: {csv_path}"
         df = pd.read_csv(csv_path)
-        assert "source_id" in df.columns, f"{csv_path.name} is missing a 'source_id' column"
-        assert not df["source_id"].isna().any(), f"{csv_path.name} has NaN source_id entries"
+        assert "source_id" in df.columns, (
+            f"{csv_path.name} is missing a 'source_id' column"
+        )
+        assert not df["source_id"].isna().any(), (
+            f"{csv_path.name} has NaN source_id entries"
+        )
         for raw_sid in df["source_id"].astype(str).str.strip().unique():
             sub_ids = [s.strip() for s in re.split(r"[;+]", raw_sid) if s.strip()]
             for sid in sub_ids:
@@ -109,8 +115,12 @@ def test_vendored_files_sha256_match() -> None:
                 if rel_path_str.startswith("data/")
                 else (SOURCES_DIR / rel_path_str).resolve()
             )
-            assert full_path.exists(), f"Vendored file {rel_path_str} for {sid!r} does not exist"
-            assert full_path.stat().st_size > 0, f"Vendored file {rel_path_str} is empty"
+            assert full_path.exists(), (
+                f"Vendored file {rel_path_str} for {sid!r} does not exist"
+            )
+            assert full_path.stat().st_size > 0, (
+                f"Vendored file {rel_path_str} is empty"
+            )
             actual_sha = hashlib.sha256(full_path.read_bytes()).hexdigest().lower()
             assert actual_sha == expected_sha, (
                 f"SHA-256 mismatch for {rel_path_str} ({sid!r}): "
@@ -118,4 +128,6 @@ def test_vendored_files_sha256_match() -> None:
             )
             verified_count += 1
 
-    assert verified_count >= 35, f"Expected >=35 verified vendored file entries, got {verified_count}"
+    assert verified_count >= 35, (
+        f"Expected >=35 verified vendored file entries, got {verified_count}"
+    )

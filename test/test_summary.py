@@ -20,8 +20,14 @@ def _make_suite3_summary_df() -> pd.DataFrame:
     for planning_year in (2025, 2030):
         for weather_year in (2010, 2013, 2020):
             for resolution in ("1h", "3h"):
-                base_co2 = 20.0 + (2030 - planning_year) * 0.8 + (weather_year - 2010) * 0.1
-                base_cost = 1000.0 + (planning_year - 2025) * 50.0 + (0.0 if resolution == "1h" else 5.0)
+                base_co2 = (
+                    20.0 + (2030 - planning_year) * 0.8 + (weather_year - 2010) * 0.1
+                )
+                base_cost = (
+                    1000.0
+                    + (planning_year - 2025) * 50.0
+                    + (0.0 if resolution == "1h" else 5.0)
+                )
                 rows.append(
                     {
                         "planning_year": planning_year,
@@ -119,7 +125,9 @@ def test_baseline_keys() -> None:
     assert row["delta_no_dc_system_cost"] == pytest.approx(0.6 * 3500, abs=1e-9)
 
     # Expected vs unmatched_dc at dc_mw=3500: (0.0004 - 0.002) * 3500 = -5.6 Mt CO2, +0.1 * 3500 = +350.0 cost
-    assert row["delta_unmatched_dc_emissions"] == pytest.approx(-0.0016 * 3500, abs=1e-9)
+    assert row["delta_unmatched_dc_emissions"] == pytest.approx(
+        -0.0016 * 3500, abs=1e-9
+    )
     assert row["delta_unmatched_dc_system_cost"] == pytest.approx(0.1 * 3500, abs=1e-9)
 
     # Abatement percentage vs unmatched_dc: (0.002 - 0.0004) / 0.002 * 100 = 80.0%

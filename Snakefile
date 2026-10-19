@@ -10,6 +10,7 @@ from the composed networks: prepare (patch engine), solve (DC + 24/7 CFE),
 validate, summarize, plot. See README for the architecture.
 """
 
+
 configfile: "pypsa-eur/config/config.default.yaml"
 configfile: "config/config.spain.yaml"
 
@@ -59,12 +60,12 @@ rule prepare_network:
         ],
     output:
         network="resources/{run}/networks/base_{year}_{variant}.nc",
-    params:
-        patches=resolved_patches,
-        data_year=lambda w: "2024" if w.run == "wy2024" else w.year,
     threads: 1
     resources:
         mem_mb=8000,
+    params:
+        patches=resolved_patches,
+        data_year=lambda w: "2024" if w.run == "wy2024" else w.year,
     shell:
         """
         PYTHONPATH="{workflow.basedir}" python -m scripts.prepare_network \
@@ -87,6 +88,9 @@ rule solve_network:
         network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.nc",
         kpis="results/{run}/kpis/kpi_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
         convergence="results/{run}/convergence/conv_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
+    threads: 2
+    resources:
+        mem_mb=8000,
     params:
         excess_share=lambda w: config["spain_cfe"]["accounting"]["excess_cap"],
         max_iter=lambda w: config["spain_cfe"]["iteration"]["max_iter"],
@@ -98,9 +102,6 @@ rule solve_network:
         r0_arg=lambda w, input: (
             f'--r0-network "{input.r0_network[0]}"' if input.r0_network else ""
         ),
-    threads: 2
-    resources:
-        mem_mb=8000,
     shell:
         """
         PYTHONPATH="{workflow.basedir}" python -m scripts.solve_network \

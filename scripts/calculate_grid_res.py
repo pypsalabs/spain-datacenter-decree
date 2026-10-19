@@ -34,7 +34,9 @@ DEFAULT_RES_CARRIERS: tuple[str, ...] = (
     "csp",
 )
 DEFAULT_CFE_EXTRA_CARRIERS: tuple[str, ...] = ("nuclear",)
-DEFAULT_CFE_CARRIERS: tuple[str, ...] = DEFAULT_RES_CARRIERS + DEFAULT_CFE_EXTRA_CARRIERS
+DEFAULT_CFE_CARRIERS: tuple[str, ...] = (
+    DEFAULT_RES_CARRIERS + DEFAULT_CFE_EXTRA_CARRIERS
+)
 DEFAULT_EXCLUDED_CARRIERS: tuple[str, ...] = (
     "PHS",
     "battery",
@@ -190,9 +192,7 @@ def _domestic_supply(
         in_country = link_df["bus1"].isin(c_buses)
         not_excl_asset = ~_is_excluded_index(link_df.index, exclude_assets_set)
         not_grid_transfer = ~link_df["bus0"].isin(all_ac_buses)
-        candidate_links = link_df.index[
-            in_country & not_excl_asset & not_grid_transfer
-        ]
+        candidate_links = link_df.index[in_country & not_excl_asset & not_grid_transfer]
 
         for lk in candidate_links:
             carrier = str(link_df.at[lk, "carrier"])
@@ -206,12 +206,18 @@ def _domestic_supply(
             ):
                 continue
 
-            if not n.links_t.p1.empty and lk in n.links_t.p1.columns and (
-                n.links_t.p1[lk] != 0.0
-            ).any():
+            if (
+                not n.links_t.p1.empty
+                and lk in n.links_t.p1.columns
+                and (n.links_t.p1[lk] != 0.0).any()
+            ):
                 p_out = _positive_part(-n.links_t.p1[lk])
             elif not n.links_t.p0.empty and lk in n.links_t.p0.columns:
-                eff = float(link_df.at[lk, "efficiency"]) if "efficiency" in link_df.columns else 1.0
+                eff = (
+                    float(link_df.at[lk, "efficiency"])
+                    if "efficiency" in link_df.columns
+                    else 1.0
+                )
                 p_out = _positive_part(n.links_t.p0[lk] * eff)
             else:
                 continue
@@ -251,24 +257,32 @@ def _corridor_import(
 
         # Subset A: bus0 in importer, bus1 in exporter (import means flow bus1 -> bus0, p1 > 0 / -p0 > 0)
         sub_a = lines_df.index[
-            not_excl & lines_df["bus0"].isin(imp_buses) & lines_df["bus1"].isin(exp_buses)
+            not_excl
+            & lines_df["bus0"].isin(imp_buses)
+            & lines_df["bus1"].isin(exp_buses)
         ]
         for ln in sub_a:
-            if not n.lines_t.p1.empty and ln in n.lines_t.p1.columns and (
-                n.lines_t.p1[ln] != 0.0
-            ).any():
+            if (
+                not n.lines_t.p1.empty
+                and ln in n.lines_t.p1.columns
+                and (n.lines_t.p1[ln] != 0.0).any()
+            ):
                 imp_total = imp_total + _positive_part(n.lines_t.p1[ln])
             elif not n.lines_t.p0.empty and ln in n.lines_t.p0.columns:
                 imp_total = imp_total + _positive_part(-n.lines_t.p0[ln])
 
         # Subset B: bus0 in exporter, bus1 in importer (import means flow bus0 -> bus1, p0 > 0 / -p1 > 0)
         sub_b = lines_df.index[
-            not_excl & lines_df["bus0"].isin(exp_buses) & lines_df["bus1"].isin(imp_buses)
+            not_excl
+            & lines_df["bus0"].isin(exp_buses)
+            & lines_df["bus1"].isin(imp_buses)
         ]
         for ln in sub_b:
-            if not n.lines_t.p0.empty and ln in n.lines_t.p0.columns and (
-                n.lines_t.p0[ln] != 0.0
-            ).any():
+            if (
+                not n.lines_t.p0.empty
+                and ln in n.lines_t.p0.columns
+                and (n.lines_t.p0[ln] != 0.0).any()
+            ):
                 imp_total = imp_total + _positive_part(n.lines_t.p0[ln])
             elif not n.lines_t.p1.empty and ln in n.lines_t.p1.columns:
                 imp_total = imp_total + _positive_part(-n.lines_t.p1[ln])
@@ -280,24 +294,32 @@ def _corridor_import(
 
         # Subset A: bus0 in importer, bus1 in exporter
         sub_a = links_df.index[
-            not_excl & links_df["bus0"].isin(imp_buses) & links_df["bus1"].isin(exp_buses)
+            not_excl
+            & links_df["bus0"].isin(imp_buses)
+            & links_df["bus1"].isin(exp_buses)
         ]
         for lk in sub_a:
-            if not n.links_t.p1.empty and lk in n.links_t.p1.columns and (
-                n.links_t.p1[lk] != 0.0
-            ).any():
+            if (
+                not n.links_t.p1.empty
+                and lk in n.links_t.p1.columns
+                and (n.links_t.p1[lk] != 0.0).any()
+            ):
                 imp_total = imp_total + _positive_part(n.links_t.p1[lk])
             elif not n.links_t.p0.empty and lk in n.links_t.p0.columns:
                 imp_total = imp_total + _positive_part(-n.links_t.p0[lk])
 
         # Subset B: bus0 in exporter, bus1 in importer
         sub_b = links_df.index[
-            not_excl & links_df["bus0"].isin(exp_buses) & links_df["bus1"].isin(imp_buses)
+            not_excl
+            & links_df["bus0"].isin(exp_buses)
+            & links_df["bus1"].isin(imp_buses)
         ]
         for lk in sub_b:
-            if not n.links_t.p0.empty and lk in n.links_t.p0.columns and (
-                n.links_t.p0[lk] != 0.0
-            ).any():
+            if (
+                not n.links_t.p0.empty
+                and lk in n.links_t.p0.columns
+                and (n.links_t.p0[lk] != 0.0).any()
+            ):
                 imp_total = imp_total + _positive_part(n.links_t.p0[lk])
             elif not n.links_t.p1.empty and lk in n.links_t.p1.columns:
                 imp_total = imp_total + _positive_part(-n.links_t.p1[lk])
@@ -338,8 +360,10 @@ def _infer_neighbours(
             continue
         if _is_excluded_index(pd.Index([b]), exclude_assets_set).iloc[0]:
             continue
-        if "country" in n.buses.columns and pd.notna(n.buses.at[b, "country"]) and str(
-            n.buses.at[b, "country"]
+        if (
+            "country" in n.buses.columns
+            and pd.notna(n.buses.at[b, "country"])
+            and str(n.buses.at[b, "country"])
         ):
             ct = str(n.buses.at[b, "country"])
         else:
@@ -394,9 +418,7 @@ def calculate_grid_share(
         else set(DEFAULT_EXCLUDED_CARRIERS)
     )
     exclude_assets_set = (
-        set(exclude_assets)
-        if exclude_assets is not None
-        else {"DC ", "DC_", "DC-"}
+        set(exclude_assets) if exclude_assets is not None else {"DC ", "DC_", "DC-"}
     )
 
     neighbour_list = (
@@ -416,7 +438,9 @@ def calculate_grid_share(
     for nb in neighbour_list:
         if nb == country:
             continue
-        imp_nb = _corridor_import(n, exporter=nb, importer=country, exclude_assets_set=exclude_assets_set)
+        imp_nb = _corridor_import(
+            n, exporter=nb, importer=country, exclude_assets_set=exclude_assets_set
+        )
         if (imp_nb > 0.0).any():
             nb_clean, nb_total = _domestic_supply(
                 n=n,
@@ -434,7 +458,9 @@ def calculate_grid_share(
             total_den = total_den + imp_nb
 
     r_values = np.where(total_den > 0.0, clean_num / total_den, 0.0)
-    r_series = pd.Series(r_values, index=n.snapshots, name=f"grid_share_{country}", dtype=float)
+    r_series = pd.Series(
+        r_values, index=n.snapshots, name=f"grid_share_{country}", dtype=float
+    )
     logger.info(
         f"Computed grid share for {country} (neighbours={neighbour_list}): mean={r_series.mean():.4f}"
     )

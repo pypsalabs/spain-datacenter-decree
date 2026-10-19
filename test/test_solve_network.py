@@ -27,7 +27,13 @@ def toy_costs() -> pd.DataFrame:
             "VOM": [1.0, 0.0, 0.0, 0.0, 0.0],
             "efficiency": [1.0, 1.0, 1.0, 1.0, 0.955],
         },
-        index=["onwind", "solar-utility", "solar-hsat", "battery storage", "battery inverter"],
+        index=[
+            "onwind",
+            "solar-utility",
+            "solar-hsat",
+            "battery storage",
+            "battery inverter",
+        ],
     )
 
 
@@ -40,12 +46,35 @@ def toy_base() -> pypsa.Network:
     for bus in ("ES0 6AC", "ES0 7AC"):
         n.add("Bus", bus, carrier="AC", country="ES", x=-3.7, y=40.4)
         n.add("Load", f"{bus} demand", bus=bus, p_set=500.0)
-        n.add("Generator", f"{bus} CCGT", bus=bus, carrier="CCGT", p_nom=2000.0,
-              efficiency=0.55, marginal_cost=70.0)
-        n.add("Generator", f"{bus} onwind bg", bus=bus, carrier="onwind", p_nom=300.0,
-              marginal_cost=1.0, p_max_pu=pd.Series(rng.uniform(0.05, 0.9, HOURS), index=n.snapshots))
-        n.add("Generator", f"{bus} solar bg", bus=bus, carrier="solar", p_nom=300.0,
-              p_max_pu=pd.Series(np.tile([0.0] * 7 + [0.6] * 10 + [0.0] * 7, HOURS // 24), index=n.snapshots))
+        n.add(
+            "Generator",
+            f"{bus} CCGT",
+            bus=bus,
+            carrier="CCGT",
+            p_nom=2000.0,
+            efficiency=0.55,
+            marginal_cost=70.0,
+        )
+        n.add(
+            "Generator",
+            f"{bus} onwind bg",
+            bus=bus,
+            carrier="onwind",
+            p_nom=300.0,
+            marginal_cost=1.0,
+            p_max_pu=pd.Series(rng.uniform(0.05, 0.9, HOURS), index=n.snapshots),
+        )
+        n.add(
+            "Generator",
+            f"{bus} solar bg",
+            bus=bus,
+            carrier="solar",
+            p_nom=300.0,
+            p_max_pu=pd.Series(
+                np.tile([0.0] * 7 + [0.6] * 10 + [0.0] * 7, HOURS // 24),
+                index=n.snapshots,
+            ),
+        )
     n.add("Line", "hub link", bus0="ES0 6AC", bus1="ES0 7AC", x=0.1, s_nom=5000.0)
     n.add("Carrier", "CCGT", co2_emissions=0.2)
     for c in ("onwind", "solar", "solar-hsat", "AC"):
@@ -88,7 +117,12 @@ def test_hourly_80_ppa_only_meets_target(toy_base, toy_costs) -> None:
 def test_grid_credit_iterates_and_relaxes_build(toy_base, toy_costs) -> None:
     n2 = toy_base.copy()
     n, conv, kpis = _solve(
-        toy_base, toy_costs, "hourly_80_grid_credit", r0_source=0.3, damping=0.5, max_iter=10
+        toy_base,
+        toy_costs,
+        "hourly_80_grid_credit",
+        r0_source=0.3,
+        damping=0.5,
+        max_iter=10,
     )
     assert kpis["converged"]
     assert len(conv) >= 2

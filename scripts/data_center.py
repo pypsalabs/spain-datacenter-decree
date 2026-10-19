@@ -95,9 +95,15 @@ def _compute_tech_costs(
     tech_row = _resolve_cost_row(costs, carrier)
     row = costs.loc[tech_row]
 
-    lifetime = float(row["lifetime"]) if "lifetime" in row and pd.notna(row["lifetime"]) else 25.0
+    lifetime = (
+        float(row["lifetime"])
+        if "lifetime" in row and pd.notna(row["lifetime"])
+        else 25.0
+    )
     investment = (
-        float(row["investment"]) if "investment" in row and pd.notna(row["investment"]) else np.nan
+        float(row["investment"])
+        if "investment" in row and pd.notna(row["investment"])
+        else np.nan
     )
     fom_pct = float(row["FOM"]) if "FOM" in row and pd.notna(row["FOM"]) else 0.0
 
@@ -108,11 +114,15 @@ def _compute_tech_costs(
     elif "capital_cost" in row and pd.notna(row["capital_cost"]):
         capital_cost = float(row["capital_cost"])
     else:
-        raise ValueError(f"Cannot determine capital_cost for '{carrier}' from costs row '{tech_row}'.")
+        raise ValueError(
+            f"Cannot determine capital_cost for '{carrier}' from costs row '{tech_row}'."
+        )
 
     # Marginal cost: check direct carrier row first (e.g. 'solar' has 0.010 VOM overwrite), then tech_row
-    if carrier in costs.index and "marginal_cost" in costs.columns and pd.notna(
-        costs.at[carrier, "marginal_cost"]
+    if (
+        carrier in costs.index
+        and "marginal_cost" in costs.columns
+        and pd.notna(costs.at[carrier, "marginal_cost"])
     ):
         marginal_cost = float(costs.at[carrier, "marginal_cost"])
     elif "marginal_cost" in row and pd.notna(row["marginal_cost"]):
@@ -123,7 +133,9 @@ def _compute_tech_costs(
         marginal_cost = 0.0
 
     efficiency = (
-        float(row["efficiency"]) if "efficiency" in row and pd.notna(row["efficiency"]) else 1.0
+        float(row["efficiency"])
+        if "efficiency" in row and pd.notna(row["efficiency"])
+        else 1.0
     )
 
     return {
@@ -220,7 +232,9 @@ def attach_data_center(
 
     policy_norm = str(policy).strip().lower()
     if policy_norm == "no_dc":
-        logger.info("Policy is 'no_dc': adding no DC loads, PPA generators, or batteries.")
+        logger.info(
+            "Policy is 'no_dc': adding no DC loads, PPA generators, or batteries."
+        )
         return n
 
     siting_norm = str(siting).strip().lower()
@@ -315,7 +329,10 @@ def attach_data_center(
             rem_potential = max(p_nom_max_existing - p_nom_existing, 0.0)
 
             ref_gen = bg_gens[0]
-            if not n.generators_t.p_max_pu.empty and ref_gen in n.generators_t.p_max_pu.columns:
+            if (
+                not n.generators_t.p_max_pu.empty
+                and ref_gen in n.generators_t.p_max_pu.columns
+            ):
                 p_max_pu = n.generators_t.p_max_pu[ref_gen].copy()
             else:
                 p_max_pu = float(n.generators.at[ref_gen, "p_max_pu"])

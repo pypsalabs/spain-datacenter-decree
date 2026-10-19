@@ -684,6 +684,34 @@ def _patch_prices(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
             ets,
         )
 
+    # Portuguese gas network premium: PT plants source at the Spanish PVB/MIBGAS hub
+    # and additionally pay Portugal's regulated gas network charges (ERSE), which
+    # Spanish plants do not. Breaks the near-tie in Iberian gas marginal costs in
+    # the physically observed direction (PT CCGTs run far less than Spanish ones).
+    pt_premium = _value(prices, "PT", year, "gas_network_premium") or _value(
+        prices, "PT", 2025, "gas_network_premium"
+    )
+    if pt_premium is None:
+        raise ValueError("Missing PT gas_network_premium row in prices.csv")
+    pt_buses = set(_country_buses(n, "PT"))
+    for carrier, fuel_key in FUEL_METRIC.items():
+        if fuel_key != "gas":
+            continue
+        sel = n.generators.index[
+            (n.generators["carrier"] == carrier) & n.generators["bus"].isin(pt_buses)
+        ]
+        if sel.empty:
+            continue
+        eta = n.generators.loc[sel, "efficiency"].replace(0.0, 1.0)
+        n.generators.loc[sel, "marginal_cost"] += float(pt_premium) / eta
+        logger.info(
+            "PT %s gas network premium +%.2f EUR/MWh_th -> %.1f-%.1f EUR/MWh.",
+            carrier,
+            float(pt_premium),
+            float(n.generators.loc[sel, "marginal_cost"].min()),
+            float(n.generators.loc[sel, "marginal_cost"].max()),
+        )
+
 
 def _cap_corridor(
     n: pypsa.Network, buses_a: set[str], buses_b: set[str], ntc_mw: float, label: str

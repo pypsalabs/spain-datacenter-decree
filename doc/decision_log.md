@@ -40,7 +40,7 @@ Validation findings, patches and their status live in [validation_log.md](valida
 
 | # | Item | Status |
 |---|---|---|
-| C1 | Final validation gate (net exports): FR seasonal nuclear availability patch vs document-and-accept vs hourly NTCs — see validation log §5 | open |
+| C1 | Final validation gate (net exports): **closed, 8/8 gates pass** (validation log §5). The FR seasonal nuclear patch is kept for physical realism although the experiment falsified the winter-scarcity hypothesis; directional NTC caps were rejected against the measured 3.6 GW flow envelope; the decisive fix was the PT gas misordering, corrected with two cited ERSE inputs (gas network premium +1.10 EUR/MWh_th; Tapada do Outeiro 990 MW in security-of-supply reserve). The gate passes with stated compensating border components (ES→FR import excess from price-duration flatness, offset by ES→PT overshoot) | closed 2026-10-19 |
 | C2 | Wind-factor transfer for the weather-year sensitivities (stage iv): the back-cast factors are in-sample on the wy2024 reference by design, but applying them to wy2010/13/20 needs an out-of-sample check (train on 2022/23 profile builds, test on 2024; PT actuals already vendored) | open |
 | C3 | Re-check `national_capacities.csv` 2025 rows against latest Redeia published capacities (mid-2026 where available) before the scenario runs | open |
 | C4 | `attach_data_center`: PPA candidates resource-class-aware (best bin with remaining potential per node); solar/solar-hsat got resource classes too for identical treatment | closed 2026-10-19 |

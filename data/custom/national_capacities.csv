@@ -208,7 +208,7 @@ PT,2024,offwind,25.000,MW,ren_dados_tecnicos_2024,Portugal 2024 offshore wind in
 PT,2024,solar PV (total incl. autoconsumo),5130.000,MW,ren_dados_tecnicos_2024,Portugal 2024 total solar PV installed capacity (REN / DGEG end-2024: ~3750 MW utility-scale + ~1380 MW UPAC self-consumption).
 PT,2024,CSP/solar thermal,0.000,MW,ren_dados_tecnicos_2024,Portugal 2024 CSP capacity (0 MW).
 PT,2024,nuclear,0.000,MW,ren_dados_tecnicos_2024,Portugal 2024 nuclear capacity (0 MW).
-PT,2024,CCGT,3829.000,MW,ren_dados_tecnicos_2024,"Portugal 2024 natural gas CCGT capacity (Tapada do Outeiro, Ribatejo, Lares, Pego CCGT: 3829 MW)."
+PT,2024,CCGT,2839.000,MW,erse_tep_gas_2025_2026,"Portugal 2024 market-dispatched CCGT capacity: 3829 MW installed (Ribatejo, Lares, Pego CCGT, Tapada do Outeiro; REN Dados Tecnicos) minus Tapada do Outeiro 990 MW, which ended its CAE in Q1 2024 and is held in security-of-supply reserve outside the market until 2026-03-31 (ERSE TEP gas 2025-26, sec. 0.2.1)."
 PT,2024,OCGT/gas turbines,0.000,MW,ren_dados_tecnicos_2024,Portugal 2024 standalone mainland OCGT capacity (0 MW).
 PT,2024,coal,0.000,MW,ren_dados_tecnicos_2024,Portugal coal phase-out completed in Nov 2021 (Sines and Pego coal closed; 0 MW).
 PT,2024,lignite,0.000,MW,ren_dados_tecnicos_2024,Portugal 2024 lignite capacity (0 MW).
@@ -225,7 +225,7 @@ PT,2025,offwind,25.000,MW,ren_dados_tecnicos_2025,Portugal 2025 offshore wind in
 PT,2025,solar PV (total incl. autoconsumo),6350.000,MW,ren_dados_tecnicos_2025,Portugal 2025 total solar PV installed capacity (REN / DGEG 2025).
 PT,2025,CSP/solar thermal,0.000,MW,ren_dados_tecnicos_2025,Portugal 2025 CSP capacity (0 MW).
 PT,2025,nuclear,0.000,MW,ren_dados_tecnicos_2025,Portugal 2025 nuclear capacity (0 MW).
-PT,2025,CCGT,3829.000,MW,ren_dados_tecnicos_2025,Portugal 2025 natural gas CCGT capacity (3829 MW).
+PT,2025,CCGT,2839.000,MW,erse_tep_gas_2025_2026,"Portugal 2025 market-dispatched CCGT capacity: 3829 MW installed minus Tapada do Outeiro 990 MW in security-of-supply reserve until 2026-03-31 (ERSE TEP gas 2025-26, sec. 0.2.1)."
 PT,2025,OCGT/gas turbines,0.000,MW,ren_dados_tecnicos_2025,Portugal 2025 standalone mainland OCGT capacity (0 MW).
 PT,2025,coal,0.000,MW,ren_dados_tecnicos_2025,Portugal 2025 coal capacity (0 MW).
 PT,2025,lignite,0.000,MW,ren_dados_tecnicos_2025,Portugal 2025 lignite capacity (0 MW).

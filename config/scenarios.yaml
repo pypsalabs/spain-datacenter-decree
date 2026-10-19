@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: : 2026 The PyPSA-Eur Authors
+#
+# SPDX-License-Identifier: MIT
+
+wy2010:
+  snapshots:
+    start: "2010-01-01"
+    end: "2011-01-01"
+    inclusive: left
+  atlite:
+    default_cutout: europe-2010-sarah3-era5
+
+wy2013:
+  snapshots:
+    start: "2013-01-01"
+    end: "2014-01-01"
+    inclusive: left
+  atlite:
+    default_cutout: europe-2013-sarah3-era5
+
+wy2020:
+  snapshots:
+    start: "2020-01-01"
+    end: "2021-01-01"
+    inclusive: left
+  atlite:
+    default_cutout: europe-2020-sarah3-era5
+
+wy2024:
+  snapshots:
+    start: "2024-01-01"
+    end: "2025-01-01"
+    inclusive: left
+  atlite:
+    default_cutout: europe-2024-sarah3-era5
+  load:
+    supplement_synthetic: false

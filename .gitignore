@@ -1,0 +1,16 @@
+# large model artifacts, never in git
+networks/
+resources/
+results/
+cutouts/
+benchmarks/
+logs/
+
+*.nc
+*.lock
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.snakemake/
+.pixi/
+*.egg-info/

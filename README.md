@@ -46,14 +46,13 @@ vanilla PyPSA-Eur and see exactly what the study adds.
 - Geography: 15 nodes, with 9 in Spain (8 mainland + Balearics), 4 in France and
   2 in Portugal.
 - France's outer borders (BE, DE, CH, IT, GB, LU): fixed to measured hourly 2024
-  flows (RTE/ENTSO-E) instead of a pan-European model. In the import tracing, a
-  neighbour's clean share is its domestic generation mix.
-- Resolution and costs: electricity-only, 3-hourly averaged snapshots,
-  technology-data v0.15.0 in EUR2025.
+  flows (RTE/ENTSO-E).
+- Resolution and costs: electricity sector, 3-hourly averaged snapshots,
+  [technology-data v0.15.0](https://github.com/PyPSA/technology-data/tree/v0.15.0) in EUR2025.
 - Fleet: frozen background fleet, calibrated to cited national data
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
   center's PPA assets are extendable.
-- Solver: HiGHS dual simplex. No commercial solver required.
+- Solver: HiGHS. No commercial solver required (but supported if available via PyPSA's solver interface).
 
 ## Workflow architecture
 
@@ -67,14 +66,11 @@ composed_{year}.nc  (pypsa-eur submodule, config-driven: clustering, profiles, 3
              └► plot_summary.py                                    →  figures
 ```
 
-`prepare_network.py` is a patch engine: it applies an ordered, config-controlled list of
-cited corrections, each individually switchable. The philosophy is **build fresh, validate,
-correct only what fails, cite every correction**: the raw variant (only the France boundary
-closure on) is validated first, patches are turned on one by one where the report demands
-it, and each patched variant is re-validated through the same pipeline.
+`prepare_network.py` is a patch engine: it applies a config-controlled list of
+cited corrections, each individually switchable. The philosophy is (i) build electricity system with pypsa-eur workflow, (ii) validate it against actual data (2024 back-cast), (iii) apply necessary data improvements for this study, and (iv) re-validate.
 
 The patch set (fleet capacities, wind correction, PHS split, CHP, CSP, biomass
-availability, prices, NTC caps, demand, hydro inflow, MA/AD exports) is defined in
+availability, NTC caps, demand, hydro inflow, MA/AD exports) is defined in
 `config/config.spain.yaml` under `spain_cfe.patches`; what each patch does, why it
 exists and what it changed in the 2024 back-cast is documented in
 [doc/validation_log.md](doc/validation_log.md).

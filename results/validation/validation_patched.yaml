@@ -1,4 +1,4 @@
-network: results/wy2024/networks/solved_2024_patched_no_dc_t0_0mw_spain_wide.nc
+network: results/wy2024/networks/solved_2024_patched_no_dc_t0_0mw_spain_wide_ex0.nc
 gates_passed: 8
 gates_total: 8
 failed: {}

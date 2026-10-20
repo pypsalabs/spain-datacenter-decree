@@ -129,8 +129,9 @@ composed_2025.nc    (pypsa-eur submodule, config-driven: clustering, profiles, 3
         ├─ snakemake all         (case study: 2025 data, DC policy scenarios)
         │    └► solve_network.py   attach DC, 24/7 CFE constraints,
         │         │                grid CFE iteration (grid-credit)   →  solved.nc, metrics
-        │         ├► make_summary.py   all metrics                    →  scenarios.csv (+ baseline deltas)
-        │         └► plot_summary.py                                  →  figures
+        │         └► summarise_network.py  national + DC metrics     →  summary row
+        │              └► make_summary.py   all scenarios             →  scenarios.csv (+ baseline deltas)
+        │                   └► plot_summary.py                        →  figures (PDF)
         │
         └─ snakemake validation  (back-cast: 2024 data, raw + patched)
              └► solve_network.py   same solver path, no_dc:

@@ -123,27 +123,37 @@ solving:
 spain_cfe:
   # Scenario suites (cross products; make_summary collects the suite named by `suite`).
   # Policy set (agreed 2026-10-19): unmatched_dc = no-policy counterfactual;
-  # annual_80/100_res = volumetric matching (Art. 8 alone / voluntary practice);
+  # annual_100_res = volumetric matching (voluntary industry practice);
   # hourly_80_ppa_only = 24/7 CFE score; strict_hourly_80_ppa_only = the decree's
   # Art. 9 (every hour); hourly_80_grid_credit = beyond-decree design alternative.
   # The _cfe (nuclear-as-clean) variants stay out of the matrix: the decree is
-  # renewable-only. Target sweep (90/100) is pre-built via the policy names.
+  # renewable-only. Target sweep (90/100) is pre-built via the policy names, as is
+  # annual_80_res (Art. 8 alone; dropped 2026-10-20 for little added value).
   # A no_dc baseline row is added automatically for every run in the suite.
+  # excess_cap: caps sigma on annual sales back to the grid,
+  # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2023 convention), one scenario
+  # per value: 0.20 (sales allowed) and 0.0 (surplus stored or curtailed) bound what
+  # happens to surplus. Unlimited sales are deliberately not offered: the optimizer
+  # would overbuild at the DC node to sell into a background system that is not in
+  # equilibrium. The no_dc and unmatched_dc baselines have no surplus and are
+  # solved once, under ex0.
   suite: core
   suites:
     # Working subset: the 2024 reference weather year, one DC size, all policies.
     core:
       runs: [wy2024]
-      policies: [unmatched_dc, annual_80_res, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+      policies: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
       dc_mw: [500]
       siting: [spain_wide]
+      excess_cap: [0.0, 0.20]
     # Full matrix: all policies x all DC sizes x all weather years. The non-2024
     # weather years need their upstream builds first (study stage iv).
     full:
       runs: [wy2024, wy2010, wy2013, wy2020]
-      policies: [unmatched_dc, annual_80_res, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+      policies: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
       dc_mw: [500, 1000, 2000, 4000, 6000]
       siting: [spain_wide]
+      excess_cap: [0.0, 0.20]
   # prepare_network.py patch engine: cited corrections, each individually switchable.
   patches:
     boundary_flows: true        # FR border closure from measured 2024 flows (model closure, always on)
@@ -199,14 +209,6 @@ spain_cfe:
     discount_rate: 0.07
   ppa:
     carriers: [onwind, solar, solar-hsat]
-  accounting:
-    # Cap sigma on annual electricity sales back to the grid:
-    # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2023 convention).
-    # Study default: 0.20. Pre-built option, excluded from our runs: 0.0 = no sales
-    # possible (surplus must be stored or curtailed). Unlimited sales are deliberately
-    # not offered: the optimizer would overbuild at the DC node to sell into a
-    # background system that is not in equilibrium.
-    excess_cap: 0.20
   solving:
     # LP solver for the study solves: highs (default; open-source, reproducible) or
     # gurobi (plain out-of-the-box defaults; ~5x faster, see README).

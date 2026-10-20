@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-Import-traced hourly grid renewable / CFE share calculation.
+Import-traced hourly grid renewable / CFE share and grid emission factor.
 
 Adapts ``PyPSA/247-cfe``'s ``calculate_grid_cfe`` for a multi-node network with
 cross-border lines and HVDC links.
@@ -47,6 +47,7 @@ DEFAULT_EXCLUDED_CARRIERS: tuple[str, ...] = (
     "battery discharger",
     "battery storage",
 )
+DEFAULT_EXCLUDED_ASSETS: tuple[str, ...] = ("DC ", "DC_", "DC-")
 BOUNDARY_CARRIER: str = "boundary"
 NON_GENERATION_CARRIERS: frozenset[str] = frozenset(
     {"AC", "DC", BOUNDARY_CARRIER, "load", "virtual_link", "dsm", ""}
@@ -420,8 +421,8 @@ def calculate_grid_cfe(
         if excluded_carriers is not None
         else set(DEFAULT_EXCLUDED_CARRIERS)
     )
-    exclude_assets_set = (
-        set(exclude_assets) if exclude_assets is not None else {"DC ", "DC_", "DC-"}
+    exclude_assets_set = set(
+        exclude_assets if exclude_assets is not None else DEFAULT_EXCLUDED_ASSETS
     )
 
     neighbour_list = (
@@ -468,3 +469,76 @@ def calculate_grid_cfe(
         f"Computed grid CFE factor for {country} (neighbours={neighbour_list}): mean={cfe_series.mean():.4f}"
     )
     return cfe_series
+
+
+def _domestic_emissions(
+    n: pypsa.Network,
+    country: str,
+    exclude_assets_set: set[str],
+) -> pd.Series:
+    """Hourly CO2 (t/h) of ``country``'s generators: output / efficiency x carrier intensity."""
+    c_buses = _country_buses(n, country, exclude_assets_set)
+    gens = n.generators.index[
+        n.generators["bus"].isin(c_buses)
+        & ~_is_excluded_index(n.generators.index, exclude_assets_set)
+    ].intersection(n.generators_t.p.columns)
+    carrier_co2 = n.generators.loc[gens, "carrier"].map(n.carriers["co2_emissions"])
+    eta = n.generators.loc[gens, "efficiency"].replace(0.0, 1.0)
+    intensity = carrier_co2.fillna(0.0) / eta
+    return (_positive_part(n.generators_t.p[gens]) * intensity).sum(axis=1)
+
+
+def calculate_grid_emission_factor(
+    n: pypsa.Network,
+    country: str = "ES",
+    exclude_assets: Iterable[str] | None = None,
+    neighbours: Iterable[str] | None = None,
+) -> pd.Series:
+    """
+    Compute the import-traced hourly grid emission factor ``EF_t`` for ``country``.
+
+    Uses the supply definition and import tracing of ``calculate_grid_cfe``: each
+    import carries its exporter's domestic emission factor; storage cycling, the
+    data center's own assets and fixed boundary flows are excluded.
+
+    Parameters
+    ----------
+    n : pypsa.Network
+        Solved PyPSA network.
+    country : str, default "ES"
+        Two-letter country code of the target country.
+    exclude_assets : Iterable[str] | None, optional
+        Asset names or prefixes excluded from supply and emissions (default: the
+        data center's assets).
+    neighbours : Iterable[str] | None, optional
+        Neighbouring country codes to trace imports from (default: inferred).
+
+    Returns
+    -------
+    pd.Series
+        Hourly grid emission factor in tCO2/MWh, indexed by ``n.snapshots``.
+    """
+    excl = set(
+        exclude_assets if exclude_assets is not None else DEFAULT_EXCLUDED_ASSETS
+    )
+    storage = set(DEFAULT_EXCLUDED_CARRIERS)
+    neighbour_list = (
+        list(neighbours)
+        if neighbours is not None
+        else _infer_neighbours(n, country, excl)
+    )
+
+    emissions = _domestic_emissions(n, country, excl)
+    _, supply = _domestic_supply(n, country, set(), storage, excl)
+    for nb in neighbour_list:
+        imports = _corridor_import(
+            n, exporter=nb, importer=country, exclude_assets_set=excl
+        )
+        nb_emissions = _domestic_emissions(n, nb, excl)
+        _, nb_supply = _domestic_supply(n, nb, set(), storage, excl)
+        nb_factor = np.where(nb_supply > 0.0, nb_emissions / nb_supply, 0.0)
+        emissions = emissions + imports * nb_factor
+        supply = supply + imports
+
+    factor = np.where(supply > 0.0, emissions / supply, 0.0)
+    return pd.Series(factor, index=n.snapshots, name=f"grid_ef_{country}", dtype=float)

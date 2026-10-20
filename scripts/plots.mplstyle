@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 Iegor Riepin
+#
+# SPDX-License-Identifier: MIT
+#
+# Shared Matplotlib style for the study figures (plot_summary.py).
+
+figure.dpi: 150
+figure.constrained_layout.use: True
+savefig.dpi: 300
+pdf.fonttype: 42
+svg.fonttype: none
+
+font.size: 8
+axes.labelsize: 8
+axes.titlesize: 8
+xtick.labelsize: 7
+ytick.labelsize: 7
+legend.fontsize: 7
+legend.frameon: True
+legend.framealpha: 1.0
+legend.edgecolor: cccccc
+
+axes.spines.top: False
+axes.spines.right: False
+axes.linewidth: 0.6
+axes.axisbelow: True
+axes.grid: True
+axes.grid.axis: y
+grid.color: e6e6e6
+grid.linewidth: 0.6
+xtick.major.width: 0.6
+ytick.major.width: 0.6
+hatch.linewidth: 0.6
+
+# Okabe-Ito, colorblind-safe
+axes.prop_cycle: cycler("color", ["000000", "E69F00", "56B4E9", "009E73", "F0E442", "0072B2", "D55E00", "CC79A7"])

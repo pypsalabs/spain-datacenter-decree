@@ -458,6 +458,7 @@ def main(argv: list[str] | None = None) -> None:
         ]
         cfg["dc"] = dc_block
         w = smk.wildcards
+        cfg["accounting"] = {"excess_cap": int(w.excess) / 100}
         net_in, costs_in = Path(smk.input.network), Path(smk.input.costs)
         cfe0_in = Path(smk.input.cfe0_network[0]) if smk.input.cfe0_network else None
         net_out = Path(smk.output.network)

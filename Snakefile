@@ -18,6 +18,31 @@ configfile: "config/config.spain.yaml"
 import re
 
 HORIZON = config["planning_horizons"][0]
+SUITE = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
+NO_SURPLUS_POLICIES = ("no_dc", "unmatched_dc")
+PLOTS = [
+    "clean_coverage",
+    "portfolio",
+    "dc_cost",
+    "system_impact",
+    "generation_shift",
+    "dc_emission_intensity",
+]
+
+
+def ex_tag(sigma):
+    """Sales-cap wildcard value: sigma as a whole percentage (0.20 -> '20')."""
+    return f"{round(100 * sigma)}"
+
+
+def suite_plots(wildcards):
+    """Figure files of the selected suite: one folder per run and sales cap."""
+    return [
+        f"results/{run}/plots/ex{ex_tag(sigma)}/{plot}.pdf"
+        for run in SUITE["runs"]
+        for sigma in SUITE["excess_cap"]
+        for plot in PLOTS
+    ]
 
 
 rule all:
@@ -25,7 +50,7 @@ rule all:
     default_target: True
     input:
         "results/scenarios.csv",
-        "results/plots/.done",
+        suite_plots,
 
 
 rule validation:
@@ -67,7 +92,7 @@ def solve_cfe0_input(wildcards):
     if "grid_credit" in wildcards.policy:
         return [
             f"results/{wildcards.run}/networks/"
-            f"solved_{wildcards.year}_{wildcards.variant}_unmatched_dc_t0_{wildcards.dc_mw}mw_{wildcards.siting}.nc"
+            f"solved_{wildcards.year}_{wildcards.variant}_unmatched_dc_t0_{wildcards.dc_mw}mw_{wildcards.siting}_ex0.nc"
         ]
     return []
 
@@ -80,6 +105,7 @@ wildcard_constraints:
     target=r"\d+(?:\.\d+)?",
     dc_mw=r"\d+(?:\.\d+)?",
     siting=r"spain_wide|local_region",
+    excess=r"\d+",
 
 
 rule prepare_network:
@@ -133,18 +159,14 @@ rule solve_network:
         costs=lambda w: f"pypsa-eur/resources/{w.run}/costs_{HORIZON}_processed.csv",
         cfe0_network=solve_cfe0_input,
     output:
-        network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.nc",
-        metrics="results/{run}/metrics/metrics_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
-        convergence="results/{run}/convergence/conv_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
+        network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.nc",
+        metrics="results/{run}/metrics/metrics_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
+        convergence="results/{run}/convergence/conv_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
     threads: 2
     resources:
         mem_mb=8000,
     params:
-        excess_share=lambda w: (
-            "none"
-            if config["spain_cfe"]["accounting"]["excess_cap"] is None
-            else config["spain_cfe"]["accounting"]["excess_cap"]
-        ),
+        excess_share=lambda w: int(w.excess) / 100,
         n_iterations=lambda w: config["spain_cfe"]["iteration"]["n_iterations"],
         solver=lambda w: config["spain_cfe"]["solving"]["solver"],
         ppa_carriers=lambda w: ",".join(config["spain_cfe"]["ppa"]["carriers"]),
@@ -186,7 +208,7 @@ rule solve_network:
 rule validate_network:
     """Compares the solved no-DC 2024 network with Redeia actuals in one report."""
     input:
-        network="results/wy2024/networks/solved_2024_{variant}_no_dc_t0_0mw_spain_wide.nc",
+        network="results/wy2024/networks/solved_2024_{variant}_no_dc_t0_0mw_spain_wide_ex0.nc",
         actuals="data/custom/validation_2024_es.csv",
     output:
         report="results/validation/validation_{variant}.csv",
@@ -210,32 +232,59 @@ def policy_target(policy):
     return int(digits.group(1)) if digits else 0
 
 
-def suite_metrics(wildcards):
-    """metrics files of the selected suite: its cross product plus a no_dc row per run."""
-    year = HORIZON
-    suite = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
+rule summarise_network:
+    """Postprocesses one solved scenario into national and data center metrics."""
+    input:
+        network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.nc",
+        metrics="results/{run}/metrics/metrics_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
+    output:
+        summary="results/{run}/summaries/summary_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
+    threads: 1
+    resources:
+        mem_mb=4000,
+    shell:
+        """
+        PYTHONPATH="{workflow.basedir}" python -m scripts.summarise_network \
+            --network "{input.network}" \
+            --metrics "{input.metrics}" \
+            --output "{output.summary}"
+        """
 
-    def metrics_file(run, policy, target, dc_mw, siting):
+
+def suite_summaries(wildcards):
+    """Summary files of the selected suite: its cross product plus a no_dc row per run.
+
+    The baselines have no surplus to sell, so they are solved once, under ex0.
+    """
+    year = HORIZON
+
+    def summary_file(run, policy, target, dc_mw, siting, sigma):
         return (
-            f"results/{run}/metrics/metrics_{year}_patched_"
-            f"{policy}_t{target}_{dc_mw}mw_{siting}.csv"
+            f"results/{run}/summaries/summary_{year}_patched_"
+            f"{policy}_t{target}_{dc_mw}mw_{siting}_ex{ex_tag(sigma)}.csv"
         )
 
-    files = [metrics_file(run, "no_dc", 0, 0, "spain_wide") for run in suite["runs"]]
+    def caps(policy):
+        return [0.0] if policy in NO_SURPLUS_POLICIES else SUITE["excess_cap"]
+
+    files = [
+        summary_file(run, "no_dc", 0, 0, "spain_wide", 0.0) for run in SUITE["runs"]
+    ]
     files += [
-        metrics_file(run, policy, policy_target(policy), dc_mw, siting)
-        for run in suite["runs"]
-        for policy in suite["policies"]
-        for dc_mw in suite["dc_mw"]
-        for siting in suite["siting"]
+        summary_file(run, policy, policy_target(policy), dc_mw, siting, sigma)
+        for run in SUITE["runs"]
+        for policy in SUITE["policies"]
+        for dc_mw in SUITE["dc_mw"]
+        for siting in SUITE["siting"]
+        for sigma in caps(policy)
     ]
     return files
 
 
 rule make_summary:
-    """Collects all scenario metrics rows into one tidy table with baseline deltas."""
+    """Collects all scenario summary rows into one tidy table with baseline deltas."""
     input:
-        metrics=suite_metrics,
+        metrics=suite_summaries,
     output:
         summary="results/scenarios.csv",
     threads: 1
@@ -248,15 +297,23 @@ rule make_summary:
 
 
 rule plot_summary:
-    """Produces the study figures from the scenario summary table."""
+    """Produces the study figures of one run and sales cap from the summary table."""
     input:
         summary="results/scenarios.csv",
+        colors="pypsa-eur/config/plotting.default.yaml",
+        style="scripts/plots.mplstyle",
     output:
-        touch("results/plots/.done"),
+        expand("results/{{run}}/plots/ex{{excess}}/{plot}.pdf", plot=PLOTS),
     threads: 1
+    params:
+        excess_cap=lambda w: int(w.excess) / 100,
+        weather_year=lambda w: w.run.removeprefix("wy"),
     shell:
         """
         PYTHONPATH="{workflow.basedir}" python -m scripts.plot_summary \
             --summary "{input.summary}" \
-            --plots-dir "results/plots"
+            --colors "{input.colors}" \
+            --excess-cap {params.excess_cap} \
+            --weather-year {params.weather_year} \
+            --plots-dir "results/{wildcards.run}/plots/ex{wildcards.excess}"
         """

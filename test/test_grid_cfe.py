@@ -9,6 +9,7 @@ import pytest
 
 from scripts.calculate_grid_cfe import (
     calculate_grid_cfe,
+    calculate_grid_emission_factor,
     get_clean_carriers,
 )
 
@@ -196,6 +197,24 @@ def test_import_tracing() -> None:
     assert "nuclear" not in res_carriers
     assert "nuclear" in cfe_carriers
     assert (r_cfe > r_res).all()
+
+
+def test_import_traced_emission_factor() -> None:
+    """Imports carry their exporter's domestic emission factor, as in the CFE tracing."""
+    n = _make_import_tracing_network()
+    n.add("Carrier", "CCGT", co2_emissions=0.2)
+    gas = ["ES_gas", "FR_gas", "PT_gas"]
+    n.generators.loc[gas, "efficiency"] = 0.5
+    n.generators.loc[["ES_wind", "FR_nuc"], "efficiency"] = (
+        0.3  # carbon-free: no effect
+    )
+
+    ef = calculate_grid_emission_factor(n, country="ES")
+
+    # 0.4 t/MWh_el gas. ES own [80, 60, 40, 40] t over [500, 400, 400, 400] MWh;
+    # FR factor 0.08 every hour; PT factor [0.1, 0.4, 0.2, 0.2]; imports as above.
+    expected = [100.0 / 730.0, 68.0 / 500.0, 64.0 / 550.0, 48.0 / 500.0]
+    assert ef.tolist() == pytest.approx(expected, abs=1e-12)
 
 
 def test_storage_excluded() -> None:

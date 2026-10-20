@@ -132,8 +132,9 @@ spain_cfe:
   # A no_dc baseline row is added automatically for every run in the suite.
   # excess_cap: caps sigma on annual sales back to the grid,
   # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2023 convention), one scenario
-  # per value: 0.20 (sales allowed) and 0.0 (surplus stored or curtailed) bound what
-  # happens to surplus. Unlimited sales are deliberately not offered: the optimizer
+  # per value. Study focus: 0.0 (no sales; surplus is stored or curtailed). Pre-built:
+  # add 0.20 to a suite's list for the sales-allowed scenario (results under ex20).
+  # Unlimited sales are deliberately not offered: the optimizer
   # would overbuild at the DC node to sell into a background system that is not in
   # equilibrium. The no_dc and unmatched_dc baselines have no surplus and are
   # solved once, under ex0.
@@ -145,7 +146,7 @@ spain_cfe:
       policies: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
       dc_mw: [500]
       siting: [spain_wide]
-      excess_cap: [0.0, 0.20]
+      excess_cap: [0.0]
     # Full matrix: all policies x all DC sizes x all weather years. The non-2024
     # weather years need their upstream builds first (study stage iv).
     full:
@@ -153,7 +154,7 @@ spain_cfe:
       policies: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
       dc_mw: [500, 1000, 2000, 4000, 6000]
       siting: [spain_wide]
-      excess_cap: [0.0, 0.20]
+      excess_cap: [0.0]
   # prepare_network.py patch engine: cited corrections, each individually switchable.
   patches:
     boundary_flows: true        # FR border closure from measured 2024 flows (model closure, always on)

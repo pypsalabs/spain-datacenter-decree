@@ -26,8 +26,10 @@ Policy constraints:
   \ge x \sum_t d_t`
 - ``strict_hourly``: the same left-hand side per snapshot,
   :math:`\ge x \cdot d_t \; \forall t` (the draft royal decree's Art. 9).
-- ``annual_res``: :math:`\sum_{r,t} g_{r,t} \ge x \sum_t d_t`
-  (volumetric matching; the residual load is bought from the grid).
+- ``annual_res``: :math:`\sum_{r,t} a_{r,t} G_r = x \sum_t d_t`, the contracted
+  PPA yield (availability :math:`a_{r,t}` times capacity :math:`G_r`, whether the
+  output is used, sold or curtailed) equals the target volume, as in Riepin &
+  Brown (2023); the residual load is bought from the grid.
 
 PPA-only policies set :math:`CFE_t \equiv 0`; grid-credit policies take the
 hourly grid CFE factor from ``calculate_grid_cfe`` (resolved with fixed forward
@@ -104,8 +106,13 @@ def _resolve_dc_components(
         "chargers": chargers,
         "dischargers": dischargers,
         "load_series": load_series,
-        "annual_equality": bool(cfg.get("annual_equality", False)),
     }
+
+
+def yield_per_mw(n: pypsa.Network, gens: list[str]) -> pd.Series:
+    """Annual energy (MWh) each generator yields per MW of capacity, used or not."""
+    p_max_pu = n.get_switchable_as_dense("Generator", "p_max_pu")[gens]
+    return p_max_pu.mul(n.snapshot_weightings["generators"], axis=0).sum()
 
 
 def _effective_cfe_factor(
@@ -168,7 +175,6 @@ def add_dc_cfe_constraints(
     chargers: list[str] = comp["chargers"]
     dischargers: list[str] = comp["dischargers"]
     d: pd.Series = comp["load_series"]
-    annual_equality: bool = comp["annual_equality"]
 
     snapshots = n.snapshots.rename("snapshot")
     weights = n.snapshot_weightings["generators"].copy()
@@ -227,14 +233,14 @@ def add_dc_cfe_constraints(
             raise ValueError(
                 "Policy 'annual_res' requires at least one DC PPA generator."
             )
-        annual_lhs = (weights * g).sum()
-        annual_rhs = float(target) * total_demand
-        if annual_equality:
-            n.model.add_constraints(annual_lhs == annual_rhs, name="DC-annual-res")
-        else:
-            n.model.add_constraints(annual_lhs >= annual_rhs, name="DC-annual-res")
+        capacity = n.model["Generator-p_nom"].loc[dc_gens]
+        per_mw = yield_per_mw(n, dc_gens).rename_axis(capacity.dims[0])
+        n.model.add_constraints(
+            (capacity * per_mw).sum() == float(target) * total_demand,
+            name="DC-annual-res",
+        )
         logger.info(
-            f"Added DC annual RES constraint (equality={annual_equality}, x={target:.3f})."
+            f"Added DC annual RES constraint on contracted yield (x={target:.3f})."
         )
     elif policy_norm.startswith("strict"):
         n.model.add_constraints(
@@ -355,13 +361,11 @@ def dc_metrics(
 
     cfe_score = constraint_lhs / total_load_mwh if total_load_mwh > 0.0 else 0.0
     ppa_only_score = ppa_only_lhs / total_load_mwh if total_load_mwh > 0.0 else 0.0
-    annual_res_score = ppa_gen_mwh / total_load_mwh if total_load_mwh > 0.0 else 0.0
     export_mwh = float((weights * ex_s).sum())
 
     return {
         "cfe_score": cfe_score,
         "ppa_only_score": ppa_only_score,
-        "annual_res_score": annual_res_score,
         "constraint_lhs": constraint_lhs,
         "constraint_lhs_from_balance": constraint_lhs_from_balance,
         "model_constraint_lhs": model_constraint_lhs,

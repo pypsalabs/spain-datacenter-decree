@@ -11,7 +11,7 @@ import pandas as pd
 import pypsa
 import pytest
 
-from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics
+from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics, yield_per_mw
 
 
 def _build_toy_3bus_network() -> tuple[pypsa.Network, pd.Series]:
@@ -248,7 +248,7 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     n_ann.optimize.create_model()
     add_dc_cfe_constraints(
         n=n_ann,
-        dc_cfg={"prefix": "DC", "annual_equality": True},
+        dc_cfg={"prefix": "DC"},
         cfe_t=r,
         policy="annual_res",
         target=1.00,
@@ -256,7 +256,9 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     status, _ = n_ann.optimize.solve_model(solver_name="highs", solver="simplex")
     assert status == "ok"
     metrics_ann = dc_metrics(n_ann)
-    assert metrics_ann["annual_res_score"] == pytest.approx(1.00, abs=1e-6)
+    gens = [g for g in n_ann.generators.index if g.startswith("DC")]
+    contracted = yield_per_mw(n_ann, gens) * n_ann.generators.loc[gens, "p_nom_opt"]
+    assert contracted.sum() == pytest.approx(metrics_ann["total_load_mwh"], rel=1e-6)
 
 
 def test_no_clip_in_metrics() -> None:

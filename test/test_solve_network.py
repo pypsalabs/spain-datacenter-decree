@@ -212,6 +212,16 @@ def test_no_same_hour_buy_and_sell(toy_base, toy_costs) -> None:
     assert float(np.minimum(im, ex).max()) < 1e-6
 
 
+def test_annual_matches_contracted_yield(toy_base, toy_costs) -> None:
+    # no sales: surplus is curtailed, yet it counts toward the contracted volume
+    n, conv, metrics = _solve(toy_base, toy_costs, "annual_100_res", excess_share=0.0)
+    ppa = n.generators.index[n.generators.index.str.startswith("DC")]
+    available = n.generators_t.p_max_pu[ppa] * n.generators.loc[ppa, "p_nom_opt"]
+    assert available.sum().sum() == pytest.approx(metrics["total_load_mwh"], rel=1e-6)
+    losses = metrics["battery_charge_mwh"] - metrics["battery_discharge_mwh"]
+    assert metrics["grid_import_mwh"] > losses + 1.0
+
+
 def test_strict_hourly_meets_every_hour(toy_base, toy_costs) -> None:
     n, conv, metrics = _solve(toy_base, toy_costs, "strict_hourly_80_ppa_only")
     # per-hour check from the solved primal: matched share >= 80% of load in every hour

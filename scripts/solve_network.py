@@ -278,9 +278,9 @@ def solve_network(
 
     policy_norm = str(policy).strip().lower()
     tau = resolve_target(policy_norm, target)
-    # Sales cap sigma (study default 0.20 via config; None = uncapped, offered for
-    # tests only). For policies without a target the DC has no PPA assets, so ex_t
-    # is pinned to zero for clean metrics.
+    # Sales cap sigma (study default 0.0 via the suite's excess_cap; None = uncapped,
+    # offered for tests only). For policies without a target the DC has no PPA
+    # assets, so ex_t is pinned to zero for clean metrics.
     if policy_norm in NO_TARGET_POLICIES:
         sigma: float | None = 0.0
     else:

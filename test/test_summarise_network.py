@@ -12,7 +12,7 @@ import pytest
 from scripts.calculate_grid_cfe import calculate_grid_emission_factor
 from scripts.data_center import attach_data_center
 from scripts.solve_network import solve_network
-from scripts.summarise_network import summarise_network
+from scripts.summarise_network import dc_hourly, summarise_network
 
 
 def _summarise(
@@ -78,6 +78,21 @@ def test_unmatched_dc_buys_at_grid_emission_factor(toy_base, toy_costs) -> None:
     )
     gas = n.generators_t.p[["ES0 6AC CCGT", "ES0 7AC CCGT"]].sum().sum() / 0.55
     assert s["es_gas_fuel_mwh_th"] == pytest.approx(gas, rel=1e-9)
+
+
+@pytest.mark.parametrize(
+    "policy", ["unmatched_dc", "hourly_80_ppa_only", "strict_hourly_80_ppa_only"]
+)
+def test_hourly_series_average_to_annual_metrics(toy_base, toy_costs, policy) -> None:
+    n, s = _summarise(toy_base, toy_costs, policy)
+    hourly = dc_hourly(n)
+    # flat DC load: the consumption-weighted mean is the snapshot-weighted one
+    w = n.snapshot_weightings["generators"]
+    mean = hourly.mul(w, axis=0).sum() / w.sum()
+    assert mean["cfe_score"] == pytest.approx(s["clean_coverage"], rel=1e-9)
+    assert mean["intensity_g_per_kwh"] == pytest.approx(
+        s["dc_attributional_intensity_g_per_kwh"], rel=1e-9
+    )
 
 
 def test_annual_score_is_contracted_yield(toy_base, toy_costs) -> None:

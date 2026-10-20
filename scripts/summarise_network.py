@@ -15,6 +15,8 @@ from the solved network without re-solving:
 - Data center: PPA cost, output and curtailment by carrier, battery cost, and the
   attributional CO2 intensity of its consumption: grid purchases at the
   import-traced hourly grid emission factor, PPA supply at zero.
+- Hourly series of the data center: CFE score and attributional CO2 intensity
+  of its consumption, for the heatmaps.
 
 Grid purchases are rebuilt from the physical balance,
 ``im_t = max(d_t - g_t - dis_t + cha_t, 0)``. This is exact because the sales
@@ -31,7 +33,10 @@ from pathlib import Path
 import pandas as pd
 import pypsa
 
-from scripts.calculate_grid_cfe import calculate_grid_emission_factor
+from scripts.calculate_grid_cfe import (
+    calculate_grid_cfe,
+    calculate_grid_emission_factor,
+)
 from scripts.cfe_constraints import yield_per_mw
 
 logger = logging.getLogger(__name__)
@@ -214,6 +219,28 @@ def dc_attributional_metrics(n: pypsa.Network, row: pd.Series) -> dict[str, floa
     }
 
 
+def dc_hourly(n: pypsa.Network) -> pd.DataFrame:
+    """
+    Hourly CFE score and attributional CO2 intensity of DC consumption.
+
+    The CFE score is the share of consumption covered by PPA and battery supply
+    plus the renewable share of grid purchases, ``1 - im_t (1 - CFE_t) / d_t``;
+    the intensity values the purchases at the import-traced grid emission factor.
+    Their consumption-weighted means are ``clean_coverage`` and
+    ``dc_attributional_intensity_g_per_kwh``. Both are NaN without a data center.
+    """
+    d, im = dc_grid_purchases(n)
+    bought = im / d
+    cfe = calculate_grid_cfe(n, country="ES")
+    ef = calculate_grid_emission_factor(n, country="ES")
+    return pd.DataFrame(
+        {
+            "cfe_score": 1.0 - bought * (1.0 - cfe),
+            "intensity_g_per_kwh": bought * ef * G_PER_KWH,
+        }
+    )
+
+
 def summarise_network(n: pypsa.Network, row: pd.Series) -> pd.Series:
     """
     Return the solve metrics ``row`` extended by the postprocessing metrics.
@@ -230,12 +257,13 @@ def summarise_network(n: pypsa.Network, row: pd.Series) -> pd.Series:
 
 
 def main(argv: list[str] | None = None) -> None:
-    """CLI entry point: postprocess one solved scenario into a one-row summary CSV."""
+    """CLI entry point: one solved scenario into a summary row and hourly DC series."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--network", type=Path, required=True)
     parser.add_argument("--metrics", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--output-hourly", type=Path, required=True)
     args = parser.parse_args(argv)
 
     n = pypsa.Network(str(args.network))
@@ -243,6 +271,8 @@ def main(argv: list[str] | None = None) -> None:
     summary = summarise_network(n, row)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     summary.to_frame().T.to_csv(args.output, index=False)
+    args.output_hourly.parent.mkdir(parents=True, exist_ok=True)
+    dc_hourly(n).to_csv(args.output_hourly)
     logger.info("Summarised %s -> %s", args.network, args.output)
 
 

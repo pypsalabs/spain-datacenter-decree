@@ -37,11 +37,12 @@ def ex_tag(sigma):
 
 def suite_plots(wildcards):
     """Figure files of the selected suite: one folder per run and sales cap."""
+    plots = PLOTS + [f"heatmap_{policy}" for policy in SUITE["policies"]]
     return [
         f"results/{run}/plots/ex{ex_tag(sigma)}/{plot}.pdf"
         for run in SUITE["runs"]
         for sigma in SUITE["excess_cap"]
-        for plot in PLOTS
+        for plot in plots
     ]
 
 
@@ -239,6 +240,7 @@ rule summarise_network:
         metrics="results/{run}/metrics/metrics_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
     output:
         summary="results/{run}/summaries/summary_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
+        hourly="results/{run}/hourly/hourly_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
     threads: 1
     resources:
         mem_mb=4000,
@@ -247,31 +249,37 @@ rule summarise_network:
         PYTHONPATH="{workflow.basedir}" python -m scripts.summarise_network \
             --network "{input.network}" \
             --metrics "{input.metrics}" \
-            --output "{output.summary}"
+            --output "{output.summary}" \
+            --output-hourly "{output.hourly}"
         """
 
 
-def suite_summaries(wildcards):
-    """Summary files of the selected suite: its cross product plus a no_dc row per run.
+def scenario_stem(policy, dc_mw, siting, sigma):
+    """Case-study scenario part of the result file names.
 
     The baselines have no surplus to sell, so they are solved once, under ex0.
     """
-    year = HORIZON
+    if policy in NO_SURPLUS_POLICIES:
+        sigma = 0.0
+    return (
+        f"{HORIZON}_patched_{policy}_t{policy_target(policy)}_{dc_mw}mw_{siting}"
+        f"_ex{ex_tag(sigma)}"
+    )
 
-    def summary_file(run, policy, target, dc_mw, siting, sigma):
-        return (
-            f"results/{run}/summaries/summary_{year}_patched_"
-            f"{policy}_t{target}_{dc_mw}mw_{siting}_ex{ex_tag(sigma)}.csv"
-        )
+
+def suite_summaries(wildcards):
+    """Summary files of the selected suite: its cross product plus a no_dc row per run."""
+
+    def summary_file(run, policy, dc_mw, siting, sigma):
+        stem = scenario_stem(policy, dc_mw, siting, sigma)
+        return f"results/{run}/summaries/summary_{stem}.csv"
 
     def caps(policy):
         return [0.0] if policy in NO_SURPLUS_POLICIES else SUITE["excess_cap"]
 
-    files = [
-        summary_file(run, "no_dc", 0, 0, "spain_wide", 0.0) for run in SUITE["runs"]
-    ]
+    files = [summary_file(run, "no_dc", 0, "spain_wide", 0.0) for run in SUITE["runs"]]
     files += [
-        summary_file(run, policy, policy_target(policy), dc_mw, siting, sigma)
+        summary_file(run, policy, dc_mw, siting, sigma)
         for run in SUITE["runs"]
         for policy in SUITE["policies"]
         for dc_mw in SUITE["dc_mw"]
@@ -316,4 +324,33 @@ rule plot_summary:
             --excess-cap {params.excess_cap} \
             --weather-year {params.weather_year} \
             --plots-dir "results/{wildcards.run}/plots/ex{wildcards.excess}"
+        """
+
+
+def heatmap_inputs(wildcards):
+    """Summary row and hourly series of one policy in a single-size suite."""
+    if len(SUITE["dc_mw"]) > 1 or len(SUITE["siting"]) > 1:
+        raise ValueError("Heatmaps cover suites with one DC size and one siting.")
+    sigma = int(wildcards.excess) / 100
+    stem = scenario_stem(wildcards.policy, SUITE["dc_mw"][0], SUITE["siting"][0], sigma)
+    return {
+        "summary": f"results/{wildcards.run}/summaries/summary_{stem}.csv",
+        "hourly": f"results/{wildcards.run}/hourly/hourly_{stem}.csv",
+    }
+
+
+rule plot_heatmap:
+    """Plots the hourly CFE score and CO2 intensity of one policy's DC consumption."""
+    input:
+        unpack(heatmap_inputs),
+        style="scripts/plots.mplstyle",
+    output:
+        "results/{run}/plots/ex{excess}/heatmap_{policy}.pdf",
+    threads: 1
+    shell:
+        """
+        PYTHONPATH="{workflow.basedir}" python -m scripts.plot_heatmap \
+            --hourly "{input.hourly}" \
+            --summary "{input.summary}" \
+            --output "{output}"
         """

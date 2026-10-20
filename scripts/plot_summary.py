@@ -535,7 +535,7 @@ def plot_dc_emission_intensity(
     grid = float(rows.loc[BASELINE, "es_grid_ef_g_per_kwh"])
     grid_line = ax.axhline(grid, color=GRID_COLOR, linewidth=0.6, linestyle=(0, (4, 3)))
     ax.set_xlim(-0.5, len(policies) - 0.5)
-    ax.set_ylabel("Emission intensity of DC\nconsumption [gCO$_2$/kWh]")
+    ax.set_ylabel("Emission intensity of DC\nconsumption (gCO$_2$/kWh)")
     dot = {"marker": "o", "linestyle": "none", "markersize": 5}
     handles = [
         Line2D([], [], color="black", **dot),

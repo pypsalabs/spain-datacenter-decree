@@ -123,12 +123,13 @@ solving:
 spain_cfe:
   # Scenario suites (cross products; make_summary collects the suite named by `suite`).
   # Policy set (agreed 2026-10-19): unmatched_dc = no-policy counterfactual;
-  # annual_100_res = volumetric matching (voluntary industry practice);
+  # annual_80_res = volumetric matching (the decree's Art. 8 alone);
   # hourly_80_ppa_only = 24/7 CFE score; strict_hourly_80_ppa_only = the decree's
   # Art. 9 (every hour); hourly_80_grid_credit = beyond-decree design alternative.
   # The _cfe (nuclear-as-clean) variants stay out of the matrix: the decree is
   # renewable-only. Target sweep (90/100) is pre-built via the policy names, as is
-  # annual_80_res (Art. 8 alone; dropped 2026-10-20 for little added value).
+  # annual_100_res (voluntary industry practice; swapped for annual_80_res on
+  # 2026-10-20 so every policy shares the 80% target).
   # `policies` maps each PPA siting to the policies solved with it: spain_wide =
   # anywhere in mainland Spain (the site's synchronous area), local_region = the
   # data center's own region only.
@@ -147,7 +148,7 @@ spain_cfe:
     core:
       runs: [wy2024]
       policies:
-        spain_wide: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+        spain_wide: [unmatched_dc, annual_80_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
         local_region: [hourly_80_ppa_only]
       dc_mw: [500]
       excess_cap: [0.0]
@@ -156,7 +157,7 @@ spain_cfe:
     full:
       runs: [wy2024, wy2010, wy2013, wy2020]
       policies:
-        spain_wide: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+        spain_wide: [unmatched_dc, annual_80_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
         local_region: [hourly_80_ppa_only]
       dc_mw: [500, 1000, 2000, 4000, 6000]
       excess_cap: [0.0]

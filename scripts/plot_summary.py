@@ -45,10 +45,11 @@ POLICIES: dict[str, tuple[str, str]] = {
     "hourly_80_ppa_only": ("Hourly 80%\non average", "#0072B2"),
     "hourly_80_grid_credit": ("Hourly 80%\navg. + credit", "#56B4E9"),
     LOCAL: ("Hourly 80%\navg., local", "#CC79A7"),
-    "annual_100_res": ("Annual\n100%", "#009E73"),
+    "annual_80_res": ("Annual\n80%", "#009E73"),
 }
 DECREE = "strict_hourly_80_ppa_only"
-SUM_RULES = ("hourly_80_ppa_only", "hourly_80_grid_credit", "annual_100_res")
+ANNUAL = "annual_80_res"
+SUM_RULES = ("hourly_80_ppa_only", "hourly_80_grid_credit", ANNUAL)
 BASELINE = "no_dc"
 
 PPA_CARRIERS: dict[str, str] = {
@@ -223,7 +224,8 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
 
     coverage = r["clean_coverage"].mul(100.0)
     ppa = r["ppa_only_score"].mul(100.0)
-    curtailed = _curtailed_share(r.loc[["annual_100_res"]]).iloc[0]
+    curtailed = _curtailed_share(r.loc[[ANNUAL]]).iloc[0]
+    annual = 100.0 * r.at[ANNUAL, "target"]
     _caption(
         fig,
         "Share of the data center's consumption covered by renewables in the same "
@@ -238,13 +240,17 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
             f"{coverage[DECREE]:.0f}% on average.",
             "Hourly 80%: matched energy is summed over the year, so surplus hours "
             "offset short ones and the rule lands exactly on 80%.",
-            "Annual 100%: the PPAs yield as much energy as the data center consumes, "
-            f"but {curtailed:.0f}% of it arrives when it is not needed and is "
-            f"curtailed: they match {ppa['annual_100_res']:.0f}% of consumption hour "
-            "by hour.",
-            "Grid credit: the grid's renewable share counts toward the 80%, so the "
-            "data center contracts less and its PPAs alone match "
-            f"{ppa['hourly_80_grid_credit']:.0f}%.",
+            f"Annual {annual:.0f}%: the PPAs yield {annual:.0f}% of the energy the data "
+            f"center consumes, but {curtailed:.0f}% of it arrives when it is not needed "
+            f"and is curtailed: they match {ppa[ANNUAL]:.0f}% of consumption hour by "
+            "hour.",
+            "Grid credit: the grid's renewable share counts toward the 80%, and its "
+            f"PPAs alone match {ppa['hourly_80_grid_credit']:.0f}%.",
+            f"Annual {annual:.0f}% and grid credit ask for little more than a data "
+            "center contracts without any rule, as PPAs cost less than grid power: "
+            "grid credit does not bind (score "
+            f"{100 * r.at['hourly_80_grid_credit', 'cfe_score']:.0f}%), annual "
+            f"{annual:.0f}% barely does.",
         ],
     )
     return fig

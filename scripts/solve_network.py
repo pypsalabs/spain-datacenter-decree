@@ -11,7 +11,7 @@ from ``scripts/cfe_constraints.py`` as linopy extra functionality, and solves
 with HiGHS (default) or Gurobi. Grid-credit policies resolve the bilinear
 grid-CFE term with fixed forward passes in ``scripts/iterate.py``, starting from
 the solved ``unmatched_dc`` network's import-traced hourly grid CFE factor
-(``scripts/calculate_grid_cfe.py``). Writes the solved network, a one-row KPI
+(``scripts/calculate_grid_cfe.py``). Writes the solved network, a one-row metrics
 table, and the per-pass convergence log.
 
 Policies: ``no_dc``, ``unmatched_dc``, ``annual_{target}_res``, ``hourly_80_ppa_only``,
@@ -34,7 +34,7 @@ import pandas as pd
 import pypsa
 
 from scripts.calculate_grid_cfe import calculate_grid_cfe
-from scripts.cfe_constraints import add_dc_cfe_constraints, dc_kpis
+from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics
 from scripts.data_center import DEFAULT_DISCOUNT_RATE, attach_data_center, load_costs
 from scripts.iterate import (
     DEFAULT_N_ITERATIONS,
@@ -242,7 +242,7 @@ def solve_network(
     load_shedding_cost: float = DEFAULT_LOAD_SHEDDING_COST,
 ) -> tuple[pypsa.Network, pd.DataFrame, dict[str, Any]]:
     """
-    Solve one policy scenario and return ``(network, convergence_df, kpi_row)``.
+    Solve one policy scenario and return ``(network, convergence_df, metrics_row)``.
 
     The network must already carry the DC components (``attach_data_center``).
     """
@@ -252,7 +252,7 @@ def solve_network(
     tau = resolve_target(policy_norm, target)
     # Sales cap sigma (study default 0.20 via config; None = uncapped, offered for
     # tests only). For policies without a target the DC has no PPA assets, so ex_t
-    # is pinned to zero for clean KPIs.
+    # is pinned to zero for clean metrics.
     if policy_norm in NO_TARGET_POLICIES:
         sigma: float | None = 0.0
     else:
@@ -338,9 +338,9 @@ def solve_network(
         )
     solve_time_s = time.perf_counter() - t_start
 
-    raw_kpis = dc_kpis(n)
-    total_load_mwh = float(raw_kpis["total_load_mwh"])
-    kpi_row: dict[str, Any] = {
+    raw_metrics = dc_metrics(n)
+    total_load_mwh = float(raw_metrics["total_load_mwh"])
+    metrics_row: dict[str, Any] = {
         "policy": str(policy),
         "target": tau,
         "excess_cap": sigma,
@@ -351,11 +351,11 @@ def solve_network(
         "max_delta": float(convergence_df["max_delta"].iloc[-1]),
         "mean_grid_cfe_es": float(n._grid_cfe.mean()),
     }
-    for k, v in raw_kpis.items():
+    for k, v in raw_metrics.items():
         if not isinstance(v, pd.Series):
-            kpi_row[k] = float(v)
-    kpi_row.update(_dc_portfolio_metrics(n, total_load_mwh))
-    return n, convergence_df, kpi_row
+            metrics_row[k] = float(v)
+    metrics_row.update(_dc_portfolio_metrics(n, total_load_mwh))
+    return n, convergence_df, metrics_row
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -367,7 +367,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--costs", type=Path, required=True, help="Processed costs CSV."
     )
     parser.add_argument("--output-network", type=Path, required=True)
-    parser.add_argument("--output-kpis", type=Path, required=True)
+    parser.add_argument("--output-metrics", type=Path, required=True)
     parser.add_argument("--output-convergence", type=Path, required=True)
     parser.add_argument("--policy", type=str, required=True)
     parser.add_argument("--target", type=float, default=None)
@@ -412,7 +412,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="LP solver: highs (default, open) or gurobi (plain defaults).",
     )
     parser.add_argument(
-        "--meta", type=str, default="", help="key=value,... appended to the KPI row."
+        "--meta",
+        type=str,
+        default="",
+        help="key=value,... appended to the metrics row.",
     )
     return parser.parse_args(argv)
 
@@ -432,7 +435,7 @@ def main(argv: list[str] | None = None) -> None:
         net_in, costs_in = Path(smk.input.network), Path(smk.input.costs)
         cfe0_in = Path(smk.input.cfe0_network[0]) if smk.input.cfe0_network else None
         net_out = Path(smk.output.network)
-        kpi_out, conv_out = Path(smk.output.kpis), Path(smk.output.convergence)
+        metrics_out, conv_out = Path(smk.output.metrics), Path(smk.output.convergence)
         policy, siting = str(w.policy), str(w.siting)
         target, dc_mw = float(w.target), float(w.dc_mw)
         meta = {
@@ -447,7 +450,7 @@ def main(argv: list[str] | None = None) -> None:
         net_in, costs_in = args.network, args.costs
         cfe0_in = args.cfe0_network
         net_out = args.output_network
-        kpi_out, conv_out = args.output_kpis, args.output_convergence
+        metrics_out, conv_out = args.output_metrics, args.output_convergence
         policy, siting = args.policy, args.siting
         target, dc_mw = args.target, args.dc_mw
         meta = dict(kv.split("=") for kv in args.meta.split(",") if "=" in kv)
@@ -494,7 +497,7 @@ def main(argv: list[str] | None = None) -> None:
         discount_rate=float(dc_cfg.get("discount_rate", DEFAULT_DISCOUNT_RATE)),
         policy=policy,
     )
-    n, conv_df, kpi_row = solve_network(
+    n, conv_df, metrics_row = solve_network(
         n,
         policy=policy,
         target=target,
@@ -508,15 +511,18 @@ def main(argv: list[str] | None = None) -> None:
         n_iterations=int(iter_cfg.get("n_iterations", DEFAULT_N_ITERATIONS)),
         solver_name=str(cfg.get("solving", {}).get("solver", DEFAULT_SOLVER_NAME)),
     )
-    kpi_row = {**meta, **kpi_row}
+    metrics_row = {**meta, **metrics_row}
 
-    for path in (net_out, kpi_out, conv_out):
+    for path in (net_out, metrics_out, conv_out):
         path.parent.mkdir(parents=True, exist_ok=True)
     n.export_to_netcdf(str(net_out))
-    pd.DataFrame([kpi_row]).to_csv(kpi_out, index=False)
+    pd.DataFrame([metrics_row]).to_csv(metrics_out, index=False)
     conv_df.to_csv(conv_out, index=False)
     logger.info(
-        "Solved %s: objective %.4e, KPIs -> %s", policy, float(n.objective), kpi_out
+        "Solved %s: objective %.4e, metrics -> %s",
+        policy,
+        float(n.objective),
+        metrics_out,
     )
 
 

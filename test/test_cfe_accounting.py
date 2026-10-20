@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Iegor Riepin
 #
 # SPDX-License-Identifier: MIT
-"""Unit tests for 24/7 CFE virtual balance, policy constraints, and unclipped KPIs."""
+"""Unit tests for 24/7 CFE virtual balance, policy constraints, and unclipped metrics."""
 
 import ast
 from pathlib import Path
@@ -11,7 +11,7 @@ import pandas as pd
 import pypsa
 import pytest
 
-from scripts.cfe_constraints import add_dc_cfe_constraints, dc_kpis
+from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics
 
 
 def _build_toy_3bus_network() -> tuple[pypsa.Network, pd.Series]:
@@ -143,8 +143,8 @@ def _build_toy_3bus_network() -> tuple[pypsa.Network, pd.Series]:
     return n, r
 
 
-def test_kpi_equals_constraint_lhs() -> None:
-    """Verify KPI score equals exact Linopy constraint LHS when battery grid-charges."""
+def test_metrics_equal_constraint_lhs() -> None:
+    """Verify metrics score equals exact Linopy constraint LHS when battery grid-charges."""
     n, r = _build_toy_3bus_network()
     target = 0.65
 
@@ -160,7 +160,7 @@ def test_kpi_equals_constraint_lhs() -> None:
     status, condition = n.optimize.solve_model(solver_name="highs", solver="simplex")
     assert status == "ok", f"Expected optimal solve, got {status} ({condition})"
 
-    kpis = dc_kpis(n)
+    metrics = dc_metrics(n)
 
     # Confirm the battery actually charged from the grid during night hours (0..7) when PPA gen is 0
     night_charge = n.links_t.p0["DC Madrid battery charger"].iloc[0:8].sum()
@@ -180,16 +180,16 @@ def test_kpi_equals_constraint_lhs() -> None:
     assert (m_sol.iloc[0:8] > 100.0 - 1e-6).any()
 
     # Exact equality between primal formula, balance formula, and Linopy constraint LHS
-    assert kpis["constraint_lhs"] == pytest.approx(
-        kpis["model_constraint_lhs"], abs=1e-6
+    assert metrics["constraint_lhs"] == pytest.approx(
+        metrics["model_constraint_lhs"], abs=1e-6
     )
-    assert kpis["constraint_lhs"] == pytest.approx(
-        kpis["constraint_lhs_from_balance"], abs=1e-6
+    assert metrics["constraint_lhs"] == pytest.approx(
+        metrics["constraint_lhs_from_balance"], abs=1e-6
     )
-    assert kpis["cfe_score"] == pytest.approx(
-        kpis["constraint_lhs"] / kpis["total_load_mwh"], abs=1e-6
+    assert metrics["cfe_score"] == pytest.approx(
+        metrics["constraint_lhs"] / metrics["total_load_mwh"], abs=1e-6
     )
-    assert kpis["cfe_score"] == pytest.approx(target, abs=1e-6)
+    assert metrics["cfe_score"] == pytest.approx(target, abs=1e-6)
 
     # Contrast with a naive clipped calculation that ignores grid-charging subtraction:
     # Unclipped PPA-only matched energy subtracts battery grid-charging c_t, whereas a
@@ -199,7 +199,7 @@ def test_kpi_equals_constraint_lhs() -> None:
     )
     dis_t = n.links_t.p0["DC Madrid battery discharger"] * 0.95
     naive_clipped_ppa_mwh = float(np.minimum(ppa_gen_t + dis_t, 100.0).sum())
-    unclipped_ppa_mwh = kpis["ppa_only_score"] * kpis["total_load_mwh"]
+    unclipped_ppa_mwh = metrics["ppa_only_score"] * metrics["total_load_mwh"]
     assert naive_clipped_ppa_mwh > unclipped_ppa_mwh + 10.0
 
 
@@ -218,11 +218,13 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     )
     status, _ = n_ppa.optimize.solve_model(solver_name="highs", solver="simplex")
     assert status == "ok"
-    kpis_ppa = dc_kpis(n_ppa)
-    assert kpis_ppa["grid_clean_import_mwh"] == pytest.approx(0.0, abs=1e-6)
-    assert kpis_ppa["cfe_score"] == pytest.approx(kpis_ppa["ppa_only_score"], abs=1e-6)
-    assert kpis_ppa["cfe_score"] >= 0.60 - 1e-6
-    assert kpis_ppa["excess_share"] <= 0.10 + 1e-6
+    metrics_ppa = dc_metrics(n_ppa)
+    assert metrics_ppa["grid_clean_import_mwh"] == pytest.approx(0.0, abs=1e-6)
+    assert metrics_ppa["cfe_score"] == pytest.approx(
+        metrics_ppa["ppa_only_score"], abs=1e-6
+    )
+    assert metrics_ppa["cfe_score"] >= 0.60 - 1e-6
+    assert metrics_ppa["excess_share"] <= 0.10 + 1e-6
 
     # 2. Strict hourly constraint enforces per-snapshot matching
     n_strict, r = _build_toy_3bus_network()
@@ -237,8 +239,8 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     )
     status, _ = n_strict.optimize.solve_model(solver_name="highs", solver="simplex")
     assert status == "ok"
-    kpis_strict = dc_kpis(n_strict)
-    per_t_ratio = kpis_strict["constraint_lhs_per_t"] / 100.0
+    metrics_strict = dc_metrics(n_strict)
+    per_t_ratio = metrics_strict["constraint_lhs_per_t"] / 100.0
     assert (per_t_ratio >= 0.50 - 1e-6).all()
 
     # 3. Annual RES volumetric constraint
@@ -253,11 +255,11 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     )
     status, _ = n_ann.optimize.solve_model(solver_name="highs", solver="simplex")
     assert status == "ok"
-    kpis_ann = dc_kpis(n_ann)
-    assert kpis_ann["annual_res_score"] == pytest.approx(1.00, abs=1e-6)
+    metrics_ann = dc_metrics(n_ann)
+    assert metrics_ann["annual_res_score"] == pytest.approx(1.00, abs=1e-6)
 
 
-def test_no_clip_in_kpis() -> None:
+def test_no_clip_in_metrics() -> None:
     """AST scan asserting no ``.clip(...)`` calls exist anywhere in ``scripts/``."""
     scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
     py_files = sorted(scripts_dir.glob("*.py"))

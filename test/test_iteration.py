@@ -7,7 +7,7 @@ import pandas as pd
 import pypsa
 import pytest
 
-from scripts.cfe_constraints import add_dc_cfe_constraints, dc_kpis
+from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics
 from scripts.iterate import solve_with_grid_iteration
 
 
@@ -148,8 +148,8 @@ def test_forward_passes_reach_fixed_point() -> None:
         expected_g_star, abs=0.5
     )
 
-    kpis = dc_kpis(solved_n)
-    assert kpis["cfe_score"] == pytest.approx(target, abs=1e-3)
+    metrics = dc_metrics(solved_n)
+    assert metrics["cfe_score"] == pytest.approx(target, abs=1e-3)
 
     with pytest.raises(ValueError, match="n_iterations"):
         solve_with_grid_iteration(n=n, build_fn=build_fn, n_iterations=0)

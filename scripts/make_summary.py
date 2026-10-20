@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 """
-Collect scenario KPI rows into one summary table with baseline deltas.
+Collect scenario metrics rows into one summary table with baseline deltas.
 
-Reads the one-row KPI CSVs written by ``solve_network.py``, concatenates them and
+Reads the one-row metrics CSVs written by ``solve_network.py``, concatenates them and
 attaches deltas relative to two distinct baselines:
 - ``no_dc``: matched on ``(planning_year, weather_year, resolution)``
 - ``unmatched_dc``: matched on ``(planning_year, weather_year, resolution, dc_mw)``
@@ -157,23 +157,23 @@ def attach_baseline_deltas(
     return out
 
 
-def collect_kpis(paths: Iterable[Path | str]) -> pd.DataFrame:
-    """Concatenate the one-row KPI CSVs of all scenarios into one table."""
+def collect_metrics(paths: Iterable[Path | str]) -> pd.DataFrame:
+    """Concatenate the one-row metrics CSVs of all scenarios into one table."""
     frames = [pd.read_csv(p) for p in paths]
     if not frames:
-        raise ValueError("No KPI files given; define the scenario suite first.")
+        raise ValueError("No metrics files given; define the scenario suite first.")
     return pd.concat(frames, ignore_index=True)
 
 
 def main(argv: list[str] | None = None) -> None:
-    """CLI entry point: collect KPI CSVs, attach baseline deltas, write the summary."""
+    """CLI entry point: collect metrics CSVs, attach baseline deltas, write the summary."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--kpis", type=Path, nargs="+", required=True)
+    parser.add_argument("--metrics", type=Path, nargs="+", required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
 
-    summary = attach_baseline_deltas(collect_kpis(args.kpis))
+    summary = attach_baseline_deltas(collect_metrics(args.metrics))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     summary.to_csv(args.output, index=False)
     logger.info("Wrote %d scenario rows to %s", len(summary), args.output)

@@ -71,12 +71,18 @@ Every modelling choice favors verifiability:
 
 ```
 composed_2025.nc    (pypsa-eur submodule, config-driven: clustering, profiles, 3h averaging)
-   └► prepare_network.py     + data/custom + spain_cfe.patches     →  base.nc (per run, data year, variant)
-        └► solve_network.py  attach DC, 24/7 CFE constraints,
-                             grid CFE iteration (grid-credit)    →  solved.nc, kpis, convergence
-             ├► validate_network.py  solved no_dc wy2024 vs Redeia →  one validation report
-             ├► make_summary.py      all KPIs                      →  scenarios.csv (+ baseline deltas)
-             └► plot_summary.py                                    →  figures
+   └► prepare_network.py   + data/custom + spain_cfe.patches      →  base.nc (per run, data year, variant)
+        │
+        ├─ snakemake all         (case study: 2025 data, DC policy scenarios)
+        │    └► solve_network.py   attach DC, 24/7 CFE constraints,
+        │         │                grid CFE iteration (grid-credit)   →  solved.nc, metrics
+        │         ├► make_summary.py   all metrics                    →  scenarios.csv (+ baseline deltas)
+        │         └► plot_summary.py                                  →  figures
+        │
+        └─ snakemake validation  (back-cast: 2024 data, raw + patched)
+             └► solve_network.py   same solver path, no_dc:
+                  │                plain dispatch, DC machinery inert →  solved.nc
+                  └► validate_network.py  vs Redeia 2024 actuals      →  validation reports
 ```
 
 `prepare_network.py` is a patch engine: it applies a config-controlled list of

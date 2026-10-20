@@ -134,7 +134,7 @@ rule solve_network:
         cfe0_network=solve_cfe0_input,
     output:
         network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.nc",
-        kpis="results/{run}/kpis/kpi_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
+        metrics="results/{run}/metrics/metrics_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
         convergence="results/{run}/convergence/conv_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
     threads: 2
     resources:
@@ -166,7 +166,7 @@ rule solve_network:
             --network "{input.network}" \
             --costs "{input.costs}" \
             --output-network "{output.network}" \
-            --output-kpis "{output.kpis}" \
+            --output-metrics "{output.metrics}" \
             --output-convergence "{output.convergence}" \
             --policy "{wildcards.policy}" \
             --target "{wildcards.target}" \
@@ -210,20 +210,20 @@ def policy_target(policy):
     return int(digits.group(1)) if digits else 0
 
 
-def suite_kpis(wildcards):
-    """KPI files of the selected suite: its cross product plus a no_dc row per run."""
+def suite_metrics(wildcards):
+    """metrics files of the selected suite: its cross product plus a no_dc row per run."""
     year = HORIZON
     suite = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
 
-    def kpi(run, policy, target, dc_mw, siting):
+    def metrics_file(run, policy, target, dc_mw, siting):
         return (
-            f"results/{run}/kpis/kpi_{year}_patched_"
+            f"results/{run}/metrics/metrics_{year}_patched_"
             f"{policy}_t{target}_{dc_mw}mw_{siting}.csv"
         )
 
-    files = [kpi(run, "no_dc", 0, 0, "spain_wide") for run in suite["runs"]]
+    files = [metrics_file(run, "no_dc", 0, 0, "spain_wide") for run in suite["runs"]]
     files += [
-        kpi(run, policy, policy_target(policy), dc_mw, siting)
+        metrics_file(run, policy, policy_target(policy), dc_mw, siting)
         for run in suite["runs"]
         for policy in suite["policies"]
         for dc_mw in suite["dc_mw"]
@@ -233,16 +233,16 @@ def suite_kpis(wildcards):
 
 
 rule make_summary:
-    """Collects all scenario KPI rows into one tidy table with baseline deltas."""
+    """Collects all scenario metrics rows into one tidy table with baseline deltas."""
     input:
-        kpis=suite_kpis,
+        metrics=suite_metrics,
     output:
         summary="results/scenarios.csv",
     threads: 1
     shell:
         """
         PYTHONPATH="{workflow.basedir}" python -m scripts.make_summary \
-            --kpis {input.kpis} \
+            --metrics {input.metrics} \
             --output "{output.summary}"
         """
 

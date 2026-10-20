@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Iegor Riepin
 #
 # SPDX-License-Identifier: MIT
-"""End-to-end toy tests for the solve driver (attach + constraints + solve + KPIs)."""
+"""End-to-end toy tests for the solve driver (attach + constraints + solve + metrics)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import pandas as pd
 import pypsa
 import pytest
 
-from scripts.cfe_constraints import dc_kpis
+from scripts.cfe_constraints import dc_metrics
 from scripts.data_center import attach_data_center
 from scripts.solve_network import resolve_target, solve_network
 
@@ -101,26 +101,26 @@ def test_resolve_target_from_policy_names() -> None:
 
 
 def test_unmatched_dc_imports_everything(toy_base, toy_costs) -> None:
-    n, conv, kpis = _solve(toy_base, toy_costs, "unmatched_dc")
-    assert kpis["dc_ppa_total_mw"] == 0.0
-    assert kpis["grid_import_mwh"] == pytest.approx(100.0 * HOURS, rel=1e-6)
-    assert kpis["cfe_score"] == pytest.approx(0.0, abs=1e-9)
-    assert kpis["load_shedding_mwh"] == pytest.approx(0.0, abs=1e-6)
+    n, conv, metrics = _solve(toy_base, toy_costs, "unmatched_dc")
+    assert metrics["dc_ppa_total_mw"] == 0.0
+    assert metrics["grid_import_mwh"] == pytest.approx(100.0 * HOURS, rel=1e-6)
+    assert metrics["cfe_score"] == pytest.approx(0.0, abs=1e-9)
+    assert metrics["load_shedding_mwh"] == pytest.approx(0.0, abs=1e-6)
 
 
 def test_hourly_80_ppa_only_meets_target(toy_base, toy_costs) -> None:
-    n, conv, kpis = _solve(toy_base, toy_costs, "hourly_80_ppa_only")
-    assert kpis["cfe_score"] >= 0.80 - 1e-6
-    assert kpis["dc_ppa_total_mw"] > 0.0
+    n, conv, metrics = _solve(toy_base, toy_costs, "hourly_80_ppa_only")
+    assert metrics["cfe_score"] >= 0.80 - 1e-6
+    assert metrics["dc_ppa_total_mw"] > 0.0
     # PPA-only: imports carry no credit, so the score equals 1 - imports/load
-    assert kpis["cfe_score"] == pytest.approx(
-        1.0 - kpis["grid_import_mwh"] / kpis["total_load_mwh"], rel=1e-9
+    assert metrics["cfe_score"] == pytest.approx(
+        1.0 - metrics["grid_import_mwh"] / metrics["total_load_mwh"], rel=1e-9
     )
 
 
 def test_grid_credit_iterates_and_relaxes_build(toy_base, toy_costs) -> None:
     n2 = toy_base.copy()
-    n, conv, kpis = _solve(
+    n, conv, metrics = _solve(
         toy_base,
         toy_costs,
         "hourly_80_grid_credit",
@@ -128,16 +128,16 @@ def test_grid_credit_iterates_and_relaxes_build(toy_base, toy_costs) -> None:
         n_iterations=2,
     )
     assert len(conv) == 2
-    assert kpis["max_delta"] < 0.05
-    assert 0.0 <= kpis["mean_grid_cfe_es"] <= 1.0
+    assert metrics["max_delta"] < 0.05
+    assert 0.0 <= metrics["mean_grid_cfe_es"] <= 1.0
     # grid credit makes the constraint easier than ppa_only at equal target
     attach_data_center(n2, dc_mw=100.0, costs=toy_costs, policy="hourly_80_ppa_only")
-    _, _, kpis_ppa = solve_network(n2, policy="hourly_80_ppa_only")
-    assert kpis["objective"] <= kpis_ppa["objective"] + 1e-3
+    _, _, metrics_ppa = solve_network(n2, policy="hourly_80_ppa_only")
+    assert metrics["objective"] <= metrics_ppa["objective"] + 1e-3
 
 
 def test_strict_hourly_meets_every_hour(toy_base, toy_costs) -> None:
-    n, conv, kpis = _solve(toy_base, toy_costs, "strict_hourly_80_ppa_only")
+    n, conv, metrics = _solve(toy_base, toy_costs, "strict_hourly_80_ppa_only")
     # per-hour check from the solved primal: matched share >= 80% of load in every hour
-    per_t = dc_kpis(n)["constraint_lhs_per_t"]
+    per_t = dc_metrics(n)["constraint_lhs_per_t"]
     assert (per_t >= 0.80 * 100.0 - 1e-4).all()

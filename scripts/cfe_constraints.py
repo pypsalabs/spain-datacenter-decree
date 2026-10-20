@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 r"""
-Linopy constraints and primal KPI extraction for 24/7 CFE procurement.
+Linopy constraints and primal metrics extraction for 24/7 CFE procurement.
 
 Notation follows Riepin & Brown (2023), "System-level impacts of 24/7
 carbon-free electricity procurement in Europe" (247-procurement-paper):
@@ -262,14 +262,14 @@ def add_dc_cfe_constraints(
     }
 
 
-def dc_kpis(
+def dc_metrics(
     n: pypsa.Network,
     dc_cfg: Mapping[str, Any] | None = None,
     cfe_t: pd.Series | float | None = None,
     policy: str | None = None,
 ) -> dict[str, Any]:
     """
-    Compute DC CFE KPIs from solved primal values using the exact constraint LHS.
+    Compute DC CFE metrics from solved primal values using the exact constraint LHS.
 
     Never applies ``.clip`` to any time series. Both ``d_t - (1 - CFE_t) * im_t``
     and ``g_t + dis_t - cha_t - ex_t + CFE_t * im_t`` are evaluated and verified

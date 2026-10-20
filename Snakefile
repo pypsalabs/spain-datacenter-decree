@@ -62,7 +62,7 @@ def resolved_patches(wildcards):
     return ",".join(name for name, on in patches.items() if on)
 
 
-def solve_r0_input(wildcards):
+def solve_cfe0_input(wildcards):
     """Return the solved unmatched_dc network for *_grid_credit policies, else nothing."""
     if "grid_credit" in wildcards.policy:
         return [
@@ -131,7 +131,7 @@ rule solve_network:
     input:
         network="resources/{run}/networks/base_{year}_{variant}.nc",
         costs=lambda w: f"pypsa-eur/resources/{w.run}/costs_{HORIZON}_processed.csv",
-        r0_network=solve_r0_input,
+        cfe0_network=solve_cfe0_input,
     output:
         network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.nc",
         kpis="results/{run}/kpis/kpi_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.csv",
@@ -157,8 +157,8 @@ rule solve_network:
             config["spain_cfe"]["dc"]["nodes"][s]
             for s in config["spain_cfe"]["dc"]["sites"]
         ),
-        r0_arg=lambda w, input: (
-            f'--r0-network "{input.r0_network[0]}"' if input.r0_network else ""
+        cfe0_arg=lambda w, input: (
+            f'--cfe0-network "{input.cfe0_network[0]}"' if input.cfe0_network else ""
         ),
     shell:
         """
@@ -179,7 +179,7 @@ rule solve_network:
             --ppa-carriers "{params.ppa_carriers}" \
             --discount-rate "{params.discount_rate}" \
             --meta "{params.meta}" \
-            {params.r0_arg}
+            {params.cfe0_arg}
         """
 
 

@@ -11,7 +11,7 @@ from ``scripts/cfe_constraints.py`` as linopy extra functionality, and solves
 with HiGHS (default) or Gurobi. Grid-credit policies resolve the bilinear
 grid-CFE term with fixed forward passes in ``scripts/iterate.py``, starting from
 the solved ``unmatched_dc`` network's import-traced hourly grid CFE factor
-(``scripts/calculate_grid_res.py``). Writes the solved network, a one-row KPI
+(``scripts/calculate_grid_cfe.py``). Writes the solved network, a one-row KPI
 table, and the per-pass convergence log.
 
 Policies: ``no_dc``, ``unmatched_dc``, ``annual_{target}_res``, ``hourly_80_ppa_only``,
@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 
-from scripts.calculate_grid_res import calculate_grid_share
+from scripts.calculate_grid_cfe import calculate_grid_cfe
 from scripts.cfe_constraints import add_dc_cfe_constraints, dc_kpis
 from scripts.data_center import DEFAULT_DISCOUNT_RATE, attach_data_center, load_costs
 from scripts.iterate import (
@@ -126,22 +126,22 @@ def resolve_target(policy: str, target: float | str | None = None) -> float:
     return DEFAULT_TARGET
 
 
-def resolve_r0(
+def resolve_cfe0(
     n: pypsa.Network,
-    r0_source: str | Path | pypsa.Network | pd.Series | float | None,
+    cfe0_source: str | Path | pypsa.Network | pd.Series | float | None,
     clean_carriers: str | list[str] = "res",
 ) -> pd.Series | None:
-    """Resolve the initial grid clean share ``r^(0)``, e.g. from a solved unmatched_dc network."""
-    if r0_source is None:
+    """Resolve the initial grid CFE factor ``CFE^(0)``, e.g. from a solved unmatched_dc network."""
+    if cfe0_source is None:
         return None
-    if isinstance(r0_source, (int, float, np.floating)):
-        return pd.Series(float(r0_source), index=n.snapshots, dtype=float)
-    if isinstance(r0_source, pd.Series):
-        return r0_source.reindex(n.snapshots).fillna(0.0).astype(float)
-    if isinstance(r0_source, (str, Path)):
-        logger.info("Computing r0 from solved network %s", r0_source)
-        r0_source = pypsa.Network(str(r0_source))
-    r_s = calculate_grid_share(r0_source, country="ES", clean_carriers=clean_carriers)
+    if isinstance(cfe0_source, (int, float, np.floating)):
+        return pd.Series(float(cfe0_source), index=n.snapshots, dtype=float)
+    if isinstance(cfe0_source, pd.Series):
+        return cfe0_source.reindex(n.snapshots).fillna(0.0).astype(float)
+    if isinstance(cfe0_source, (str, Path)):
+        logger.info("Computing r0 from solved network %s", cfe0_source)
+        cfe0_source = pypsa.Network(str(cfe0_source))
+    r_s = calculate_grid_cfe(cfe0_source, country="ES", clean_carriers=clean_carriers)
     return r_s.reindex(n.snapshots).fillna(0.0).astype(float)
 
 
@@ -234,7 +234,7 @@ def solve_network(
     policy: str,
     target: float | None = None,
     excess_share: float | None = None,
-    r0_source: str | Path | pd.Series | float | None = None,
+    cfe0_source: str | Path | pd.Series | float | None = None,
     clean_carriers: str = "res",
     n_iterations: int = DEFAULT_N_ITERATIONS,
     solver_name: str = DEFAULT_SOLVER_NAME,
@@ -268,7 +268,7 @@ def solve_network(
         )
     opts = dict(SOLVER_DEFAULTS[solver_name])
     opts.update(solver_options or {})
-    r0_series = resolve_r0(n, r0_source, clean_carriers=clean_carriers)
+    cfe0_series = resolve_cfe0(n, cfe0_source, clean_carriers=clean_carriers)
 
     t_start = time.perf_counter()
     if "grid_credit" in policy_norm:
@@ -293,14 +293,14 @@ def solve_network(
             n, convergence_df = solve_with_grid_iteration(
                 n=n,
                 build_fn=build_fn,
-                r0=r0_series,
+                r0=cfe0_series,
                 n_iterations=n_iterations,
                 solver_options=iter_opts,
                 country="ES",
                 clean_carriers=clean_carriers,
             )
     else:
-        cfe_single = r0_series if r0_series is not None else 0.0
+        cfe_single = cfe0_series if cfe0_series is not None else 0.0
 
         def extra_functionality(net: pypsa.Network, snapshots: pd.Index) -> None:
             add_battery_constraints(net)
@@ -323,8 +323,8 @@ def solve_network(
             raise RuntimeError(
                 f"Optimization failed for policy='{policy}': {status} / {condition}"
             )
-        cfe_out = calculate_grid_share(n, country="ES", clean_carriers=clean_carriers)
-        n._grid_share = cfe_out
+        cfe_out = calculate_grid_cfe(n, country="ES", clean_carriers=clean_carriers)
+        n._grid_cfe = cfe_out
         convergence_df = pd.DataFrame(
             [
                 {
@@ -349,7 +349,7 @@ def solve_network(
         "solver": solver_name,
         "iterations": len(convergence_df),
         "max_delta": float(convergence_df["max_delta"].iloc[-1]),
-        "mean_grid_share_es": float(n._grid_share.mean()),
+        "mean_grid_cfe_es": float(n._grid_cfe.mean()),
     }
     for k, v in raw_kpis.items():
         if not isinstance(v, pd.Series):
@@ -384,7 +384,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="spain_wide",
         choices=["spain_wide", "local_region"],
     )
-    parser.add_argument("--r0-network", type=Path, default=None)
+    parser.add_argument("--cfe0-network", type=Path, default=None)
     parser.add_argument(
         "--excess-share",
         type=str,
@@ -430,7 +430,7 @@ def main(argv: list[str] | None = None) -> None:
         cfg["dc"] = dc_block
         w = smk.wildcards
         net_in, costs_in = Path(smk.input.network), Path(smk.input.costs)
-        r0_in = Path(smk.input.r0_network[0]) if smk.input.r0_network else None
+        cfe0_in = Path(smk.input.cfe0_network[0]) if smk.input.cfe0_network else None
         net_out = Path(smk.output.network)
         kpi_out, conv_out = Path(smk.output.kpis), Path(smk.output.convergence)
         policy, siting = str(w.policy), str(w.siting)
@@ -445,7 +445,7 @@ def main(argv: list[str] | None = None) -> None:
     else:
         args = _parse_args(argv)
         net_in, costs_in = args.network, args.costs
-        r0_in = args.r0_network
+        cfe0_in = args.cfe0_network
         net_out = args.output_network
         kpi_out, conv_out = args.output_kpis, args.output_convergence
         policy, siting = args.policy, args.siting
@@ -503,7 +503,7 @@ def main(argv: list[str] | None = None) -> None:
             if cfg.get("accounting", {}).get("excess_cap") is None
             else float(cfg["accounting"]["excess_cap"])
         ),
-        r0_source=r0_in,
+        cfe0_source=cfe0_in,
         clean_carriers="cfe" if policy.endswith("_cfe") else "res",
         n_iterations=int(iter_cfg.get("n_iterations", DEFAULT_N_ITERATIONS)),
         solver_name=str(cfg.get("solving", {}).get("solver", DEFAULT_SOLVER_NAME)),

@@ -30,8 +30,9 @@ Policy constraints:
   (volumetric matching; the residual load is bought from the grid).
 
 PPA-only policies set :math:`CFE_t \equiv 0`; grid-credit policies take the
-hourly grid CFE factor from ``calculate_grid_res`` (resolved with fixed forward
-passes in ``iterate``). The optional excess cap limits annual sales to the
+hourly grid CFE factor from ``calculate_grid_cfe`` (resolved with fixed forward
+passes in ``iterate``), which counts **renewables only** by default — nuclear
+enters only under the ``_cfe`` policy suffix. The optional excess cap limits annual sales to the
 grid: :math:`\sum_t ex_t \le \sigma \sum_t d_t`. Battery grid-charging
 enters through :math:`\underline{g}_{s,t}` in the balance and increases
 :math:`im_t`, so no post-processing clipping is ever performed.

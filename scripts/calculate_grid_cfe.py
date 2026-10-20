@@ -5,7 +5,13 @@
 Import-traced hourly grid renewable / CFE share calculation.
 
 Adapts ``PyPSA/247-cfe``'s ``calculate_grid_cfe`` for a multi-node network with
-cross-border lines and HVDC links. Storage discharge (PHS, battery), the data
+cross-border lines and HVDC links.
+
+**Nuclear is not counted by default**: ``clean_carriers="res"`` (the study default,
+consistent with the draft royal decree's renewable-only backing) restricts the factor
+to the renewable carriers; ``clean_carriers="cfe"`` additionally counts nuclear and is
+used only by the ``_cfe``-suffixed sensitivity policies, which are outside the study
+matrix. Storage discharge (PHS, battery), the data
 center's own PPA assets and fixed ``boundary`` flow components (France's measured
 external border flows, MWh only) are excluded from both numerator and denominator:
 a neighbour's clean share is its domestic generation mix.
@@ -370,7 +376,7 @@ def _infer_neighbours(
     return neighbours
 
 
-def calculate_grid_share(
+def calculate_grid_cfe(
     n: pypsa.Network,
     country: str = "ES",
     clean_carriers: Iterable[str] | str | None = None,
@@ -454,11 +460,11 @@ def calculate_grid_share(
             clean_num = clean_num + imp_nb * nb_share
             total_den = total_den + imp_nb
 
-    r_values = np.where(total_den > 0.0, clean_num / total_den, 0.0)
-    r_series = pd.Series(
-        r_values, index=n.snapshots, name=f"grid_share_{country}", dtype=float
+    cfe_values = np.where(total_den > 0.0, clean_num / total_den, 0.0)
+    cfe_series = pd.Series(
+        cfe_values, index=n.snapshots, name=f"grid_cfe_{country}", dtype=float
     )
     logger.info(
-        f"Computed grid share for {country} (neighbours={neighbour_list}): mean={r_series.mean():.4f}"
+        f"Computed grid CFE factor for {country} (neighbours={neighbour_list}): mean={cfe_series.mean():.4f}"
     )
-    return r_series
+    return cfe_series

@@ -21,7 +21,7 @@ from typing import Any
 import pandas as pd
 import pypsa
 
-from scripts.calculate_grid_res import calculate_grid_share
+from scripts.calculate_grid_cfe import calculate_grid_cfe
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +32,13 @@ DEFAULT_SOLVER_NAME: str = "highs"
 def _coerce_initial_cfe(
     n: pypsa.Network,
     cfe0: pd.Series | float | None,
-    grid_share_kwargs: Mapping[str, Any],
+    grid_cfe_kwargs: Mapping[str, Any],
 ) -> pd.Series:
     """Return the initial hourly grid CFE series ``CFE^(0)`` indexed by ``n.snapshots``."""
     snapshots = n.snapshots
     if cfe0 is None:
         if not n.generators_t.p.empty:
-            cfe_init = calculate_grid_share(n, **grid_share_kwargs)
+            cfe_init = calculate_grid_cfe(n, **grid_cfe_kwargs)
         else:
             cfe_init = pd.Series(0.0, index=snapshots, dtype=float)
     elif isinstance(cfe0, (int, float)):
@@ -80,9 +80,9 @@ def solve_with_grid_iteration(
         Solver options for ``n.optimize.solve_model``; ``solver_name`` may be
         included (default ``"highs"``). The caller supplies per-solver defaults.
     country : str, default "ES"
-        Country code for ``calculate_grid_share``.
+        Country code for ``calculate_grid_cfe``.
     clean_carriers : Iterable[str] | str | None, optional
-        Clean carrier set or mode (``"res"`` / ``"cfe"``) for ``calculate_grid_share``.
+        Clean carrier set or mode (``"res"`` / ``"cfe"``) for ``calculate_grid_cfe``.
 
     Returns
     -------
@@ -118,7 +118,7 @@ def solve_with_grid_iteration(
                 f"Optimization failed at iteration {iteration}: status={status}, condition={condition}"
             )
 
-        cfe_new = calculate_grid_share(n, **grid_kwargs)
+        cfe_new = calculate_grid_cfe(n, **grid_kwargs)
 
         cfe_new.index = n.snapshots
         cfe_new.index.name = n.snapshots.name
@@ -141,7 +141,7 @@ def solve_with_grid_iteration(
             f"objective={objective:.4f}, mean_cfe={cfe_new.mean():.4f}"
         )
 
-        n._grid_share = cfe_new
+        n._grid_cfe = cfe_new
         cfe = cfe_new
 
     convergence_df = pd.DataFrame(records)

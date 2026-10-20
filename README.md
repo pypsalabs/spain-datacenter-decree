@@ -73,7 +73,7 @@ Every modelling choice favors verifiability:
 composed_2025.nc    (pypsa-eur submodule, config-driven: clustering, profiles, 3h averaging)
    └► prepare_network.py     + data/custom + spain_cfe.patches     →  base.nc (per run, data year, variant)
         └► solve_network.py  attach DC, 24/7 CFE constraints,
-                             grid-share iteration (grid-credit)    →  solved.nc, kpis, convergence
+                             grid CFE iteration (grid-credit)    →  solved.nc, kpis, convergence
              ├► validate_network.py  solved no_dc wy2024 vs Redeia →  one validation report
              ├► make_summary.py      all KPIs                      →  scenarios.csv (+ baseline deltas)
              └► plot_summary.py                                    →  figures

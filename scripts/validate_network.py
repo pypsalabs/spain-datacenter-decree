@@ -24,7 +24,7 @@ import pandas as pd
 import pypsa
 import yaml
 
-from scripts.calculate_grid_res import _corridor_import
+from scripts.calculate_grid_cfe import _corridor_import
 
 logger = logging.getLogger(__name__)
 

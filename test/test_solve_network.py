@@ -124,12 +124,12 @@ def test_grid_credit_iterates_and_relaxes_build(toy_base, toy_costs) -> None:
         toy_base,
         toy_costs,
         "hourly_80_grid_credit",
-        r0_source=0.3,
+        cfe0_source=0.3,
         n_iterations=2,
     )
     assert len(conv) == 2
     assert kpis["max_delta"] < 0.05
-    assert 0.0 <= kpis["mean_grid_share_es"] <= 1.0
+    assert 0.0 <= kpis["mean_grid_cfe_es"] <= 1.0
     # grid credit makes the constraint easier than ppa_only at equal target
     attach_data_center(n2, dc_mw=100.0, costs=toy_costs, policy="hourly_80_ppa_only")
     _, _, kpis_ppa = solve_network(n2, policy="hourly_80_ppa_only")

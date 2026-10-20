@@ -39,7 +39,7 @@ def toy_costs() -> pd.DataFrame:
 
 @pytest.fixture
 def toy_base() -> pypsa.Network:
-    """Two Spanish hubs with a cheap dirty and an expensive clean background fleet."""
+    """Two Spanish nodes with a cheap dirty and an expensive clean background fleet."""
     n = pypsa.Network()
     n.set_snapshots(pd.date_range("2024-01-01", periods=HOURS, freq="h"))
     rng = np.random.default_rng(7)
@@ -95,7 +95,9 @@ def test_resolve_target_from_policy_names() -> None:
     assert resolve_target("annual_100_res") == pytest.approx(1.0)
     assert resolve_target("annual_80_res") == pytest.approx(0.80)
     assert resolve_target("annual_res") == pytest.approx(1.0)
-    assert resolve_target("hourly_80_grid_credit", 60.0) == pytest.approx(0.60)
+    assert resolve_target("hourly_80_grid_credit", 80.0) == pytest.approx(0.80)
+    with pytest.raises(ValueError, match="embeds target"):
+        resolve_target("hourly_80_grid_credit", 60.0)
 
 
 def test_unmatched_dc_imports_everything(toy_base, toy_costs) -> None:

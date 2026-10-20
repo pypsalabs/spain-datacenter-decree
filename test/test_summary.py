@@ -17,15 +17,15 @@ from scripts.make_summary import (
 def _make_suite3_summary_df() -> pd.DataFrame:
     """Build a synthetic multi-year, multi-resolution, multi-dc_mw scenario summary table."""
     rows: list[dict[str, object]] = []
-    for planning_year in (2025, 2030):
+    for planning_year in (2024, 2025):
         for weather_year in (2010, 2013, 2020):
             for resolution in ("1h", "3h"):
                 base_co2 = (
-                    20.0 + (2030 - planning_year) * 0.8 + (weather_year - 2010) * 0.1
+                    20.0 + (2025 - planning_year) * 0.8 + (weather_year - 2010) * 0.1
                 )
                 base_cost = (
                     1000.0
-                    + (planning_year - 2025) * 50.0
+                    + (planning_year - 2024) * 50.0
                     + (0.0 if resolution == "1h" else 5.0)
                 )
                 rows.append(
@@ -35,11 +35,12 @@ def _make_suite3_summary_df() -> pd.DataFrame:
                         "resolution": resolution,
                         "dc_mw": 0,
                         "policy": "no_dc",
+                        "excess_cap": 0.2,
                         "emissions": base_co2,
-                        "system_cost": base_cost,
+                        "objective": base_cost,
                     }
                 )
-                for dc_mw in (500, 1000, 1500, 3500, 6000):
+                for dc_mw in (500, 1000, 2000, 4000, 6000):
                     unm_co2 = base_co2 + 0.002 * dc_mw
                     unm_cost = base_cost + 0.5 * dc_mw
                     rows.append(
@@ -49,8 +50,9 @@ def _make_suite3_summary_df() -> pd.DataFrame:
                             "resolution": resolution,
                             "dc_mw": dc_mw,
                             "policy": "unmatched_dc",
+                            "excess_cap": 0.2,
                             "emissions": unm_co2,
-                            "system_cost": unm_cost,
+                            "objective": unm_cost,
                         }
                     )
                     rows.append(
@@ -60,8 +62,9 @@ def _make_suite3_summary_df() -> pd.DataFrame:
                             "resolution": resolution,
                             "dc_mw": dc_mw,
                             "policy": "hourly_80_grid_credit",
+                            "excess_cap": 0.2,
                             "emissions": base_co2 + 0.0004 * dc_mw,
-                            "system_cost": unm_cost + 0.1 * dc_mw,
+                            "objective": unm_cost + 0.1 * dc_mw,
                         }
                     )
                     rows.append(
@@ -71,8 +74,9 @@ def _make_suite3_summary_df() -> pd.DataFrame:
                             "resolution": resolution,
                             "dc_mw": dc_mw,
                             "policy": "hourly_80_ppa_only",
+                            "excess_cap": 0.2,
                             "emissions": base_co2 + 0.0002 * dc_mw,
-                            "system_cost": unm_cost + 0.15 * dc_mw,
+                            "objective": unm_cost + 0.15 * dc_mw,
                         }
                     )
     return pd.DataFrame(rows)
@@ -88,7 +92,7 @@ def test_unmatched_delta_zero() -> None:
 
     for col in (
         "delta_unmatched_dc_emissions",
-        "delta_unmatched_dc_system_cost",
+        "delta_unmatched_dc_objective",
         "dc_co2_reduction_vs_unmatched_pct",
     ):
         assert np.allclose(unm_rows[col].to_numpy(), 0.0, atol=1e-12), (
@@ -109,24 +113,28 @@ def test_baseline_keys() -> None:
     df = _make_suite3_summary_df()
     out = attach_baseline_deltas(df)
 
-    # Check a specific slice: (2025, 2013, '1h', dc_mw=3500, policy='hourly_80_grid_credit')
+    # Identifiers and bookkeeping must not get delta columns (regression)
+    assert "delta_no_dc_excess_cap" not in out.columns
+    assert "delta_unmatched_dc_excess_cap" not in out.columns
+
+    # Check a specific slice: (2025, 2013, '1h', dc_mw=4000, policy='hourly_80_grid_credit')
     row = out.loc[
         (out["planning_year"] == 2025)
         & (out["weather_year"] == 2013)
         & (out["resolution"] == "1h")
-        & (out["dc_mw"] == 3500)
+        & (out["dc_mw"] == 4000)
         & (out["policy"] == "hourly_80_grid_credit")
     ].iloc[0]
 
-    # Expected vs no_dc: 0.0004 * 3500 = 1.4 Mt CO2, (0.5 + 0.1) * 3500 = 2100.0 cost
-    assert row["delta_no_dc_emissions"] == pytest.approx(0.0004 * 3500, abs=1e-9)
-    assert row["delta_no_dc_system_cost"] == pytest.approx(0.6 * 3500, abs=1e-9)
+    # Expected vs no_dc: 0.0004 * 4000 = 1.4 Mt CO2, (0.5 + 0.1) * 3500 = 2100.0 cost
+    assert row["delta_no_dc_emissions"] == pytest.approx(0.0004 * 4000, abs=1e-9)
+    assert row["delta_no_dc_objective"] == pytest.approx(0.6 * 4000, abs=1e-9)
 
-    # Expected vs unmatched_dc at dc_mw=3500: (0.0004 - 0.002) * 3500 = -5.6 Mt CO2, +0.1 * 3500 = +350.0 cost
+    # Expected vs unmatched_dc at dc_mw=4000: (0.0004 - 0.002) * 3500 = -5.6 Mt CO2, +0.1 * 4000 = +350.0 cost
     assert row["delta_unmatched_dc_emissions"] == pytest.approx(
-        -0.0016 * 3500, abs=1e-9
+        -0.0016 * 4000, abs=1e-9
     )
-    assert row["delta_unmatched_dc_system_cost"] == pytest.approx(0.1 * 3500, abs=1e-9)
+    assert row["delta_unmatched_dc_objective"] == pytest.approx(0.1 * 4000, abs=1e-9)
 
     # Abatement percentage vs unmatched_dc: (0.002 - 0.0004) / 0.002 * 100 = 80.0%
     assert row["dc_co2_reduction_vs_unmatched_pct"] == pytest.approx(80.0, abs=1e-9)

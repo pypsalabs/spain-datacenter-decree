@@ -8,14 +8,13 @@ Takes the base network from ``prepare_network.py``, attaches the data center
 (flat load at the configured site, Aragon by default; best-resource-class PPA
 candidates; standalone battery; see ``scripts/data_center.py``), adds the policy constraint
 from ``scripts/cfe_constraints.py`` as linopy extra functionality, and solves
-with HiGHS dual simplex. Grid-credit policies resolve the bilinear grid-share
-term with the fixed-point iteration in ``scripts/iterate.py``, starting from the
-solved ``unmatched_dc`` network's import-traced hourly clean share
-(``scripts/calculate_grid_res.py``) and reusing the simplex basis across
-iterations. Writes the solved network, a one-row KPI table, and the iteration
-convergence log.
+with HiGHS (default) or Gurobi. Grid-credit policies resolve the bilinear
+grid-CFE term with fixed forward passes in ``scripts/iterate.py``, starting from
+the solved ``unmatched_dc`` network's import-traced hourly grid CFE factor
+(``scripts/calculate_grid_res.py``). Writes the solved network, a one-row KPI
+table, and the per-pass convergence log.
 
-Policies: ``no_dc``, ``unmatched_dc``, ``annual_100_res``, ``hourly_80_ppa_only``,
+Policies: ``no_dc``, ``unmatched_dc``, ``annual_{target}_res``, ``hourly_80_ppa_only``,
 ``hourly_80_grid_credit``, ``strict_hourly_80_ppa_only``,
 ``strict_hourly_80_grid_credit``; the ``_cfe`` suffix counts nuclear as clean.
 """
@@ -44,7 +43,6 @@ from scripts.iterate import (
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_EXCESS_SHARE: float = 0.20
 DEFAULT_TARGET: float = 0.80
 DEFAULT_LOAD_SHEDDING_COST: float = 10000.0
 DEFAULT_SOLVER_NAME: str = "highs"
@@ -107,10 +105,19 @@ def resolve_target(policy: str, target: float | str | None = None) -> float:
     policy_norm = str(policy).strip().lower()
     if policy_norm in NO_TARGET_POLICIES:
         return 0.0
+    m = re.search(r"(\d+(?:\.\d+)?)", policy_norm)
     if target is not None and float(target) > 0.0:
         val = float(target)
-        return val / 100.0 if val > 1.0 else val
-    m = re.search(r"(\d+(?:\.\d+)?)", policy_norm)
+        val = val / 100.0 if val > 1.0 else val
+        if m is not None:
+            embedded = float(m.group(1))
+            embedded = embedded / 100.0 if embedded > 1.0 else embedded
+            if abs(embedded - val) > 1e-9:
+                raise ValueError(
+                    f"Policy '{policy}' embeds target {embedded:.2f} but "
+                    f"target={val:.2f} was requested."
+                )
+        return val
     if m:
         val = float(m.group(1))
         return val / 100.0 if val > 1.0 else val
@@ -243,8 +250,9 @@ def solve_network(
 
     policy_norm = str(policy).strip().lower()
     tau = resolve_target(policy_norm, target)
-    # Sales cap sigma: None = unlimited sales (study default); for policies without
-    # a target the DC has no PPA assets, so ex_t is pinned to zero for clean KPIs.
+    # Sales cap sigma (study default 0.20 via config; None = uncapped, offered for
+    # tests only). For policies without a target the DC has no PPA assets, so ex_t
+    # is pinned to zero for clean KPIs.
     if policy_norm in NO_TARGET_POLICIES:
         sigma: float | None = 0.0
     else:
@@ -265,12 +273,12 @@ def solve_network(
     t_start = time.perf_counter()
     if "grid_credit" in policy_norm:
 
-        def build_fn(net: pypsa.Network, r_iter: pd.Series) -> None:
+        def build_fn(net: pypsa.Network, cfe_iter: pd.Series) -> None:
             add_battery_constraints(net)
             add_dc_cfe_constraints(
                 n=net,
                 dc_cfg=dc_cfg,
-                cfe_t=r_iter,
+                cfe_t=cfe_iter,
                 policy=constraint_policy,
                 target=tau,
                 excess_share=sigma,
@@ -292,14 +300,14 @@ def solve_network(
                 clean_carriers=clean_carriers,
             )
     else:
-        r_single = r0_series if r0_series is not None else 0.0
+        cfe_single = r0_series if r0_series is not None else 0.0
 
         def extra_functionality(net: pypsa.Network, snapshots: pd.Index) -> None:
             add_battery_constraints(net)
             add_dc_cfe_constraints(
                 n=net,
                 dc_cfg=dc_cfg,
-                cfe_t=r_single,
+                cfe_t=cfe_single,
                 policy=constraint_policy,
                 target=tau,
                 excess_share=sigma,
@@ -315,16 +323,16 @@ def solve_network(
             raise RuntimeError(
                 f"Optimization failed for policy='{policy}': {status} / {condition}"
             )
-        r_out = calculate_grid_share(n, country="ES", clean_carriers=clean_carriers)
-        n._grid_share = r_out
+        cfe_out = calculate_grid_share(n, country="ES", clean_carriers=clean_carriers)
+        n._grid_share = cfe_out
         convergence_df = pd.DataFrame(
             [
                 {
                     "iteration": 0,
                     "max_delta": 0.0,
                     "objective": float(n.objective),
-                    "mean_cfe_in": float(np.mean(r_single)),
-                    "mean_cfe_out": float(r_out.mean()),
+                    "mean_cfe_in": float(np.mean(cfe_single)),
+                    "mean_cfe_out": float(cfe_out.mean()),
                 }
             ]
         )
@@ -384,6 +392,18 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Sales cap sigma (sum ex_t <= sigma * sum d_t); empty or 'none' = unlimited.",
     )
     parser.add_argument("--n-iterations", type=int, default=DEFAULT_N_ITERATIONS)
+    parser.add_argument(
+        "--ppa-carriers",
+        type=str,
+        default="",
+        help="Comma-separated PPA candidate carriers (default: onwind,solar,solar-hsat).",
+    )
+    parser.add_argument(
+        "--discount-rate",
+        type=float,
+        default=DEFAULT_DISCOUNT_RATE,
+        help="WACC for DC PPA and battery annuities.",
+    )
     parser.add_argument(
         "--solver",
         type=str,
@@ -448,6 +468,13 @@ def main(argv: list[str] | None = None) -> None:
                 "site_buses": [
                     b.strip() for b in args.dc_nodes.split(",") if b.strip()
                 ],
+                "discount_rate": args.discount_rate,
+            },
+            "ppa": {
+                "carriers": [
+                    c.strip() for c in args.ppa_carriers.split(",") if c.strip()
+                ]
+                or None,
             },
             "solving": {"solver": args.solver},
         }

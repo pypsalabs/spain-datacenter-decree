@@ -121,7 +121,6 @@ solving:
     options: highs-simplex
 
 spain_cfe:
-  planning_years: [2025]
   # Scenario suites (cross products; make_summary collects the suite named by `suite`).
   # Policy set (agreed 2026-10-19): unmatched_dc = no-policy counterfactual;
   # annual_80/100_res = volumetric matching (Art. 8 alone / voluntary practice);
@@ -176,9 +175,6 @@ spain_cfe:
       hydro_inflow: true
       fr_nuclear_profile: true
       ma_ad_exports: true
-  weather_years:
-    reference: 2024
-    sensitivities: [2010, 2013, 2020]
   dc:
     # Each listed site hosts the FULL dc_mw (e.g. [aragon, madrid] means dc_mw at each).
     # Aragon is the study default: the GW-scale new-build pipeline is there (AWS 33.7bn EUR
@@ -200,12 +196,9 @@ spain_cfe:
       madrid: ES0 6AC
       aragon: ES0 7AC
       balearics: ES1 0AC
-    profile: flat
     discount_rate: 0.07
   ppa:
-    siting: spain_wide
     carriers: [onwind, solar, solar-hsat]
-    storage: [battery]
   accounting:
     # Cap sigma on annual electricity sales back to the grid:
     # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2023 convention).
@@ -214,9 +207,6 @@ spain_cfe:
     # not offered: the optimizer would overbuild at the DC node to sell into a
     # background system that is not in equilibrium.
     excess_cap: 0.20
-    res_carriers: [onwind, offwind-ac, offwind-dc, offwind-float, solar, solar-hsat, ror, hydro, biomass, csp]
-    cfe_extra_carriers: [nuclear]
-    excluded: [PHS, battery]
   solving:
     # LP solver for the study solves: highs (default; open-source, reproducible) or
     # gurobi (plain out-of-the-box defaults; ~5x faster, see README).
@@ -227,4 +217,3 @@ spain_cfe:
     # converges well). The convergence table reports objective and max |dCFE_t|
     # per pass as the signal that a scenario might need more passes.
     n_iterations: 2
-    init: unmatched_dc

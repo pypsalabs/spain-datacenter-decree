@@ -8,7 +8,6 @@ import pypsa
 import pytest
 
 from scripts.calculate_grid_res import (
-    calculate_grid_res,
     calculate_grid_share,
     get_clean_carriers,
 )
@@ -146,8 +145,8 @@ def test_import_tracing() -> None:
     """Verify hand-calculated import-traced RES and CFE shares across lines & links."""
     n = _make_import_tracing_network()
 
-    r_res = calculate_grid_res(n, country="ES", clean_carriers="res")
-    r_cfe = calculate_grid_res(n, country="ES", clean_carriers="cfe")
+    r_res = calculate_grid_share(n, country="ES", clean_carriers="res")
+    r_cfe = calculate_grid_share(n, country="ES", clean_carriers="cfe")
 
     # Hand-calculated expected values per snapshot:
     # t0:
@@ -202,7 +201,7 @@ def test_import_tracing() -> None:
 def test_storage_excluded() -> None:
     """Verify PHS and battery discharge/charge are excluded while hydro and ror count."""
     n = _make_import_tracing_network()
-    baseline_res = calculate_grid_res(n, country="ES", clean_carriers="res")
+    baseline_res = calculate_grid_share(n, country="ES", clean_carriers="res")
 
     # Add PHS StorageUnit, battery StorageUnit, and Store+Link battery discharger in ES with huge output
     n.add("StorageUnit", "ES_phs", bus="ES0", carrier="PHS")
@@ -221,7 +220,7 @@ def test_storage_excluded() -> None:
     n.links_t.p0["ES_batt_discharger"] = [250.0, 250.0, 250.0, 250.0]
     n.links_t.p1["ES_batt_discharger"] = [-240.0, -240.0, -240.0, -240.0]
 
-    with_storage_res = calculate_grid_res(n, country="ES", clean_carriers="res")
+    with_storage_res = calculate_grid_share(n, country="ES", clean_carriers="res")
     pd.testing.assert_series_equal(
         with_storage_res, baseline_res, check_names=False, atol=1e-12
     )
@@ -230,7 +229,7 @@ def test_storage_excluded() -> None:
 def test_dc_assets_excluded() -> None:
     """Verify data center PPA generators and batteries are excluded from grid share."""
     n = _make_import_tracing_network()
-    baseline_res = calculate_grid_res(n, country="ES", clean_carriers="res")
+    baseline_res = calculate_grid_share(n, country="ES", clean_carriers="res")
 
     # Add large DC PPA wind and solar generators on ES0
     n.add("Generator", "DC ES0 onwind", bus="ES0", carrier="onwind")
@@ -238,7 +237,7 @@ def test_dc_assets_excluded() -> None:
     n.generators_t.p["DC ES0 onwind"] = [900.0, 900.0, 900.0, 900.0]
     n.generators_t.p["DC_ES0_solar"] = [700.0, 700.0, 700.0, 700.0]
 
-    with_dc_res = calculate_grid_res(n, country="ES", clean_carriers="res")
+    with_dc_res = calculate_grid_share(n, country="ES", clean_carriers="res")
     pd.testing.assert_series_equal(
         with_dc_res, baseline_res, check_names=False, atol=1e-12
     )

@@ -54,9 +54,11 @@ rule build_upstream:
 
 def resolved_patches(wildcards):
     """Return the enabled patch names for a variant (config defaults + variant overrides)."""
-    cfg = config.get("spain_cfe", {})
-    patches = dict(cfg.get("patches", {}))
-    patches.update(cfg.get("variants", {}).get(wildcards.variant) or {})
+    cfg = config["spain_cfe"]
+    if wildcards.variant not in cfg["variants"]:
+        raise ValueError(f"Unknown variant '{wildcards.variant}'.")
+    patches = dict(cfg["patches"])
+    patches.update(cfg["variants"][wildcards.variant] or {})
     return ",".join(name for name, on in patches.items() if on)
 
 
@@ -73,7 +75,7 @@ def solve_r0_input(wildcards):
 wildcard_constraints:
     run=r"wy\d{4}",
     year=r"\d{4}",
-    variant=r"[a-z0-9_]+",
+    variant="|".join(config["spain_cfe"]["variants"]),
     policy=r"no_dc|unmatched_dc|annual_\d+_res|(?:strict_)?hourly_\d+_(?:ppa_only|grid_credit)(?:_cfe)?",
     target=r"\d+(?:\.\d+)?",
     dc_mw=r"\d+(?:\.\d+)?",
@@ -88,12 +90,8 @@ rule prepare_network:
     (hydro inflow, wind-factor derivation) key on the run's weather year instead.
     """
     input:
-        network=lambda w: (
-            f"pypsa-eur/resources/{w.run}/networks/composed_{config['planning_horizons'][0]}.nc"
-        ),
-        costs=lambda w: (
-            f"pypsa-eur/resources/{w.run}/costs_{config['planning_horizons'][0]}_processed.csv"
-        ),
+        network=lambda w: f"pypsa-eur/resources/{w.run}/networks/composed_{HORIZON}.nc",
+        costs=lambda w: f"pypsa-eur/resources/{w.run}/costs_{HORIZON}_processed.csv",
         boundary_flows="data/custom/fr_boundary_flows_2024.csv",
         custom_data=[
             "data/custom/national_capacities.csv",
@@ -105,6 +103,7 @@ rule prepare_network:
             "data/custom/pt_actuals.csv",
             "data/custom/wind_correction.csv",
             "data/custom/fr_nuclear_monthly_2024.csv",
+            "data/custom/sources/redata_2024_emisiones_co2_mensual.json",
         ],
     output:
         network="resources/{run}/networks/base_{year}_{variant}.nc",
@@ -128,12 +127,10 @@ rule prepare_network:
 
 
 rule solve_network:
-    """Attaches the data center, adds the 24/7 CFE policy constraint and solves with HiGHS."""
+    """Attaches the data center, adds the 24/7 CFE policy constraint and solves."""
     input:
         network="resources/{run}/networks/base_{year}_{variant}.nc",
-        costs=lambda w: (
-            f"pypsa-eur/resources/{w.run}/costs_{config['planning_horizons'][0]}_processed.csv"
-        ),
+        costs=lambda w: f"pypsa-eur/resources/{w.run}/costs_{HORIZON}_processed.csv",
         r0_network=solve_r0_input,
     output:
         network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}.nc",
@@ -150,6 +147,8 @@ rule solve_network:
         ),
         n_iterations=lambda w: config["spain_cfe"]["iteration"]["n_iterations"],
         solver=lambda w: config["spain_cfe"]["solving"]["solver"],
+        ppa_carriers=lambda w: ",".join(config["spain_cfe"]["ppa"]["carriers"]),
+        discount_rate=lambda w: config["spain_cfe"]["dc"]["discount_rate"],
         meta=lambda w: (
             f"planning_year={w.year},weather_year={str(w.run).removeprefix('wy')},variant={w.variant},"
             f"sites={'+'.join(config['spain_cfe']['dc']['sites'])}"
@@ -177,6 +176,8 @@ rule solve_network:
             --excess-share "{params.excess_share}" \
             --n-iterations "{params.n_iterations}" \
             --solver "{params.solver}" \
+            --ppa-carriers "{params.ppa_carriers}" \
+            --discount-rate "{params.discount_rate}" \
             --meta "{params.meta}" \
             {params.r0_arg}
         """
@@ -211,7 +212,7 @@ def policy_target(policy):
 
 def suite_kpis(wildcards):
     """KPI files of the selected suite: its cross product plus a no_dc row per run."""
-    year = config["planning_horizons"][0]
+    year = HORIZON
     suite = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
 
     def kpi(run, policy, target, dc_mw, siting):

@@ -13,8 +13,6 @@ import pytest
 
 from scripts.cfe_constraints import add_dc_cfe_constraints, dc_kpis
 
-CFE_DIR = Path(__file__).resolve().parents[1] / "scripts"
-
 
 def _build_toy_3bus_network() -> tuple[pypsa.Network, pd.Series]:
     """
@@ -26,9 +24,9 @@ def _build_toy_3bus_network() -> tuple[pypsa.Network, pd.Series]:
     - ``ES_South`` (remote solar PPA node)
 
     During night hours (0..7), grid electricity at ``ES_Madrid`` is cheap (10 EUR/MWh)
-    with moderate grid clean share ``r_t = 0.25``, while DC PPA solar/wind availability
+    with moderate grid clean share ``CFE_t = 0.25``, while DC PPA solar/wind availability
     is zero. During evening hours (16..23), grid power is expensive (120 EUR/MWh) and
-    dirty (``r_t = 0.0``), making it economic for the DC battery to charge from the
+    dirty (``CFE_t = 0.0``), making it economic for the DC battery to charge from the
     grid at night and discharge in the evening.
     """
     snapshots = pd.date_range("2025-01-01", periods=24, freq="h")
@@ -177,7 +175,7 @@ def test_kpi_equals_constraint_lhs() -> None:
         "Expected DC battery to charge from cheap night grid power"
     )
 
-    # During night hours with c_t > 0 and G_t = d_t = 0, virtual balance forces m_t = L_t + c_t > L_t
+    # During night hours with c_t > 0 and g_t = dis_t = 0, virtual balance forces im_t = d_t + cha_t > L_t
     m_sol = n.model.solution["DC-im"].to_pandas()
     assert (m_sol.iloc[0:8] > 100.0 - 1e-6).any()
 
@@ -261,8 +259,9 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
 
 def test_no_clip_in_kpis() -> None:
     """AST scan asserting no ``.clip(...)`` calls exist anywhere in ``scripts/``."""
-    py_files = sorted(CFE_DIR.glob("*.py"))
-    assert py_files, f"No Python files found in {CFE_DIR}"
+    scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
+    py_files = sorted(scripts_dir.glob("*.py"))
+    assert py_files, f"No Python files found in {scripts_dir}"
 
     offenders: list[str] = []
     for path in py_files:

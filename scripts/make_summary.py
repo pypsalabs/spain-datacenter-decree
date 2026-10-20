@@ -31,20 +31,23 @@ UNMATCHED_DC_BASELINE_KEYS: tuple[str, ...] = (
     "resolution",
     "dc_mw",
 )
+# Scenario identifiers and run bookkeeping: excluded from delta metrics
 IDENTIFIER_COLUMNS: frozenset[str] = frozenset(
     {
         "planning_year",
         "weather_year",
+        "variant",
+        "sites",
         "resolution",
         "dc_mw",
-        "dc_load_mw",
         "policy",
-        "policy_type",
         "target",
         "siting",
-        "suite",
-        "scenario",
-        "excess_share",
+        "excess_cap",
+        "solver",
+        "solve_time_s",
+        "iterations",
+        "max_delta",
     }
 )
 MIN_INDUCED_DENOMINATOR: float = 1.0e-9
@@ -52,9 +55,9 @@ MIN_INDUCED_DENOMINATOR: float = 1.0e-9
 
 def _resolve_key_columns(df: pd.DataFrame) -> tuple[list[str], list[str], str]:
     """Return ``(no_dc_keys, unmatched_keys, policy_col)`` validated against ``df``."""
-    policy_col = "policy" if "policy" in df.columns else "policy_type"
+    policy_col = "policy"
     if policy_col not in df.columns:
-        raise KeyError("DataFrame must contain a 'policy' (or 'policy_type') column.")
+        raise KeyError("DataFrame must contain a 'policy' column.")
 
     no_dc_keys = [k for k in NO_DC_BASELINE_KEYS if k in df.columns]
     if len(no_dc_keys) != len(NO_DC_BASELINE_KEYS):
@@ -63,11 +66,10 @@ def _resolve_key_columns(df: pd.DataFrame) -> tuple[list[str], list[str], str]:
             f"DataFrame is missing required no_dc key columns: {sorted(missing)}"
         )
 
-    dc_mw_col = "dc_mw" if "dc_mw" in df.columns else "dc_load_mw"
-    if dc_mw_col not in df.columns:
-        raise KeyError("DataFrame must contain a 'dc_mw' (or 'dc_load_mw') column.")
+    if "dc_mw" not in df.columns:
+        raise KeyError("DataFrame must contain a 'dc_mw' column.")
 
-    unmatched_keys = [*no_dc_keys, dc_mw_col]
+    unmatched_keys = [*no_dc_keys, "dc_mw"]
     return no_dc_keys, unmatched_keys, policy_col
 
 
@@ -82,9 +84,8 @@ def attach_baseline_deltas(
     - ``unmatched_dc`` baseline matches on
       ``(planning_year, weather_year, resolution, dc_mw)``.
 
-    For each numeric metric column ``col``, creates:
-    - ``delta_no_dc_{col}`` and ``{col}_delta_no_dc``
-    - ``delta_unmatched_dc_{col}``, ``delta_unmatched_{col}``, and ``{col}_delta_unmatched``
+    For each numeric metric column ``col``, creates ``delta_no_dc_{col}`` and
+    ``delta_unmatched_dc_{col}``.
 
     If an emissions column (e.g. ``emissions`` or ``es_total_co2_mt``) is present,
     also computes ``dc_co2_reduction_vs_unmatched_pct`` where every ``unmatched_dc``
@@ -102,9 +103,7 @@ def attach_baseline_deltas(
         metric_cols = [
             c
             for c in out.select_dtypes(include=[np.number]).columns
-            if c not in IDENTIFIER_COLUMNS
-            and not c.startswith("delta_")
-            and "_delta_" not in c
+            if c not in IDENTIFIER_COLUMNS and not c.startswith("delta_")
         ]
 
     no_dc_df = (
@@ -133,7 +132,7 @@ def attach_baseline_deltas(
         out[f"delta_unmatched_dc_{col}"] = delta_unm
 
     # Compute DC-induced emissions abatement percentage if an emissions column exists
-    co2_candidates = ("emissions", "es_total_co2_mt", "co2_mt", "co2_emissions")
+    co2_candidates = ("emissions", "es_total_co2_mt")
     for co2_col in co2_candidates:
         if co2_col in metric_cols:
             base_no_dc_co2 = (

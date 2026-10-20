@@ -63,14 +63,13 @@ def test_every_custom_csv_has_source() -> None:
         f"Expected >=30 source_ids in doc/data_sources.md, got {len(registry)}"
     )
 
-    target_csvs = [
-        "annual_demand.csv",
-        "chp.csv",
-        "national_capacities.csv",
-        "ntc.csv",
-        "prices.csv",
-        "validation_2024_es.csv",
-    ]
+    target_csvs = sorted(
+        p.name
+        for p in CUSTOM_DATA_DIR.glob("*.csv")
+        if p.name
+        != "fr_boundary_flows_2024.csv"  # time series derived from a registered source
+    )
+    assert len(target_csvs) >= 8
     for csv_name in target_csvs:
         csv_path = CUSTOM_DATA_DIR / csv_name
         assert csv_path.exists(), f"Missing custom CSV: {csv_path}"
@@ -88,7 +87,7 @@ def test_every_custom_csv_has_source() -> None:
                     f"source_id {sid!r} in {csv_path.name} is not documented in doc/data_sources.md"
                 )
                 entry = registry[sid]
-                if sid != "study_assumption_user_confirmed":
+                if not sid.startswith("study_"):
                     assert str(entry["url"]).startswith("http"), (
                         f"source_id {sid!r} missing valid URL: {entry['url']!r}"
                     )

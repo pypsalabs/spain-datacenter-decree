@@ -30,8 +30,8 @@ Policy constraints:
   (volumetric matching; the residual load is bought from the grid).
 
 PPA-only policies set :math:`CFE_t \equiv 0`; grid-credit policies take the
-hourly grid CFE factor from ``calculate_grid_res`` (iterated to a fixed
-point in ``iterate``). The optional excess cap limits annual sales to the
+hourly grid CFE factor from ``calculate_grid_res`` (resolved with fixed forward
+passes in ``iterate``). The optional excess cap limits annual sales to the
 grid: :math:`\sum_t ex_t \le \sigma \sum_t d_t`. Battery grid-charging
 enters through :math:`\underline{g}_{s,t}` in the balance and increases
 :math:`im_t`, so no post-processing clipping is ever performed.
@@ -53,104 +53,42 @@ def _resolve_dc_components(
     n: pypsa.Network,
     dc_cfg: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Resolve DC PPA generators, battery links, and load time series from ``dc_cfg``."""
+    """Resolve DC PPA generators, battery links, and load series by name prefix."""
     cfg = dc_cfg or {}
     prefix = str(cfg.get("prefix", DEFAULT_DC_PREFIX))
 
-    # 1. PPA Generators (at any node)
-    gen_keys = ("generators", "ppa_generators", "dc_generators")
-    dc_gens: list[str] | None = None
-    for k in gen_keys:
-        if k in cfg and cfg[k] is not None:
-            dc_gens = [g for g in cfg[k] if g in n.generators.index]
-            break
-    if dc_gens is None:
-        dc_gens = [
-            g
-            for g in n.generators.index
-            if str(g).startswith(prefix)
-            and str(n.generators.at[g, "carrier"])
-            not in {"load", "virtual_link", "dsm"}
-        ]
+    dc_gens = [
+        g
+        for g in n.generators.index
+        if str(g).startswith(prefix)
+        and str(n.generators.at[g, "carrier"]) not in {"load"}
+    ]
 
-    # 2. Battery chargers & dischargers
-    charger_keys = ("chargers", "battery_chargers", "storage_chargers")
-    chargers: list[str] | None = None
-    for k in charger_keys:
-        if k in cfg and cfg[k] is not None:
-            chargers = [lk for lk in cfg[k] if lk in n.links.index]
-            break
-    if chargers is None:
-        chargers = [
-            lk
-            for lk in n.links.index
-            if str(lk).startswith(prefix)
-            and "charger" in str(n.links.at[lk, "carrier"]).lower()
-            and "discharger" not in str(n.links.at[lk, "carrier"]).lower()
-        ]
-        if not chargers:
-            chargers = [
-                lk
-                for lk in n.links.index
-                if str(lk).startswith(prefix)
-                and "charger" in str(lk).lower()
-                and "discharger" not in str(lk).lower()
-            ]
+    def _links_with(token: str, without: str | None = None) -> list[str]:
+        out = []
+        for lk in n.links.index:
+            if not str(lk).startswith(prefix):
+                continue
+            carrier = str(n.links.at[lk, "carrier"]).lower()
+            name = str(lk).lower()
+            hit = token in carrier or token in name
+            miss = without is not None and (without in carrier or without in name)
+            if hit and not miss:
+                out.append(lk)
+        return out
 
-    discharger_keys = ("dischargers", "battery_dischargers", "storage_dischargers")
-    dischargers: list[str] | None = None
-    for k in discharger_keys:
-        if k in cfg and cfg[k] is not None:
-            dischargers = [lk for lk in cfg[k] if lk in n.links.index]
-            break
-    if dischargers is None:
-        dischargers = [
-            lk
-            for lk in n.links.index
-            if str(lk).startswith(prefix)
-            and "discharger" in str(n.links.at[lk, "carrier"]).lower()
-        ]
-        if not dischargers:
-            dischargers = [
-                lk
-                for lk in n.links.index
-                if str(lk).startswith(prefix) and "discharger" in str(lk).lower()
-            ]
+    chargers = _links_with("charger", without="discharger")
+    dischargers = _links_with("discharger")
 
-    # 3. DC Load profile L_t
     snapshots = n.snapshots
-    load_series: pd.Series | None = None
-    if "load_series" in cfg and cfg["load_series"] is not None:
-        raw_l = cfg["load_series"]
-        if isinstance(raw_l, pd.Series):
-            load_series = raw_l.reindex(snapshots).fillna(0.0).astype(float)
-        else:
-            load_series = pd.Series(float(raw_l), index=snapshots, dtype=float)
-    elif "load_mw" in cfg and cfg["load_mw"] is not None and "loads" not in cfg:
-        load_series = pd.Series(float(cfg["load_mw"]), index=snapshots, dtype=float)
-    else:
-        load_keys = ("loads", "dc_loads")
-        dc_loads: list[str] | None = None
-        for k in load_keys:
-            if k in cfg and cfg[k] is not None:
-                if isinstance(cfg[k], pd.Series):
-                    load_series = cfg[k].reindex(snapshots).fillna(0.0).astype(float)
-                elif isinstance(cfg[k], (int, float)):
-                    load_series = pd.Series(float(cfg[k]), index=snapshots, dtype=float)
-                else:
-                    dc_loads = [ld for ld in cfg[k] if ld in n.loads.index]
-                break
-        if load_series is None:
-            if dc_loads is None:
-                dc_loads = [ld for ld in n.loads.index if str(ld).startswith(prefix)]
-            load_series = pd.Series(0.0, index=snapshots, dtype=float)
-            for ld in dc_loads:
-                if not n.loads_t.p_set.empty and ld in n.loads_t.p_set.columns:
-                    load_series = load_series + n.loads_t.p_set[ld].reindex(
-                        snapshots
-                    ).fillna(0.0)
-                elif "p_set" in n.loads.columns:
-                    load_series = load_series + float(n.loads.at[ld, "p_set"])
+    load_series = pd.Series(0.0, index=snapshots, dtype=float)
+    for ld in n.loads.index:
+        if not str(ld).startswith(prefix):
+            continue
+        if not n.loads_t.p_set.empty and ld in n.loads_t.p_set.columns:
+            load_series += n.loads_t.p_set[ld].reindex(snapshots).fillna(0.0)
+        elif "p_set" in n.loads.columns:
+            load_series += float(n.loads.at[ld, "p_set"])
 
     load_series.index = snapshots
     load_series.index.name = snapshots.name
@@ -172,7 +110,7 @@ def _effective_cfe_factor(
     """Return the effective hourly grid CFE factor ``CFE_t`` (zeros for PPA-only policies)."""
     snapshots = n.snapshots
     policy_norm = policy.strip().lower()
-    if "ppa_only" in policy_norm or "ppa-only" in policy_norm or cfe_t is None:
+    if "ppa_only" in policy_norm or cfe_t is None:
         cfe = pd.Series(0.0, index=snapshots, dtype=float)
     elif isinstance(cfe_t, (int, float)):
         cfe = pd.Series(float(cfe_t), index=snapshots, dtype=float)
@@ -271,7 +209,7 @@ def add_dc_cfe_constraints(
     matched_t = d - (1.0 - cfe) * im
     matched_total = (weights * matched_t).sum()
 
-    if policy_norm in {"no_dc", "unmatched_dc", "ref", "none"}:
+    if policy_norm in {"no_dc", "unmatched_dc"}:
         logger.info(
             f"Added DC virtual balance with no CFE target for policy='{policy}'."
         )
@@ -295,7 +233,7 @@ def add_dc_cfe_constraints(
             name="DC-strict-hourly-cfe",
         )
         logger.info(f"Added DC strict hourly CFE constraint (x={target:.3f}).")
-    elif policy_norm.startswith("hourly") or policy_norm == "cfe":
+    elif policy_norm.startswith("hourly"):
         n.model.add_constraints(
             matched_total >= float(target) * total_demand,
             name="DC-hourly-cfe",
@@ -320,11 +258,7 @@ def add_dc_cfe_constraints(
         "target": float(target),
         "excess_share": float(excess_share) if excess_share is not None else None,
         "matched_expr": matched_total,
-        "matched_per_t_expr": matched_t,
     }
-
-
-add_cfe_constraints = add_dc_cfe_constraints
 
 
 def dc_kpis(
@@ -417,14 +351,12 @@ def dc_kpis(
 
     return {
         "cfe_score": cfe_score,
-        "hourly_score": cfe_score,
         "ppa_only_score": ppa_only_score,
         "annual_res_score": annual_res_score,
         "constraint_lhs": constraint_lhs,
         "constraint_lhs_from_balance": constraint_lhs_from_balance,
         "model_constraint_lhs": model_constraint_lhs,
         "constraint_lhs_per_t": matched_t,
-        "hourly_matched_mwh": matched_t,
         "total_load_mwh": total_load_mwh,
         "ppa_generation_mwh": ppa_gen_mwh,
         "battery_discharge_mwh": float((weights * dis_s).sum()),
@@ -432,6 +364,5 @@ def dc_kpis(
         "grid_import_mwh": float((weights * im_s).sum()),
         "grid_clean_import_mwh": float((weights * cfe_s * im_s).sum()),
         "export_mwh": export_mwh,
-        "excess_mwh": export_mwh,
         "excess_share": export_mwh / total_load_mwh if total_load_mwh > 0.0 else 0.0,
     }

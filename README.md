@@ -41,15 +41,14 @@ group, can check the numbers, challenge them, and build on them.
 
 ## Model
 
-Every modelling choice favors verifiability: anyone can diff this repository against
-vanilla PyPSA-Eur and see exactly what the study adds.
+Every modelling choice favors verifiability:
 
 - Base model: PyPSA-Eur v2026.09.0 as a pinned git submodule. No upstream file is
   modified; every study choice lives in the `config/` overlay and this repository.
 - Geography: 15 nodes, with 9 in Spain (8 mainland + Balearics), 4 in France and
   2 in Portugal.
-- France's outer borders (BE, DE, CH, IT, GB, LU): fixed to measured hourly 2024
-  flows (RTE/ENTSO-E).
+- France's outer borders (GB, IT, CH, DE+BE combined): fixed to measured hourly
+  2024 flows (RTE eCO2mix via ODRE).
 - Temporal resolution: full year at 3-hourly resolution (2920 snapshots,
   averaged from hourly inputs upstream; each
   snapshot carries a weight of 3 hours in dispatch, storage and cost accounting).
@@ -65,14 +64,14 @@ vanilla PyPSA-Eur and see exactly what the study adds.
   `spain_wide` (contract anywhere in Spain, letting the optimizer choose the locations).
 - Fleet: frozen background fleet, calibrated to cited national data
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
-  center's PPA assets are extendable.
+  center's PPA and battery assets are extendable.
 - Solver: HiGHS by default, so anyone can reproduce a study without a license; Gurobi via `spain_cfe.solving.solver`. One full-year dispatch solves in ~2 min (HiGHS) or ~25 s (Gurobi) at ~4 GB RAM.
 
 ## Workflow architecture
 
 ```
-composed_{year}.nc  (pypsa-eur submodule, config-driven: clustering, profiles, 3h averaging)
-   └► prepare_network.py     + data/custom + config.patches        →  base.nc (per run, per variant)
+composed_2025.nc    (pypsa-eur submodule, config-driven: clustering, profiles, 3h averaging)
+   └► prepare_network.py     + data/custom + spain_cfe.patches     →  base.nc (per run, data year, variant)
         └► solve_network.py  attach DC, 24/7 CFE constraints,
                              grid-share iteration (grid-credit)    →  solved.nc, kpis, convergence
              ├► validate_network.py  solved no_dc wy2024 vs Redeia →  one validation report
@@ -83,8 +82,9 @@ composed_{year}.nc  (pypsa-eur submodule, config-driven: clustering, profiles, 3
 `prepare_network.py` is a patch engine: it applies a config-controlled list of
 cited corrections, each individually switchable. The philosophy is (i) build electricity system with pypsa-eur workflow, (ii) validate it against actual data (2024 back-cast), (iii) apply necessary data improvements for this study, and (iv) re-validate.
 
-The patch set (fleet capacities, wind correction, PHS split, CHP, CSP, biomass
-availability, NTC caps, demand, hydro inflow, MA/AD exports) is defined in
+The patch set (France border closure, fleet capacities, wind correction, PHS split,
+CHP, CSP, biomass availability, prices, NTC caps, demand, hydro inflow, FR nuclear
+seasonality, MA/AD exports) is defined in
 `config/config.spain.yaml` under `spain_cfe.patches`; what each patch does, why it
 exists and what it changed in the 2024 back-cast is documented in
 [doc/validation_log.md](doc/validation_log.md).
@@ -93,8 +93,9 @@ exists and what it changed in the 2024 back-cast is documented in
 
 The study keeps what we measure strictly separate from what we assume. The `{year}`
 wildcard is the data vintage; the run is the weather year. Fleet, demand, price and NTC
-patches read rows for `{year}`, while weather-measurement closures (France border flows,
-hydro inflow, the wind-bias derivation) key on the run's weather year.
+patches read rows for `{year}`; hydro inflow keys on the run's weather year; the France
+border flows are the measured 2024 series in every run; the wind-bias factor is derived on the back-cast and applied to other
+data years as fixed cited constants.
 
 | Stage | run (weather) | `{year}` (data) | variant | artifacts |
 |---|---|---|---|---|
@@ -124,7 +125,7 @@ with. The path must contain no spaces.
 
 ## Workflow
 
-Two commands run everything. The first invocation also installs the pinned environment.
+Two commands run everything. The first call also installs the pinned environment.
 
 ```bash
 # full case study: upstream build, scenario solves, summary, figures
@@ -138,7 +139,7 @@ France's measured border flows ship with the repository
 (`data/custom/fr_boundary_flows_2024.csv`, regenerable with
 `scripts/retrieve_fr_boundary_flows.py --download`). Every intermediate target (prepared
 network, single scenario solve, report) stays addressable by its filename; see
-`Snakefile`. For interactive work, activate the environment once with
+`Snakefile`. For interactive work, activate the environment with
 `pixi shell --manifest-path pypsa-eur/pixi.toml`.
 
 ## Validation preview

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Iegor Riepin
 #
 # SPDX-License-Identifier: MIT
-"""Unit tests for the fixed-point grid-CFE iteration loop."""
+"""Unit tests for the forward-pass grid-CFE iteration."""
 
 import pandas as pd
 import pypsa
@@ -107,11 +107,11 @@ def test_forward_passes_reach_fixed_point() -> None:
     expected_r_star = 0.60
     expected_g_star = 50.0
 
-    def build_fn(net: pypsa.Network, r_iter: pd.Series) -> None:
+    def build_fn(net: pypsa.Network, cfe_iter: pd.Series) -> None:
         add_dc_cfe_constraints(
             n=net,
             dc_cfg={"prefix": "DC"},
-            cfe_t=r_iter,
+            cfe_t=cfe_iter,
             policy="hourly_80_grid_credit",
             target=target,
             excess_share=0.20,

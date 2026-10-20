@@ -15,12 +15,13 @@ demands, cite every correction (inputs in ``data/custom``, sources in
 Two year dimensions: the **data year** (the ``{year}`` wildcard: 2024 rows for the
 back-cast calibration, 2025 rows for the case study) selects the cited data vintage
 for fleet, demand, prices and NTCs, while the **weather year** (from the run) keys
-the weather-measurement patches (``hydro_inflow``, and the back-cast derivation in
-``wind_correction``).
+``hydro_inflow`` and guards the back-cast derivation in ``wind_correction``. The
+France border flows are the measured 2024 series in every run (non-2024 weather
+years will need a documented remap before stage-iv sensitivities).
 
 Patches
 -------
-- ``boundary_flows``: France's external borders (BE, DE, CH, IT, GB) fixed to measured
+- ``boundary_flows``: France's external borders (GB, IT, CH, DE+BE combined) fixed to measured
   hourly 2024 flows (RTE eCO2mix), attached as fixed generators (imports) and loads
   (exports) at the nearest French node. MWh only; no clean shares are traced beyond
   France. Model closure, not calibration: on in every variant.
@@ -72,13 +73,10 @@ logger = logging.getLogger(__name__)
 
 # Border coordinates used to pick the nearest node for fixed border flows.
 FR_NEIGHBOUR_COORDS: dict[str, tuple[float, float]] = {
-    "BE": (4.35, 50.50),
-    "DE": (7.80, 48.80),
     "DE_BE": (5.90, 49.90),
     "CH": (6.80, 46.80),
     "IT": (7.00, 45.10),
     "GB": (0.50, 50.80),
-    "LU": (6.13, 49.61),
 }
 ES_BORDER_COORDS: dict[str, tuple[float, float]] = {
     "MA": (-5.60, 36.00),
@@ -1017,7 +1015,7 @@ def main(argv: list[str] | None = None) -> None:
         enabled = [p.strip() for p in str(smk.params.patches).split(",") if p.strip()]
         ctx: dict[str, Any] = {
             "boundary_flows": Path(smk.input.boundary_flows),
-            "custom_dir": Path(smk.params.custom_dir),
+            "custom_dir": Path("data/custom"),
             "costs": Path(smk.input.costs),
             "data_year": int(smk.wildcards.year),
             "weather_year": int(smk.params.weather_year),

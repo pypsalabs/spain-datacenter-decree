@@ -27,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_N_ITERATIONS: int = 2
 DEFAULT_SOLVER_NAME: str = "highs"
-DEFAULT_SOLVER_OPTIONS: dict[str, Any] = {"solver": "simplex"}
 
 
 def _coerce_initial_cfe(
@@ -60,13 +59,9 @@ def solve_with_grid_iteration(
     solver_options: Mapping[str, Any] | None = None,
     country: str = "ES",
     clean_carriers: Iterable[str] | str | None = None,
-    excluded_carriers: Iterable[str] | None = None,
-    exclude_assets: Iterable[str] | None = None,
-    neighbours: Iterable[str] | None = None,
-    grid_share_fn: Callable[[pypsa.Network], pd.Series] | None = None,
 ) -> tuple[pypsa.Network, pd.DataFrame]:
     """
-    Solve ``n_iterations`` forward passes for ``CFE_t`` with HiGHS Simplex.
+    Solve ``n_iterations`` forward passes for ``CFE_t``.
 
     Parameters
     ----------
@@ -82,21 +77,12 @@ def solve_with_grid_iteration(
         Number of forward passes. Each pass solves once and recomputes
         ``CFE_t`` from the solved dispatch by plain replacement.
     solver_options : Mapping[str, Any] | None, optional
-        Additional options passed to ``n.optimize.solve_model(solver_name="highs", ...)``.
-        Defaults to ``{"solver": "simplex"}``.
+        Solver options for ``n.optimize.solve_model``; ``solver_name`` may be
+        included (default ``"highs"``). The caller supplies per-solver defaults.
     country : str, default "ES"
         Country code for ``calculate_grid_share``.
     clean_carriers : Iterable[str] | str | None, optional
         Clean carrier set or mode (``"res"`` / ``"cfe"``) for ``calculate_grid_share``.
-    excluded_carriers : Iterable[str] | None, optional
-        Excluded storage carriers for ``calculate_grid_share``.
-    exclude_assets : Iterable[str] | None, optional
-        Excluded DC assets or prefixes for ``calculate_grid_share``.
-    neighbours : Iterable[str] | None, optional
-        Neighbouring country codes for import tracing.
-    grid_share_fn : Callable[[pypsa.Network], pd.Series] | None, optional
-        Optional custom function ``grid_share_fn(n) -> pd.Series`` overriding
-        ``calculate_grid_share``.
 
     Returns
     -------
@@ -107,22 +93,14 @@ def solve_with_grid_iteration(
     if n_iterations < 1:
         raise ValueError(f"n_iterations must be >= 1; got {n_iterations}.")
 
-    eff_exclude = set(exclude_assets) if exclude_assets is not None else {"DC"}
-    eff_exclude.add("DC")
-
     grid_kwargs: dict[str, Any] = {
         "country": country,
         "clean_carriers": clean_carriers,
-        "excluded_carriers": excluded_carriers,
-        "exclude_assets": eff_exclude,
-        "neighbours": neighbours,
     }
 
     cfe = _coerce_initial_cfe(n, r0, grid_kwargs)
 
-    opts: dict[str, Any] = dict(DEFAULT_SOLVER_OPTIONS)
-    if solver_options is not None:
-        opts.update(solver_options)
+    opts: dict[str, Any] = dict(solver_options or {})
     solver_name = str(opts.pop("solver_name", DEFAULT_SOLVER_NAME))
 
     records: list[dict[str, Any]] = []
@@ -140,10 +118,7 @@ def solve_with_grid_iteration(
                 f"Optimization failed at iteration {iteration}: status={status}, condition={condition}"
             )
 
-        if grid_share_fn is not None:
-            cfe_new = grid_share_fn(n).reindex(n.snapshots).fillna(0.0).astype(float)
-        else:
-            cfe_new = calculate_grid_share(n, **grid_kwargs)
+        cfe_new = calculate_grid_share(n, **grid_kwargs)
 
         cfe_new.index = n.snapshots
         cfe_new.index.name = n.snapshots.name

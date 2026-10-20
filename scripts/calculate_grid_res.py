@@ -34,9 +34,6 @@ DEFAULT_RES_CARRIERS: tuple[str, ...] = (
     "csp",
 )
 DEFAULT_CFE_EXTRA_CARRIERS: tuple[str, ...] = ("nuclear",)
-DEFAULT_CFE_CARRIERS: tuple[str, ...] = (
-    DEFAULT_RES_CARRIERS + DEFAULT_CFE_EXTRA_CARRIERS
-)
 DEFAULT_EXCLUDED_CARRIERS: tuple[str, ...] = (
     "PHS",
     "battery",
@@ -465,6 +462,3 @@ def calculate_grid_share(
         f"Computed grid share for {country} (neighbours={neighbour_list}): mean={r_series.mean():.4f}"
     )
     return r_series
-
-
-calculate_grid_res = calculate_grid_share

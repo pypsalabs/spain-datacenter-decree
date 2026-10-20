@@ -363,11 +363,11 @@ def attach_data_center(
     )
     one_way_eff = float(np.sqrt(inv_cost["efficiency"]))
 
-    for hub_bus in sites:
-        bat_bus_name = f"DC {hub_bus} battery"
-        bat_store_name = f"DC {hub_bus} battery"
-        charger_name = f"DC {hub_bus} battery charger"
-        discharger_name = f"DC {hub_bus} battery discharger"
+    for site_bus in sites:
+        bat_bus_name = f"DC {site_bus} battery"
+        bat_store_name = f"DC {site_bus} battery"
+        charger_name = f"DC {site_bus} battery charger"
+        discharger_name = f"DC {site_bus} battery discharger"
 
         for comp, df_idx, name in (
             ("Link", n.links.index, charger_name),
@@ -378,10 +378,10 @@ def attach_data_center(
             if name in df_idx:
                 n.remove(comp, name)
 
-        hub_x = float(n.buses.at[hub_bus, "x"]) if "x" in n.buses.columns else 0.0
-        hub_y = float(n.buses.at[hub_bus, "y"]) if "y" in n.buses.columns else 0.0
-        hub_ct = (
-            str(n.buses.at[hub_bus, "country"])
+        site_x = float(n.buses.at[site_bus, "x"]) if "x" in n.buses.columns else 0.0
+        site_y = float(n.buses.at[site_bus, "y"]) if "y" in n.buses.columns else 0.0
+        site_ct = (
+            str(n.buses.at[site_bus, "country"])
             if "country" in n.buses.columns
             else "ES"
         )
@@ -390,10 +390,10 @@ def attach_data_center(
             "Bus",
             bat_bus_name,
             carrier="DC battery",
-            location=hub_bus,
-            country=hub_ct,
-            x=hub_x,
-            y=hub_y,
+            location=site_bus,
+            country=site_ct,
+            x=site_x,
+            y=site_y,
         )
         n.add(
             "Store",
@@ -410,7 +410,7 @@ def attach_data_center(
         n.add(
             "Link",
             charger_name,
-            bus0=hub_bus,
+            bus0=site_bus,
             bus1=bat_bus_name,
             carrier="DC battery charger",
             efficiency=one_way_eff,
@@ -424,7 +424,7 @@ def attach_data_center(
             "Link",
             discharger_name,
             bus0=bat_bus_name,
-            bus1=hub_bus,
+            bus1=site_bus,
             carrier="DC battery discharger",
             efficiency=one_way_eff,
             capital_cost=0.0,
@@ -436,7 +436,7 @@ def attach_data_center(
         logger.info(
             "Added DC battery at site '%s': Store cap_cost=%.2f EUR/MWh/a, "
             "Inverter cap_cost=%.2f EUR/MW/a, one_way_eff=%.4f",
-            hub_bus,
+            site_bus,
             store_cost["capital_cost"],
             inv_cost["capital_cost"],
             one_way_eff,

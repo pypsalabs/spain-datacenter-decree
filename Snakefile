@@ -149,6 +149,7 @@ rule solve_network:
             else config["spain_cfe"]["accounting"]["excess_cap"]
         ),
         n_iterations=lambda w: config["spain_cfe"]["iteration"]["n_iterations"],
+        solver=lambda w: config["spain_cfe"]["solving"]["solver"],
         meta=lambda w: (
             f"planning_year={w.year},weather_year={str(w.run).removeprefix('wy')},variant={w.variant},"
             f"sites={'+'.join(config['spain_cfe']['dc']['sites'])}"
@@ -175,6 +176,7 @@ rule solve_network:
             --siting "{wildcards.siting}" \
             --excess-share "{params.excess_share}" \
             --n-iterations "{params.n_iterations}" \
+            --solver "{params.solver}" \
             --meta "{params.meta}" \
             {params.r0_arg}
         """

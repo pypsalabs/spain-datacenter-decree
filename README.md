@@ -66,7 +66,7 @@ vanilla PyPSA-Eur and see exactly what the study adds.
 - Fleet: frozen background fleet, calibrated to cited national data
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
   center's PPA assets are extendable.
-- Solver: HiGHS. No commercial solver required (but supported if available via PyPSA's solver interface).
+- Solver: HiGHS by default, so anyone can reproduce a study without a license; Gurobi via `spain_cfe.solving.solver`. One full-year dispatch solves in ~2 min (HiGHS) or ~25 s (Gurobi) at ~4 GB RAM.
 
 ## Workflow architecture
 

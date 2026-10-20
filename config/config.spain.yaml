@@ -217,6 +217,10 @@ spain_cfe:
     res_carriers: [onwind, offwind-ac, offwind-dc, offwind-float, solar, solar-hsat, ror, hydro, biomass, csp]
     cfe_extra_carriers: [nuclear]
     excluded: [PHS, battery]
+  solving:
+    # LP solver for the study solves: highs (default; open-source, reproducible) or
+    # gurobi (plain out-of-the-box defaults; ~5x faster, see README).
+    solver: highs
   iteration:
     # Forward passes for the endogenous grid CFE factor (Riepin & Brown 2023:
     # plain replacement, no damping or stopping criterion; one forward pass

@@ -47,7 +47,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_EXCESS_SHARE: float = 0.20
 DEFAULT_TARGET: float = 0.80
 DEFAULT_LOAD_SHEDDING_COST: float = 10000.0
-DEFAULT_SOLVER_OPTIONS: dict[str, Any] = {"solver": "simplex", "threads": 2}
+DEFAULT_SOLVER_NAME: str = "highs"
+# Per-solver defaults: HiGHS dual simplex (study default, open); Gurobi w/ out-of-the-box defaults ~5x faster on the full-year dispatch.
+SOLVER_DEFAULTS: dict[str, dict[str, Any]] = {
+    "highs": {"solver": "simplex", "threads": 2},
+    "gurobi": {},
+}
 NO_TARGET_POLICIES: frozenset[str] = frozenset({"no_dc", "unmatched_dc"})
 
 
@@ -225,6 +230,7 @@ def solve_network(
     r0_source: str | Path | pd.Series | float | None = None,
     clean_carriers: str = "res",
     n_iterations: int = DEFAULT_N_ITERATIONS,
+    solver_name: str = DEFAULT_SOLVER_NAME,
     solver_options: dict[str, Any] | None = None,
     load_shedding_cost: float = DEFAULT_LOAD_SHEDDING_COST,
 ) -> tuple[pypsa.Network, pd.DataFrame, dict[str, Any]]:
@@ -248,7 +254,11 @@ def solve_network(
     )
     dc_cfg = {"prefix": "DC"}
 
-    opts = dict(DEFAULT_SOLVER_OPTIONS)
+    if solver_name not in SOLVER_DEFAULTS:
+        raise ValueError(
+            f"Unsupported solver '{solver_name}'; expected one of {sorted(SOLVER_DEFAULTS)}."
+        )
+    opts = dict(SOLVER_DEFAULTS[solver_name])
     opts.update(solver_options or {})
     r0_series = resolve_r0(n, r0_source, clean_carriers=clean_carriers)
 
@@ -267,13 +277,11 @@ def solve_network(
             )
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            bas = Path(tmpdir) / "highs_iter.bas"
-            iter_opts = {
-                "io_api": "direct",
-                "basis_fn": bas,
-                "warmstart_fn": bas,
-                **opts,
-            }
+            iter_opts = {"io_api": "direct", "solver_name": solver_name, **opts}
+            if solver_name == "highs":
+                # basis warm-start between passes; Gurobi is fast enough without
+                bas = Path(tmpdir) / "highs_iter.bas"
+                iter_opts.update({"basis_fn": bas, "warmstart_fn": bas})
             n, convergence_df = solve_with_grid_iteration(
                 n=n,
                 build_fn=build_fn,
@@ -298,7 +306,7 @@ def solve_network(
             )
 
         status, condition = n.optimize(
-            solver_name="highs",
+            solver_name=solver_name,
             solver_options=opts,
             extra_functionality=extra_functionality,
             io_api="direct",
@@ -330,6 +338,7 @@ def solve_network(
         "excess_cap": sigma,
         "objective": float(n.objective),
         "solve_time_s": solve_time_s,
+        "solver": solver_name,
         "iterations": len(convergence_df),
         "max_delta": float(convergence_df["max_delta"].iloc[-1]),
         "mean_grid_share_es": float(n._grid_share.mean()),
@@ -375,6 +384,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Sales cap sigma (sum ex_t <= sigma * sum d_t); empty or 'none' = unlimited.",
     )
     parser.add_argument("--n-iterations", type=int, default=DEFAULT_N_ITERATIONS)
+    parser.add_argument(
+        "--solver",
+        type=str,
+        default=DEFAULT_SOLVER_NAME,
+        choices=sorted(SOLVER_DEFAULTS),
+        help="LP solver: highs (default, open) or gurobi (plain defaults).",
+    )
     parser.add_argument(
         "--meta", type=str, default="", help="key=value,... appended to the KPI row."
     )
@@ -433,6 +449,7 @@ def main(argv: list[str] | None = None) -> None:
                     b.strip() for b in args.dc_nodes.split(",") if b.strip()
                 ],
             },
+            "solving": {"solver": args.solver},
         }
 
     iter_cfg = cfg.get("iteration", {})
@@ -462,6 +479,7 @@ def main(argv: list[str] | None = None) -> None:
         r0_source=r0_in,
         clean_carriers="cfe" if policy.endswith("_cfe") else "res",
         n_iterations=int(iter_cfg.get("n_iterations", DEFAULT_N_ITERATIONS)),
+        solver_name=str(cfg.get("solving", {}).get("solver", DEFAULT_SOLVER_NAME)),
     )
     kpi_row = {**meta, **kpi_row}
 

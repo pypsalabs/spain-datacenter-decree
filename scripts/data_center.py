@@ -142,27 +142,27 @@ def _best_class_gens(
     Pick the PPA reference generator at ``bus`` for ``carrier``: the resource class
     (CF bin) with the highest mean availability among those with remaining potential.
 
+    Only generators with a time-varying ``p_max_pu`` profile qualify: a new-build
+    PPA candidate must carry a resource-class availability profile. An existing
+    plant with static ``p_max_pu`` (e.g. the Balearic onwind fleet, which has no
+    resource class) would otherwise anchor a fictitious baseload renewable.
+
     Returns ``(reference_generator, remaining_potential_mw)`` or ``None`` if the
-    bus has no background generator of that carrier.
+    bus has no profiled background generator of that carrier.
     """
     bg_mask = (
         (n.generators["bus"] == bus)
         & (n.generators["carrier"] == carrier)
         & (~n.generators.index.astype(str).str.startswith("DC"))
     )
-    bg_gens = n.generators.index[bg_mask]
+    bg_gens = n.generators.index[bg_mask].intersection(n.generators_t.p_max_pu.columns)
     if bg_gens.empty:
         return None
 
     remaining = (
         n.generators.loc[bg_gens, "p_nom_max"] - n.generators.loc[bg_gens, "p_nom"]
     ).where(lambda s: s > 0.0, 0.0)
-    t_cols = bg_gens.intersection(n.generators_t.p_max_pu.columns)
-    mean_cf = pd.Series(
-        n.generators.loc[bg_gens, "p_max_pu"].astype(float), index=bg_gens
-    )
-    if not t_cols.empty:
-        mean_cf.loc[t_cols] = n.generators_t.p_max_pu[t_cols].mean()
+    mean_cf = n.generators_t.p_max_pu[bg_gens].mean()
 
     with_room = remaining[remaining > 0.0]
     pool = with_room.index if not with_room.empty else bg_gens
@@ -311,20 +311,13 @@ def attach_data_center(
             picked = _best_class_gens(n, bus, car)
             if picked is None:
                 logger.warning(
-                    "No background generator found at bus '%s' for carrier '%s'; skipping PPA candidate.",
+                    "No profiled background generator at bus '%s' for carrier '%s'; skipping PPA candidate.",
                     bus,
                     car,
                 )
                 continue
             ref_gen, rem_potential = picked
-
-            if (
-                not n.generators_t.p_max_pu.empty
-                and ref_gen in n.generators_t.p_max_pu.columns
-            ):
-                p_max_pu = n.generators_t.p_max_pu[ref_gen].copy()
-            else:
-                p_max_pu = float(n.generators.at[ref_gen, "p_max_pu"])
+            p_max_pu = n.generators_t.p_max_pu[ref_gen].copy()
 
             c_info = _compute_tech_costs(costs_df, car, discount_rate=discount_rate)
             ppa_name = f"DC {bus} {car}"

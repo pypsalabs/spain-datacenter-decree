@@ -161,6 +161,15 @@ def test_spain_wide_adds_27_ppa_gens_and_site_battery(
     assert n.stores.loc[dc_stores, "e_cyclic"].all()
     assert n.links.loc[dc_links, "p_nom_extendable"].all()
 
+    # Regression (corrupted the first core-suite run): every PPA candidate must carry
+    # a time-varying resource-class profile; a static p_max_pu means baseload "wind".
+    for g in dc_gens:
+        assert g in n.generators_t.p_max_pu.columns, (
+            f"PPA candidate {g!r} has no time-varying availability profile"
+        )
+        assert float(n.generators_t.p_max_pu[g].mean()) < 1.0
+        assert np.isfinite(float(n.generators.at[g, "p_nom_max"]))
+
 
 def test_local_region_adds_3_ppa_gens(
     base_sliced_network: pypsa.Network, costs_2025: pd.DataFrame
@@ -181,19 +190,16 @@ def test_local_region_adds_3_ppa_gens(
 
 
 def _expected_best_class(n: pypsa.Network, bus: str, car: str) -> tuple[str, float]:
-    """Reference implementation: highest-mean-CF class with remaining potential."""
+    """Reference implementation: highest-mean-CF profiled class with remaining potential."""
     bg = n.generators.index[
         (n.generators["bus"] == bus)
         & (n.generators["carrier"] == car)
         & (~n.generators.index.astype(str).str.startswith("DC"))
-    ]
+    ].intersection(n.generators_t.p_max_pu.columns)
     remaining = (
         n.generators.loc[bg, "p_nom_max"] - n.generators.loc[bg, "p_nom"]
     ).where(lambda s: s > 0.0, 0.0)
-    mean_cf = pd.Series(n.generators.loc[bg, "p_max_pu"].astype(float), index=bg)
-    t_cols = bg.intersection(n.generators_t.p_max_pu.columns)
-    if not t_cols.empty:
-        mean_cf.loc[t_cols] = n.generators_t.p_max_pu[t_cols].mean()
+    mean_cf = n.generators_t.p_max_pu[bg].mean()
     pool = remaining[remaining > 0.0].index
     if pool.empty:
         pool = bg
@@ -233,17 +239,11 @@ def test_ppa_candidates_use_best_resource_class(
         assert np.isclose(
             float(n.generators.at[g, "p_nom_max"]), expected_pot, rtol=1e-6, atol=1e-6
         )
-        if ref_bg in n.generators_t.p_max_pu.columns:
-            pd.testing.assert_series_equal(
-                n.generators_t.p_max_pu[g],
-                n.generators_t.p_max_pu[ref_bg],
-                check_names=False,
-            )
-        else:
-            assert np.isclose(
-                float(n.generators.at[g, "p_max_pu"]),
-                float(n.generators.at[ref_bg, "p_max_pu"]),
-            )
+        pd.testing.assert_series_equal(
+            n.generators_t.p_max_pu[g],
+            n.generators_t.p_max_pu[ref_bg],
+            check_names=False,
+        )
 
 
 def test_capital_costs_match_v015_annuity_formula(

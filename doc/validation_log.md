@@ -96,8 +96,10 @@ patched, no_dc):
    edge, so the model ran PT gas at 12.9 TWh (CF 38%) against ~3 TWh real, suppressing
    both ES→PT exports and Spanish CCGT/CO2. Two corrections from the ERSE gas tariff
    decision 2025–26 (`erse_tep_gas_2025_2026`): (a) the Portuguese **gas network
-   premium** (+1.10 EUR/MWh_th: UGS parcela I 0.71 + annual firm entry/exit URT ≈ 0.39,
-   a conservative lower bound) that PT plants pay on top of the PVB/MIBGAS hub price;
+   premium** (+1.10 EUR/MWh_th: UGS parcela I 0.71 + annual firm entry/exit URT ≈ 0.39)
+   that PT plants pay on top of the PVB/MIBGAS hub price — a conservative lower bound,
+   since PT CCGTs are supplied predominantly via the Sines LNG terminal and its
+   regasification charge is deliberately not counted;
    (b) **Tapada do Outeiro (990 MW)** ended its CAE in Q1 2024 and is held in
    security-of-supply reserve outside the market until 2026-03-31 — removed from the
    market-dispatched PT fleet.

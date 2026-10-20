@@ -656,11 +656,11 @@ def plot_dc_emission_intensity(
 
 
 FIGURES: dict[str, Callable[[pd.DataFrame, dict[str, str]], plt.Figure]] = {
-    "clean_coverage": plot_clean_coverage,
-    "portfolio": plot_portfolio,
+    "dc_clean_coverage": plot_clean_coverage,
+    "dc_portfolio": plot_portfolio,
     "dc_cost": plot_dc_cost,
     "system_impact": plot_system_impact,
-    "generation_shift": plot_generation_shift,
+    "system_generation_shift": plot_generation_shift,
     "dc_emission_intensity": plot_dc_emission_intensity,
 }
 

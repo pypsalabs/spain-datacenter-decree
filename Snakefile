@@ -23,11 +23,11 @@ SUITE = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
 SCENARIOS = [(p, siting) for siting, ps in SUITE["policies"].items() for p in ps]
 NO_SURPLUS_POLICIES = ("no_dc", "unmatched_dc")
 PLOTS = [
-    "clean_coverage",
-    "portfolio",
+    "dc_clean_coverage",
+    "dc_portfolio",
     "dc_cost",
     "system_impact",
-    "generation_shift",
+    "system_generation_shift",
     "dc_emission_intensity",
 ]
 

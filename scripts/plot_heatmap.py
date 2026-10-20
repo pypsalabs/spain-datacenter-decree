@@ -23,7 +23,14 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from scripts.plot_summary import POLICIES, STYLE, _caption  # noqa: E402
+from scripts.plot_summary import (  # noqa: E402
+    POLICIES,
+    SPAIN_WIDE,
+    STYLE,
+    _caption,
+    scenario_key,
+    site_name,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -76,15 +83,16 @@ def plot_heatmap(hourly: pd.DataFrame, row: pd.Series) -> plt.Figure:
     starts = np.flatnonzero(days.day == 1)
     ax.set_xticks(starts, days[starts].strftime("%b"))
 
-    name = POLICIES[row["policy"]][0].replace("\n", " ")
+    name = POLICIES[scenario_key(row["policy"], row["siting"])][0].replace("\n", " ")
     fig.suptitle(name, x=0.0, ha="left", fontweight="bold")
     step = 24 // len(grid.index)
-    site = str(row["sites"]).replace("_", " ").title()
+    site = site_name(row["sites"])
+    local = "" if row["siting"] == SPAIN_WIDE else f" Local: PPAs in {site} only."
     _caption(
         fig,
         f"Hourly CFE score (a) and emission intensity (b) of the consumption of a "
         f"{row['dc_mw']:.0f} MW data center in {site}, one cell per {step}-hour "
-        "snapshot. CFE score: the share of consumption covered by the data center's "
+        f"snapshot.{local} CFE score: the share of consumption covered by the data center's "
         "PPAs and battery plus the renewable share of its grid purchases "
         "(import-traced, nuclear excluded); annual mean "
         f"{100.0 * row['clean_coverage']:.0f}%. Emission intensity: its grid "

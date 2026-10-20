@@ -129,6 +129,9 @@ spain_cfe:
   # The _cfe (nuclear-as-clean) variants stay out of the matrix: the decree is
   # renewable-only. Target sweep (90/100) is pre-built via the policy names, as is
   # annual_80_res (Art. 8 alone; dropped 2026-10-20 for little added value).
+  # `policies` maps each PPA siting to the policies solved with it: spain_wide =
+  # anywhere in mainland Spain (the site's synchronous area), local_region = the
+  # data center's own region only.
   # A no_dc baseline row is added automatically for every run in the suite.
   # excess_cap: caps sigma on annual sales back to the grid,
   # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2023 convention), one scenario
@@ -143,17 +146,19 @@ spain_cfe:
     # Working subset: the 2024 reference weather year, one DC size, all policies.
     core:
       runs: [wy2024]
-      policies: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+      policies:
+        spain_wide: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+        local_region: [hourly_80_ppa_only]
       dc_mw: [500]
-      siting: [spain_wide]
       excess_cap: [0.0]
     # Full matrix: all policies x all DC sizes x all weather years. The non-2024
     # weather years need their upstream builds first (study stage iv).
     full:
       runs: [wy2024, wy2010, wy2013, wy2020]
-      policies: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+      policies:
+        spain_wide: [unmatched_dc, annual_100_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
+        local_region: [hourly_80_ppa_only]
       dc_mw: [500, 1000, 2000, 4000, 6000]
-      siting: [spain_wide]
       excess_cap: [0.0]
   # prepare_network.py patch engine: cited corrections, each individually switchable.
   patches:

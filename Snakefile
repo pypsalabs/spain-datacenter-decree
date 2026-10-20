@@ -19,6 +19,8 @@ import re
 
 HORIZON = config["planning_horizons"][0]
 SUITE = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
+# (policy, PPA siting) pairs of the selected suite
+SCENARIOS = [(p, siting) for siting, ps in SUITE["policies"].items() for p in ps]
 NO_SURPLUS_POLICIES = ("no_dc", "unmatched_dc")
 PLOTS = [
     "clean_coverage",
@@ -37,7 +39,7 @@ def ex_tag(sigma):
 
 def suite_plots(wildcards):
     """Figure files of the selected suite: one folder per run and sales cap."""
-    plots = PLOTS + [f"heatmap_{policy}" for policy in SUITE["policies"]]
+    plots = PLOTS + [f"heatmap_{policy}_{siting}" for policy, siting in SCENARIOS]
     return [
         f"results/{run}/plots/ex{ex_tag(sigma)}/{plot}.pdf"
         for run in SUITE["runs"]
@@ -281,9 +283,8 @@ def suite_summaries(wildcards):
     files += [
         summary_file(run, policy, dc_mw, siting, sigma)
         for run in SUITE["runs"]
-        for policy in SUITE["policies"]
+        for policy, siting in SCENARIOS
         for dc_mw in SUITE["dc_mw"]
-        for siting in SUITE["siting"]
         for sigma in caps(policy)
     ]
     return files
@@ -328,11 +329,11 @@ rule plot_summary:
 
 
 def heatmap_inputs(wildcards):
-    """Summary row and hourly series of one policy in a single-size suite."""
-    if len(SUITE["dc_mw"]) > 1 or len(SUITE["siting"]) > 1:
-        raise ValueError("Heatmaps cover suites with one DC size and one siting.")
+    """Summary row and hourly series of one scenario in a single-size suite."""
+    if len(SUITE["dc_mw"]) > 1:
+        raise ValueError("Heatmaps cover suites with one DC size.")
     sigma = int(wildcards.excess) / 100
-    stem = scenario_stem(wildcards.policy, SUITE["dc_mw"][0], SUITE["siting"][0], sigma)
+    stem = scenario_stem(wildcards.policy, SUITE["dc_mw"][0], wildcards.siting, sigma)
     return {
         "summary": f"results/{wildcards.run}/summaries/summary_{stem}.csv",
         "hourly": f"results/{wildcards.run}/hourly/hourly_{stem}.csv",
@@ -340,12 +341,12 @@ def heatmap_inputs(wildcards):
 
 
 rule plot_heatmap:
-    """Plots the hourly CFE score and CO2 intensity of one policy's DC consumption."""
+    """Plots the hourly CFE score and CO2 intensity of one scenario's DC consumption."""
     input:
         unpack(heatmap_inputs),
         style="scripts/plots.mplstyle",
     output:
-        "results/{run}/plots/ex{excess}/heatmap_{policy}.pdf",
+        "results/{run}/plots/ex{excess}/heatmap_{policy}_{siting}.pdf",
     threads: 1
     shell:
         """

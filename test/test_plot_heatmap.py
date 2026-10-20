@@ -27,9 +27,8 @@ def test_heatmap_renders(toy_base, toy_costs, tmp_path: Path) -> None:
     policy = "strict_hourly_80_ppa_only"
     attach_data_center(toy_base, dc_mw=100.0, costs=toy_costs, policy=policy)
     n, _, metrics = solve_network(toy_base, policy=policy)
-    row = summarise_network(
-        n, pd.Series({"sites": "aragon", "dc_mw": 100.0, **metrics})
-    )
+    meta = {"sites": "aragon", "dc_mw": 100.0, "siting": "spain_wide"}
+    row = summarise_network(n, pd.Series({**meta, **metrics}))
     summary, hourly = tmp_path / "summary.csv", tmp_path / "hourly.csv"
     row.to_frame().T.to_csv(summary, index=False)
     dc_hourly(n).to_csv(hourly)

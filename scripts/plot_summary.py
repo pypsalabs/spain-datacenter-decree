@@ -36,15 +36,19 @@ logger = logging.getLogger(__name__)
 STYLE = Path(__file__).with_name("plots.mplstyle")
 FORMATS = ("pdf",)
 
-# policy -> (label, Okabe-Ito colour), in order of policy relevance
+SPAIN_WIDE = "spain_wide"
+LOCAL = "hourly_80_ppa_only@local_region"
+# scenario key (see scenario_key) -> (label, Okabe-Ito colour), in order of relevance
 POLICIES: dict[str, tuple[str, str]] = {
     "unmatched_dc": ("No policy", "#999999"),
-    "strict_hourly_80_ppa_only": ("Decree\nCFE 80%", "#D55E00"),
-    "hourly_80_ppa_only": ("Hourly\n80%", "#0072B2"),
-    "hourly_80_grid_credit": ("Hourly 80%\n+ grid credit", "#56B4E9"),
+    "strict_hourly_80_ppa_only": ("Decree:\n80% every hour", "#D55E00"),
+    "hourly_80_ppa_only": ("Hourly 80%\non average", "#0072B2"),
+    "hourly_80_grid_credit": ("Hourly 80%\navg. + credit", "#56B4E9"),
+    LOCAL: ("Hourly 80%\navg., local", "#CC79A7"),
     "annual_100_res": ("Annual\n100%", "#009E73"),
 }
 DECREE = "strict_hourly_80_ppa_only"
+SUM_RULES = ("hourly_80_ppa_only", "hourly_80_grid_credit", "annual_100_res")
 BASELINE = "no_dc"
 
 PPA_CARRIERS: dict[str, str] = {
@@ -83,17 +87,28 @@ def load_colors(path: Path) -> dict[str, str]:
         return yaml.safe_load(f)["plotting"]["tech_colors"]
 
 
+def scenario_key(policy: str, siting: str) -> str:
+    """Key into ``POLICIES``: the policy, suffixed '@siting' unless PPAs are Spain-wide."""
+    return policy if siting == SPAIN_WIDE else f"{policy}@{siting}"
+
+
+def site_name(sites: str) -> str:
+    """Display name of the data center site(s), e.g. 'aragon' -> 'Aragon'."""
+    return str(sites).replace("_", " ").title()
+
+
 def reference_rows(df: pd.DataFrame) -> pd.DataFrame:
-    """Rows of a single-run suite indexed by policy; fails on multi-run suites."""
-    if df["policy"].duplicated().any():
+    """Rows of a single-run suite indexed by scenario key; fails on multi-run suites."""
+    keys = pd.Index(map(scenario_key, df["policy"], df["siting"]), name="scenario")
+    if keys.duplicated().any():
         raise ValueError(
-            "plot_summary covers single-run suites (one row per policy); "
+            "plot_summary covers single-run suites (one row per scenario); "
             "the full suite needs its own figures."
         )
-    missing = (set(POLICIES) | {BASELINE}) - set(df["policy"])
+    missing = (set(POLICIES) | {BASELINE}) - set(keys)
     if missing:
-        raise ValueError(f"Summary lacks policies {sorted(missing)}.")
-    return df.set_index("policy").fillna(0.0)
+        raise ValueError(f"Summary lacks scenarios {sorted(missing)}.")
+    return df.set_index(keys).fillna(0.0)
 
 
 def select_rows(df: pd.DataFrame, excess_cap: float, weather_year: int) -> pd.DataFrame:
@@ -169,6 +184,11 @@ def _curtailed_share(r: pd.DataFrame) -> pd.Series:
     return 100.0 * curtailed / r["ppa_yield_mwh"]
 
 
+def _siting_note(rows: pd.DataFrame) -> str:
+    site = site_name(rows.at[LOCAL, "sites"])
+    return f" PPAs anywhere in mainland Spain unless marked local ({site} only)."
+
+
 def _caption(fig: plt.Figure, summary: str, points: list[str]) -> None:
     """Caption under the figure: what is shown, then the key mechanics as bullets."""
     width = int(CAPTION_CHARS_PER_INCH * fig.get_size_inches()[0])
@@ -184,7 +204,7 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
     """Hourly renewable coverage of DC consumption: PPA-matched plus grid renewables."""
     policies = list(POLICIES)
     r = rows.loc[policies]
-    fig, ax = plt.subplots(figsize=(4.6, 4.3))
+    fig, ax = plt.subplots(figsize=(5.4, 4.3))
     pos = _policy_axis(ax, policies)
     parts = pd.DataFrame(
         {"PPA matched": r["ppa_only_score"], "Grid renewables": r["grid_clean_share"]}
@@ -208,7 +228,7 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
         fig,
         "Share of the data center's consumption covered by renewables in the same "
         "hour: by its own PPAs and battery (dark), or by the renewable share of its "
-        "grid purchases (light; import-traced, nuclear excluded).",
+        "grid purchases (light; import-traced, nuclear excluded)." + _siting_note(r),
         [
             f"No policy: the data center still gets the grid's renewable share, "
             f"{coverage['unmatched_dc']:.0f}%.",
@@ -234,7 +254,9 @@ def plot_portfolio(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     """DC PPA and battery capacity, and PPA output with its curtailment."""
     policies = [p for p in POLICIES if p != "unmatched_dc"]
     r = rows.loc[policies]
-    fig, axd = plt.subplot_mosaic([["capacity", "energy"]], figsize=(7.2, 3.9))
+    fig, axd = plt.subplot_mosaic(
+        [["capacity"], ["energy"]], figsize=(5.4, 6.6), sharex=True
+    )
     carriers = {c: label for c, label in PPA_CARRIERS.items() if f"dc_ppa_{c}_mw" in r}
     carrier_colors = {label: colors[c] for c, label in carriers.items()}
 
@@ -285,15 +307,15 @@ def plot_portfolio(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
 
     handles += [Patch(facecolor="white", edgecolor="0.3", hatch="/////"), consumption]
     labels += ["Curtailed", "DC load"]
-    _legend(fig, handles, labels, ncol=len(labels))
+    _legend(fig, handles, labels, ncol=3)
 
     yield_share = r["annual_res_score"].mul(100.0)
-    others = [p for p in policies if p != DECREE]
+    others = list(SUM_RULES)
     _caption(
         fig,
         "The data center's contracted assets (a) and their output (b); hatched: "
         "output curtailed, as surplus cannot be sold; dashed: the data center's load, "
-        "as capacity (a) and annual consumption (b).",
+        "as capacity (a) and annual consumption (b)." + _siting_note(r),
         [
             "Decree: covering every hour takes solar plus a battery that carries it "
             "into the night, overbuilt for winter lulls: "
@@ -301,11 +323,15 @@ def plot_portfolio(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
             f"{r.at[DECREE, 'dc_battery_mwh'] / 1e3:.1f} GWh of storage for a "
             f"{r.at[DECREE, 'total_load_mwh'] / HOURS_PER_YEAR:.0f} MW load, with "
             f"{_curtailed_share(r).loc[DECREE]:.0f}% of their output curtailed.",
-            "The other rules are met with onshore wind plus tracking solar and no "
-            "storage: wind also blows at night, and their targets need not hold in "
-            "every hour.",
+            "The other Spain-wide rules are met with onshore wind plus tracking solar "
+            "and no storage: wind also blows at night, and their targets need not hold "
+            "in every hour.",
+            "Local: without Spain's windiest sites, the same hourly 80% on average "
+            f"takes {r.at[LOCAL, 'dc_ppa_total_mw'] / 1e3:.1f} GW of PPAs, mostly solar, "
+            f"and {r.at[LOCAL, 'dc_battery_mwh'] / 1e3:.1f} GWh of storage, with "
+            f"{_curtailed_share(r).loc[LOCAL]:.0f}% of their output curtailed.",
             f"Contracted yield: {yield_share[DECREE]:.0f}% of consumption under the "
-            f"decree, {_span(yield_share[others])}% under the other rules.",
+            f"decree, {_span(yield_share[others])}% under the other Spain-wide rules.",
         ],
     )
     return fig
@@ -337,7 +363,7 @@ def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
         "Grid purchases": GRID_COLOR,
         "Sales revenue": SALES_COLOR,
     }
-    fig, ax = plt.subplots(figsize=(4.6, 4.6))
+    fig, ax = plt.subplots(figsize=(5.4, 4.6))
     pos = _policy_axis(ax, policies)
     tops = _stack(ax, pos, parts, {k: {"color": seg_colors[k]} for k in parts})
     ax.hlines(
@@ -357,22 +383,26 @@ def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     ax.set_ylabel("DC cost (€ per MWh consumed)")
     _legend(fig, *ax.get_legend_handles_labels(), ncol=4)
 
-    others = net.drop(["unmatched_dc", DECREE])
+    others = net[list(SUM_RULES)]
     _caption(
         fig,
         "The data center's cost per MWh it consumes: PPA and battery annuities plus "
         "grid purchases (bold line: net cost). Surplus PPA output cannot be sold, so "
-        "no revenue offsets it.",
+        "no revenue offsets it." + _siting_note(r),
         [
             "No policy: the data center buys every MWh at the modelled hourly Spanish "
             f"spot price; {net['unmatched_dc']:.0f} €/MWh is the annual average of "
             "these hourly purchases.",
-            "Annual and hourly rules: wind and solar PPAs cost less than the grid even "
-            f"with {_span(_curtailed_share(r.loc[others.index]))}% of their output "
-            f"curtailed, so the bill falls to {_span(others)} €/MWh.",
+            "Spain-wide annual and hourly rules: wind and solar PPAs cost less than the "
+            f"grid even with {_span(_curtailed_share(r.loc[others.index]))}% of their "
+            f"output curtailed, so the bill falls to {_span(others)} €/MWh.",
             f"Decree: the solar overbuild and battery raise it to {net[DECREE]:.0f} "
             "€/MWh, above buying from the grid and "
-            f"{_span(net[DECREE] - others)} €/MWh above the other rules.",
+            f"{_span(net[DECREE] - others)} €/MWh above these rules.",
+            f"Local: the same hourly 80% on average costs {net[LOCAL]:.0f} €/MWh with "
+            f"PPAs in {site_name(r.at[LOCAL, 'sites'])} only, "
+            f"{net[LOCAL] - net['hourly_80_ppa_only']:.0f} €/MWh more than with "
+            "Spain-wide PPAs.",
         ],
     )
     return fig
@@ -396,7 +426,7 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         ("price", "Δ spot price\n(€/MWh)", "es_mean_price_eur_mwh", 1.0, 2),
     ]
     fig, axd = plt.subplot_mosaic(
-        [[p[0]] for p in panels], figsize=(5.2, 9.4), sharex=True
+        [[p[0]] for p in panels], figsize=(6.4, 9.4), sharex=True
     )
     bar_colors = [POLICIES[p][1] for p in policies]
     for key, label, col, scale, decimals in panels:
@@ -432,7 +462,7 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         relative.set_ylabel("% of baseline")
 
     no = "unmatched_dc"
-    site = str(r.at[no, "sites"]).replace("_", " ").title()
+    site = site_name(r.at[no, "sites"])
     _caption(
         fig,
         f"Change in the Spanish power system with a {r.at[no, 'dc_mw']:.0f} MW data "
@@ -442,7 +472,8 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         "in Spanish plants times its carbon content. CO2 intensity: Spanish CO2 per "
         "kWh of Spanish generation, the data center's PPAs included. Gas: fuel burnt "
         "in Spanish gas-fired power plants (CCGT, OCGT). Spot price: hourly nodal "
-        "prices weighted by Spanish demand, the data center excluded.",
+        "prices weighted by Spanish demand, the data center excluded."
+        + _siting_note(r),
         [],
     )
     return fig
@@ -469,7 +500,7 @@ def plot_generation_shift(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Fig
     parts = parts / 1.0e6
     shown = parts.loc[:, parts.abs().max() >= MIN_SUPPLY_SHIFT_TWH]
 
-    fig, ax = plt.subplots(figsize=(5.2, 4.4))
+    fig, ax = plt.subplots(figsize=(5.4, 4.4))
     pos = _policy_axis(ax, policies)
     _stack(ax, pos, shown, {k: {"color": seg_colors[k]} for k in shown})
     ax.axhline(0.0, color="black", linewidth=0.6)
@@ -485,18 +516,18 @@ def plot_generation_shift(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Fig
     _legend(fig, *ax.get_legend_handles_labels(), ncol=4)
 
     no = parts.loc["unmatched_dc"]
-    sum_rules = [p for p in policies if p not in ("unmatched_dc", DECREE)]
     _caption(
         fig,
         "Change in Spanish electricity supply against no data center; dashed line: "
         "the data center's consumption. Surplus cannot be sold, so the data center's "
-        "PPAs supply at most its own consumption (plus battery losses).",
+        "PPAs supply at most its own consumption (plus battery losses)."
+        + _siting_note(r),
         [
             f"No policy: the extra load is served by gas ({no.get('Gas', 0.0):.1f} TWh), "
             f"more nuclear output ({no.get('Nuclear', 0.0):.1f} TWh) and imports "
             f"({no['Net imports']:.1f} TWh).",
-            "Annual and hourly rules: the PPAs supply "
-            f"{_span(parts.loc[sum_rules, 'DC PPAs'], 1)} TWh of the data center's "
+            "Spain-wide annual and hourly rules: the PPAs supply "
+            f"{_span(parts.loc[list(SUM_RULES), 'DC PPAs'], 1)} TWh of the data center's "
             f"{load:.1f} TWh; gas serves most of the rest, in hours of low wind and sun.",
             "Decree: its PPAs and battery supply the whole load, so the rest of the "
             "system barely changes.",
@@ -517,7 +548,7 @@ def plot_dc_emission_intensity(
     attributional = r["dc_attributional_intensity_g_per_kwh"].to_numpy(dtype=float)
     point_colors = [POLICIES[p][1] for p in policies]
 
-    fig, ax = plt.subplots(figsize=(4.6, 4.4))
+    fig, ax = plt.subplots(figsize=(5.4, 4.4))
     pos = _policy_axis(ax, policies)
     for x, a, b, c in zip(pos, attributional, consequential, point_colors, strict=True):
         ax.plot([x, x], [a, b], color=c, linewidth=1.2, zorder=2)
@@ -545,27 +576,37 @@ def plot_dc_emission_intensity(
     _legend(fig, handles, ["Consequential", "Attributional", "Spanish grid average"], 3)
 
     i = policies.index(DECREE)
-    sums = [policies.index(p) for p in policies if p not in ("unmatched_dc", DECREE)]
+    sums = [policies.index(p) for p in SUM_RULES]
+    loc, sw = policies.index(LOCAL), policies.index("hourly_80_ppa_only")
+    imports = r["delta_no_dc_es_net_import_mwh"] / 1e6
     _caption(
         fig,
         "CO2 per kWh the data center consumes, measured two ways. Consequential "
         "(filled): the change in whole-model emissions against no data center, per "
         "kWh it consumes. Attributional (hollow): the emissions of its grid purchases, "
         "valued at the hourly emission factor of Spanish supply (imports traced to "
-        "their exporter's mix), divided by all its consumption.",
+        "their exporter's mix), divided by all its consumption." + _siting_note(r),
         [
             f"No policy: consequential {consequential[0]:.0f} g/kWh against "
             f"attributional {attributional[0]:.0f} g/kWh, "
             f"{consequential[0] / attributional[0]:.1f}× higher: new load is served by "
             "gas at the margin, not by the average mix.",
-            f"Annual and hourly rules: consequential {_span(consequential[sums])} g/kWh "
+            "Spain-wide annual and hourly rules: consequential "
+            f"{_span(consequential[sums])} g/kWh "
             f"against attributional {_span(attributional[sums])} g/kWh: their residual "
             "purchases fall in hours when gas sets the margin.",
             "Decree: attributional nearly zero "
             f"({attributional[i]:.0f} g/kWh), consequential slightly negative "
-            f"({_signed(consequential[i], 0)} g/kWh): with no sales it adds almost no "
-            "grid demand, and its load absorbs local wind and solar that grid "
-            "congestion would otherwise curtail.",
+            f"({_signed(consequential[i], 0)} g/kWh): it buys only "
+            f"{r.at[DECREE, 'grid_import_mwh'] / 1e6:.2f} TWh from the grid, and with "
+            f"the shifted grid flows Spain imports {imports[DECREE]:.2f} TWh more and "
+            f"burns {-r.at[DECREE, 'delta_no_dc_es_gas_fuel_mwh_th'] / 1e6:.2f} TWh "
+            "less gas.",
+            f"Local: attributional {attributional[loc]:.0f} g/kWh, below the "
+            f"Spain-wide {attributional[sw]:.0f}, yet consequential "
+            f"{consequential[loc]:.0f} against {consequential[sw]:.0f} g/kWh: Spain "
+            f"imports {imports[LOCAL]:.2f} TWh more, so part of the extra emissions "
+            "lands in France and Portugal.",
         ],
     )
     return fig

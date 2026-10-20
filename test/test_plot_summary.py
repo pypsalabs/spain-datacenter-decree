@@ -32,19 +32,27 @@ META = {
 }
 
 
+def _split(key: str) -> tuple[str, str]:
+    """(policy, siting) of a ``POLICIES`` key."""
+    policy, _, siting = key.partition("@")
+    return policy, siting or "spain_wide"
+
+
 @pytest.fixture
 def toy_summary(toy_base, toy_costs, tmp_path: Path) -> Path:
     rows = []
-    for policy in ["no_dc", *POLICIES]:
+    for policy, siting in map(_split, ["no_dc", *POLICIES]):
         n = toy_base.copy()
         dc_mw = 0.0 if policy == "no_dc" else 100.0
-        attach_data_center(n, dc_mw=dc_mw, costs=toy_costs, policy=policy)
+        attach_data_center(
+            n, dc_mw=dc_mw, siting=siting, costs=toy_costs, policy=policy
+        )
         cfe0 = 0.3 if "grid_credit" in policy else None
         n, _, metrics = solve_network(
             n, policy=policy, excess_share=0.2, cfe0_source=cfe0
         )
-        row = summarise_network(n, pd.Series({**META, "dc_mw": dc_mw, **metrics}))
-        rows.append(row)
+        meta = {**META, "dc_mw": dc_mw, "siting": siting}
+        rows.append(summarise_network(n, pd.Series({**meta, **metrics})))
     path = tmp_path / "scenarios.csv"
     attach_baseline_deltas(pd.DataFrame(rows)).to_csv(path, index=False)
     return path
@@ -73,18 +81,19 @@ def test_every_figure_renders(toy_summary: Path, tmp_path: Path) -> None:
 
 
 def test_multi_run_suite_fails_fast() -> None:
-    df = pd.DataFrame({"policy": ["no_dc", "no_dc"]})
+    df = pd.DataFrame({"policy": ["no_dc", "no_dc"], "siting": "spain_wide"})
     with pytest.raises(ValueError, match="single-run"):
         reference_rows(df)
 
 
 @pytest.mark.parametrize("sigma", [0.0, 0.2])
 def test_select_rows_takes_one_cap_and_shared_baselines(sigma: float) -> None:
-    policies = [p for p in POLICIES if p != "unmatched_dc"]
-    baselines = [("no_dc", 0.0), ("unmatched_dc", 0.0)]
-    rows = baselines + [(p, cap) for p in policies for cap in (0.0, 0.2)]
-    df = pd.DataFrame(rows, columns=["policy", "excess_cap"]).assign(weather_year=2024)
+    keys = [k for k in POLICIES if k != "unmatched_dc"]
+    baselines = [("no_dc", "spain_wide", 0.0), ("unmatched_dc", "spain_wide", 0.0)]
+    rows = baselines + [(*_split(k), cap) for k in keys for cap in (0.0, 0.2)]
+    df = pd.DataFrame(rows, columns=["policy", "siting", "excess_cap"])
+    df = df.assign(weather_year=2024)
     other_year = df.assign(weather_year=2013)
     selected = select_rows(pd.concat([df, other_year]), sigma, 2024)
     assert sorted(selected.index) == sorted(["no_dc", *POLICIES])
-    assert (selected.loc[policies, "excess_cap"] == sigma).all()
+    assert (selected.loc[keys, "excess_cap"] == sigma).all()

@@ -61,7 +61,8 @@ Every modelling choice favors verifiability:
   plants are spatially joined to the class where they stand. The data center procurement model contracts renewable assets in merit order of their
   generation profiles, subject to remaining land availability, with an optional switch between two
   procurement scopes: `local_region` (contract only in the data center's own region) and
-  `spain_wide` (contract anywhere in Spain, letting the optimizer choose the locations).
+  `spain_wide` (contract anywhere in mainland Spain, letting the optimizer choose the locations;
+  the Balearics, linked by a single HVDC cable, are a separate system).
 - Fleet: frozen background fleet, calibrated to cited national data
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
   center's PPA and battery assets are extendable.

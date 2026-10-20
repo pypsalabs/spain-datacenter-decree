@@ -129,10 +129,10 @@ def test_each_site_gets_full_dc_mw(
     assert np.isclose(n.loads.at["DC ES0 6AC load", "p_set"], 1000.0)
 
 
-def test_spain_wide_adds_27_ppa_gens_and_site_battery(
+def test_spain_wide_adds_24_ppa_gens_and_site_battery(
     base_sliced_network: pypsa.Network, costs_2025: pd.DataFrame
 ) -> None:
-    """Siting 'spain_wide' adds 27 PPA gens (9 ES buses x 3 carriers), 1 battery, 1 load."""
+    """Siting 'spain_wide' adds 24 PPA gens (8 mainland buses x 3 carriers), 1 battery, 1 load."""
     n = base_sliced_network.copy()
     attach_data_center(
         n,
@@ -150,7 +150,7 @@ def test_spain_wide_adds_27_ppa_gens_and_site_battery(
     dc_dischargers = [lk for lk in dc_links if "battery discharger" in str(lk)]
 
     assert len(dc_loads) == 1
-    assert len(dc_gens) == 27  # 9 ES buses x 3 carriers
+    assert len(dc_gens) == 24  # 8 mainland ES buses x 3 carriers
     assert list(dc_stores) == ["DC ES0 7AC battery"]
     assert dc_chargers == ["DC ES0 7AC battery charger"]
     assert dc_dischargers == ["DC ES0 7AC battery discharger"]
@@ -169,6 +169,30 @@ def test_spain_wide_adds_27_ppa_gens_and_site_battery(
         )
         assert float(n.generators_t.p_max_pu[g].mean()) < 1.0
         assert np.isfinite(float(n.generators.at[g, "p_nom_max"]))
+
+
+@pytest.mark.parametrize(
+    ("site", "expected"),
+    [("ES0 7AC", {f"ES0 {i}AC" for i in range(8)}), ("ES1 0AC", {"ES1 0AC"})],
+)
+def test_spain_wide_stays_in_the_site_synchronous_area(
+    base_sliced_network: pypsa.Network,
+    costs_2025: pd.DataFrame,
+    site: str,
+    expected: set[str],
+) -> None:
+    """The HVDC-linked Balearics and the mainland never contract each other's PPAs."""
+    n = base_sliced_network.copy()
+    attach_data_center(
+        n,
+        dc_mw=1000.0,
+        site_buses=[site],
+        siting="spain_wide",
+        costs=costs_2025,
+        policy="hourly_80_grid_credit",
+    )
+    dc_gens = n.generators.index[n.generators.index.astype(str).str.startswith("DC")]
+    assert set(n.generators.loc[dc_gens, "bus"]) == expected
 
 
 def test_local_region_adds_3_ppa_gens(

@@ -6,7 +6,7 @@ Prepare a PyPSA-Eur network for 24/7 CFE data center procurement.
 
 Adds flat data center loads at the configured Spanish site buses (additional to
 existing background electricity demand), extendable PPA renewable generator
-candidates at the best resource class across Spain (or in the local region only), and standalone DC battery
+candidates at the best resource class across mainland Spain (or in the local region only), and standalone DC battery
 storage (``Bus`` + ``Store`` + charger/discharger ``Link``s) at each site.
 
 Processed technology costs from ``PyPSA/technology-data v0.15.0`` are stored by
@@ -209,8 +209,9 @@ def attach_data_center(
         mapping live in the config under ``spain_cfe.dc``.
     siting : str, default 'spain_wide'
         PPA candidate scope: ``'spain_wide'`` (the best resource class at every
-        ES AC bus; the optimizer chooses where to contract) or ``'local_region'``
-        (the best class in the DC's own region only).
+        ES AC bus in the sites' synchronous area, i.e. mainland Spain for a
+        mainland site; the optimizer chooses where to contract) or
+        ``'local_region'`` (the best class in the DC's own region only).
     ppa_carriers : Sequence[str] | None, optional
         Extendable PPA generator carriers. Defaults to
         ``['onwind', 'solar', 'solar-hsat']``.
@@ -299,7 +300,10 @@ def attach_data_center(
             n.buses["carrier"].astype(str) == "AC"
         )
         not_dc_bus = ~n.buses.index.astype(str).str.startswith("DC")
-        candidate_buses = list(n.buses.index[es_mask & not_dc_bus])
+        # the HVDC-linked Balearics form a separate system from the mainland
+        n.determine_network_topology()
+        site_area = n.buses["sub_network"].isin(n.buses.loc[sites, "sub_network"])
+        candidate_buses = list(n.buses.index[es_mask & not_dc_bus & site_area])
     else:
         candidate_buses = list(sites)
 

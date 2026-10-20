@@ -67,34 +67,6 @@ Every modelling choice favors verifiability:
   center's PPA and battery assets are extendable.
 - Solver: HiGHS by default, so anyone can reproduce a study without a license; Gurobi via `spain_cfe.solving.solver`. One full-year dispatch solves in ~2 min (HiGHS) or ~25 s (Gurobi) at ~4 GB RAM.
 
-## Workflow architecture
-
-```
-composed_2025.nc    (pypsa-eur submodule, config-driven: clustering, profiles, 3h averaging)
-   └► prepare_network.py   + data/custom + spain_cfe.patches      →  base.nc (per run, data year, variant)
-        │
-        ├─ snakemake all         (case study: 2025 data, DC policy scenarios)
-        │    └► solve_network.py   attach DC, 24/7 CFE constraints,
-        │         │                grid CFE iteration (grid-credit)   →  solved.nc, metrics
-        │         ├► make_summary.py   all metrics                    →  scenarios.csv (+ baseline deltas)
-        │         └► plot_summary.py                                  →  figures
-        │
-        └─ snakemake validation  (back-cast: 2024 data, raw + patched)
-             └► solve_network.py   same solver path, no_dc:
-                  │                plain dispatch, DC machinery inert →  solved.nc
-                  └► validate_network.py  vs Redeia 2024 actuals      →  validation reports
-```
-
-`prepare_network.py` is a patch engine: it applies a config-controlled list of
-cited corrections, each individually switchable. The philosophy is (i) build electricity system with pypsa-eur workflow, (ii) validate it against actual data (2024 back-cast), (iii) apply necessary data improvements for this study, and (iv) re-validate.
-
-The patch set (France border closure, fleet capacities, wind correction, PHS split,
-CHP, CSP, biomass availability, prices, NTC caps, demand, hydro inflow, FR nuclear
-seasonality, MA/AD exports) is defined in
-`config/config.spain.yaml` under `spain_cfe.patches`; what each patch does, why it
-exists and what it changed in the 2024 back-cast is documented in
-[doc/validation_log.md](doc/validation_log.md).
-
 ## Study stages
 
 The study keeps what we measure strictly separate from what we assume. The `{year}`
@@ -148,13 +120,51 @@ network, single scenario solve, report) stays addressable by its filename; see
 `Snakefile`. For interactive work, activate the environment with
 `pixi shell --manifest-path pypsa-eur/pixi.toml`.
 
+What those two commands execute:
+
+```
+composed_2025.nc    (pypsa-eur submodule, config-driven: clustering, profiles, 3h averaging)
+   └► prepare_network.py   + data/custom + spain_cfe.patches      →  base.nc (per run, data year, variant)
+        │
+        ├─ snakemake all         (case study: 2025 data, DC policy scenarios)
+        │    └► solve_network.py   attach DC, 24/7 CFE constraints,
+        │         │                grid CFE iteration (grid-credit)   →  solved.nc, metrics
+        │         ├► make_summary.py   all metrics                    →  scenarios.csv (+ baseline deltas)
+        │         └► plot_summary.py                                  →  figures
+        │
+        └─ snakemake validation  (back-cast: 2024 data, raw + patched)
+             └► solve_network.py   same solver path, no_dc:
+                  │                plain dispatch, DC machinery inert →  solved.nc
+                  └► validate_network.py  vs Redeia 2024 actuals      →  validation reports
+```
+
+`prepare_network.py` is a patch engine: a config-controlled list of cited
+corrections, each individually switchable. The method is: (i) build the
+electricity system with the PyPSA-Eur workflow, (ii) validate it against 2024
+actuals (the back-cast), (iii) correct only what the validation demands, every
+correction cited, and (iv) re-validate through the same pipeline.
+
+The patch set (France border closure, fleet capacities, wind correction, PHS split,
+CHP, CSP, biomass availability, prices, NTC caps, demand, hydro inflow, FR nuclear
+seasonality, MA/AD exports) is defined in
+`config/config.spain.yaml` under `spain_cfe.patches`; what each patch does, why it
+exists and what it changed in the 2024 back-cast is documented in
+[doc/validation_log.md](doc/validation_log.md).
+
 ## Validation preview
 
 *placeholder*
 
 ## License
 
-MIT © 2026 Iegor Riepin (TU Berlin, PyPSA Labs gGmbH); see [LICENSES/](LICENSES/),
+MIT © 2026 Iegor Riepin (PyPSA Labs gGmbH); see [LICENSES/](LICENSES/),
 [REUSE](https://reuse.software/)-compliant. Vendored
 third-party primary sources under `data/custom/sources/` keep their providers' licences,
 registered per file in [doc/data_sources.md](doc/data_sources.md).
+
+## Independence
+
+This project is independent work: Iegor Riepin and PyPSA Labs gGmbH received no funding,
+no grant and no direction for it, from any government, company or interest group. The
+modelling work was done because Spain is about to take a decision of lasting consequence, and a
+decision of that weight deserves open, verifiable evidence that belongs to everyone.

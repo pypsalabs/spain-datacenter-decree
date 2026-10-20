@@ -1,8 +1,8 @@
 country,year,carrier_or_metric,value,unit,source_id,note
 EU,2024,co2_ets_price,65.24,EUR/tCO2,icap_ets_2025,2024 annual average EU ETS allowance (EUA) auction/spot clearing price (~65 EUR/tCO2 per EEX/ICAP 2024 market report)
-EU,2025,co2_ets_price,70.00,EUR/tCO2,study_assumption_user_confirmed,study assumption (user-confirmed) per the decision log Decisions for 2025 planning horizon
-EU,2024,gas_ttf_price,34.45,EUR/MWh_th,acer_gas_2024,2024 annual average Dutch TTF day-ahead/month-ahead natural gas wholesale price (~34 EUR/MWh_th per ACER/ICIS 2024 monitoring)
-EU,2025,gas_fuel_price,42.9003,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) gas fuel price from World Bank (2025) Commodity Markets
+EU,2025,co2_ets_price,73.43,EUR/tCO2,icap_ets_2025,2025 average EU ETS allowance (EUA) auction price per ICAP Allowance Price Explorer (secondary market average 74.35 EUR/tCO2)
+ES,2024,gas_pvb_price,38.08,EUR/MWh_th,mibgas_ia_2025,"2024 annual average MIBGAS PVB day-ahead price (Informe Anual 2025, p. 51: 38,08 EUR/MWh). PVB is the hub Iberian gas plants actually buy at; preferred over TTF (ACER 2024 average ~34.45)."
+ES,2025,gas_pvb_price,35.97,EUR/MWh_th,mibgas_ia_2025,"2025 annual average MIBGAS PVB day-ahead price (Informe Anual 2025, p. 51: 35,97 EUR/MWh). Replaces the technology-data scenario gas price (42.90), an EU-generic forecast unsuitable for a dispatch-year study."
 EU,2024,coal_fuel_price,14.83,EUR/MWh_th,iea_coal_2025,"Realized 2024 European steam coal price: IEA Coal 2025 reports the CIF ARA 6000 kcal/kg average at USD 101/t in 2025, down 10% y-o-y, implying ~USD 112/t in 2024; converted at the ~1.082 average 2024 EUR/USD rate and 6.978 MWh_th/t. The technology-data TYNDP coal price (7.82 EUR/MWh_th) is a long-run scenario input, unsuitable for a market-year back-cast."
 EU,2025,coal_fuel_price,12.81,EUR/MWh_th,iea_coal_2025,"Realized 2025 European steam coal price: CIF ARA average USD 101/t (IEA Coal 2025), converted at the ~1.13 average 2025 EUR/USD rate and 6.978 MWh_th/t."
 EU,2025,lignite_fuel_price,7.9423,EUR/MWh_th,pypsa_tech_data_v015_2025,PyPSA/technology-data v0.15.0 (EUR2025) lignite fuel price from ENTSO-E & ENTSOG TYNDP 2024 Scenarios Inputs

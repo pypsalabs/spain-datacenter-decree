@@ -44,7 +44,7 @@ principled part of the wind treatment; the factor below covers only the residual
 | `chp_profile` | Cogeneration as a fixed profile: monthly shape derived at run time from the vendored Redeia monthly cogeneration CO2 series, scaled to published annual output (16.42 TWh, 0.366 tCO2/MWh_el), distributed by nodal load share. By construction | `chp.csv` + vendored REData JSON |
 | `csp` | 2.3 GW CSP, nodal solar profile rescaled to the realized 2024 CSP capacity factor. By construction (no storage dispatch modelled; stated assumption) | `national_capacities.csv`, `validation_2024_es.csv` |
 | `biomass_availability` | Biomass/waste `p_max_pu` capped at the realized capacity factor (ES 0.391, PT 0.563) — fuel-limited plants | cited generation ÷ capacity |
-| `prices` | Thermal marginal costs = VOM + fuel/η + ETS × intensity/η (2024: TTF gas 34.45, CIF-ARA coal 14.83, ETS 65.24; realized market prices, not scenario inputs); PT gas plants additionally pay the Portuguese gas network premium (+1.10 EUR/MWh_th, ERSE: UGS parcela I + firm entry/exit URT), breaking the Iberian gas near-tie in the observed direction | `prices.csv`, processed technology-data (VOM), ERSE TEP gás 2025-26 |
+| `prices` | Thermal marginal costs = VOM + fuel/η + ETS × intensity/η (2024: MIBGAS PVB gas 38.08, CIF-ARA coal 14.83, ETS 65.24; realized market prices at the hubs the plants buy at, not scenario inputs); PT gas plants additionally pay the Portuguese gas network premium (+1.10 EUR/MWh_th, ERSE: UGS parcela I + firm entry/exit URT), breaking the Iberian gas near-tie in the observed direction | `prices.csv`, processed technology-data (VOM), ERSE TEP gás 2025-26 |
 | `ntc_caps` | ES-FR 2.8 GW, ES-PT 4.2 GW, Peninsula-Balearics 0.4 GW via per-element `s_max_pu`/`p_max_pu` scaling (impedances untouched; pro-rata caps are mildly conservative under KVL) | `ntc.csv` |
 | `demand` | Country loads scaled to cited demand (ES 239.7 and PT 51.4 TWh busbar; FR 449.2 TWh RTE weather-corrected consumption) | `annual_demand.csv` |
 | `hydro_inflow` | wy2024 runs only (back-cast and case study): ES and PT reservoir inflow scaled to observed 2024 hydro energy (ES ×1.143, PT ×2.177), closing the EIA data gap. FR needs none (model hits the actual 74.7 TWh) | `validation_2024_es.csv`, `pt_actuals.csv` |
@@ -131,4 +131,8 @@ component-level numbers are reported alongside the total in §4.
 - The net-exports gate passes on the total; the ES→FR and ES→PT components carry
   compensating errors (±~6 TWh) rooted in the price-duration flatness of §5.5.
 - The average price level is informational only; grid-purchase costs reported from the
-  model inherit its +25% bias (€78.5 vs €63 OMIE average).
+  model inherit its +33% bias (€84.0 vs €63 OMIE average). Decomposition on the solved
+  back-cast: the weighting convention is immaterial (arithmetic 83.4 vs load-weighted
+  84.0) and there are no scarcity spikes (max 95); the entire gap is a cheap-hour
+  deficit — the model prices below 1 EUR in 0.3% of snapshots against ~8.5% of real
+  2024 hours, and its median (94.6) sits at the CCGT marginal cost. Causes: hydro priced at fossil opportunity value and no zero/negative bidding

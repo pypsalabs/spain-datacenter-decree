@@ -652,7 +652,7 @@ def _patch_prices(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
 
     ets = price(("co2_ets_price",))
     fuel = {
-        "gas": price(("gas_ttf_price", "gas_fuel_price")),
+        "gas": price(("gas_pvb_price", "gas_fuel_price")),
         "coal": price(("coal_fuel_price",)),
         "lignite": price(("lignite_fuel_price",)),
         "oil": price(("oil_fuel_price",)),

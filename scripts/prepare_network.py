@@ -307,13 +307,15 @@ def _patch_national_capacities(n: pypsa.Network, ctx: Mapping[str, Any]) -> None
                     .sum()
                     .idxmax()
                 )
-                _ensure_carrier(n, carriers[0])
                 costs = pd.read_csv(ctx["costs"], index_col=0)
-                eta = (
-                    float(costs.at[carriers[0], "efficiency"])
-                    if carriers[0] in costs.index
-                    else 1.0
+                tech = costs.loc[carriers[0]] if carriers[0] in costs.index else None
+                eta = float(tech["efficiency"]) if tech is not None else 1.0
+                co2 = (
+                    float(tech["CO2 intensity"])
+                    if tech is not None and pd.notna(tech["CO2 intensity"])
+                    else 0.0
                 )
+                _ensure_carrier(n, carriers[0], co2=co2)
                 n.add(
                     "Generator",
                     f"{bus} {carriers[0]}",

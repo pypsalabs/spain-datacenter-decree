@@ -14,6 +14,7 @@ import pytest
 
 from scripts.prepare_network import (
     _patch_fr_nuclear_profile,
+    _patch_national_capacities,
     _patch_wind_correction,
     attach_boundary_flows,
     freeze_fleet,
@@ -227,6 +228,33 @@ def test_fr_nuclear_profile_applies_in_every_weather_year(tmp_path: Path) -> Non
     _patch_fr_nuclear_profile(n, ctx)
     profile = n.generators_t.p_max_pu["FR0 0AC nuclear"]
     assert np.isclose(profile.mean(), 0.715, rtol=1e-9)
+
+
+def test_created_fleet_carrier_gets_tech_data_co2(tmp_path: Path) -> None:
+    """A carrier the patch creates from scratch carries its CO2 intensity (priced and counted)."""
+    n = _toy_network()
+    n.add("Load", "FR0 1AC demand", bus="FR0 1AC", p_set=pd.Series(1.0, n.snapshots))
+    pd.DataFrame(
+        [
+            {
+                "country": "FR",
+                "year": 2025,
+                "carrier_or_metric": "OCGT/gas turbines",
+                "value": 1500.0,
+                "unit": "MW",
+                "source_id": "x",
+                "note": "",
+            }
+        ]
+    ).to_csv(tmp_path / "national_capacities.csv", index=False)
+    costs = tmp_path / "costs.csv"
+    pd.DataFrame(
+        {"efficiency": [0.405], "CO2 intensity": [0.198]}, index=["OCGT"]
+    ).to_csv(costs)
+    ctx = {"custom_dir": tmp_path, "data_year": 2025, "costs": costs}
+    _patch_national_capacities(n, ctx)
+    assert n.generators.at["FR0 1AC OCGT", "p_nom"] == pytest.approx(1500.0)
+    assert n.carriers.at["OCGT", "co2_emissions"] == pytest.approx(0.198)
 
 
 def test_wind_correction_backcast_requires_wy2024(tmp_path: Path) -> None:

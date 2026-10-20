@@ -57,12 +57,20 @@ principled part of the wind treatment; the factor below covers only the residual
 |---|---|---|---|
 | Wind (±15%) | −13.1% | **−2.5%** | PASS |
 | Solar PV (±15%) | +46.2% | **+3.4%** | PASS |
-| Nuclear (±10%) | +5.4% | −1.9% | PASS |
+| Nuclear (±10%) | +5.4% | −2.2% | PASS |
 | Hydro (±20%) | −30.4% | −8.4% | PASS (by construction via inflow) |
 | CCGT+CHP (±25%) | −62.3% | +10.0% | PASS |
 | CO2 (±20%) | −37.6% | **−5.1%** | PASS |
 | Load shedding (< 0.01%) | 0 | 0 | PASS |
-| Net exports (sign + ±50%) | −196% | **+9.18 vs +10.23 TWh (−10.2%)** | PASS |
+| Net exports (sign + ±50%) | −196% | **+9.08 vs +10.23 TWh (−11.2%)** | PASS |
+
+OCGT carbon price (2026-10-20): `national_capacities` creates France's 1.5 GW of OCGT
+from scratch (no upstream units), and the created carrier carried no CO2 intensity, so
+it ran ~0.18 TWh/yr without a carbon price and uncounted. Created carriers now take the
+technology-data CO2 intensity (OCGT 0.198 t/MWh_th, as CCGT). Effect on the back-cast,
+same solver before and after: net exports −0.03 TWh, nuclear −0.03 TWh, CO2 +0.002 Mt;
+every gate unchanged. The table reflects a Gurobi solve; HiGHS and Gurobi reach different
+equally optimal dispatches of this LP, ~0.1 TWh apart on nuclear and the French exchange.
 
 
 ## 5. The net-exports gate: diagnosis, experiments, resolution
@@ -111,9 +119,10 @@ patched, no_dc):
    the model class, stated as a limitation rather than patched.
 
 **Resolution (2026-10-19):** with `fr_nuclear_profile` and the two PT corrections on,
-the gate **passes**: net exports +9.18 vs +10.23 TWh actual (−10.2%), and CO2 moves to
-−5.1%. The pass carries a stated caveat: the border components compensate (ES→PT +16.0
-vs +10.5; ES→FR −9.6 vs −3.0 from the persistent import excess in item 5), so the
+the gate **passes**: net exports +9.08 vs +10.23 TWh actual (−11.2%; current solve,
+see the OCGT note in §4), and CO2 moves to −5.1%. The pass carries a
+stated caveat: the border components compensate (ES→PT +16.0 vs +10.5; ES→FR −9.7 vs
+−3.0 from the persistent import excess in item 5), so the
 component-level numbers are reported alongside the total in §4.
 
 ## 6. Known caveats to carry into the paper

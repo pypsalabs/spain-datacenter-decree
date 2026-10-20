@@ -87,6 +87,14 @@ def _solve(n: pypsa.Network, costs: pd.DataFrame, policy: str, **kw):
     return solve_network(n, policy=policy, **kw)
 
 
+def _es_price(n: pypsa.Network) -> pd.Series:
+    """Hourly Spanish price: nodal prices weighted by background load."""
+    load = n.loads_t.p[["ES0 6AC demand", "ES0 7AC demand"]]
+    load = load.set_axis(["ES0 6AC", "ES0 7AC"], axis=1)
+    prices = n.buses_t.marginal_price[load.columns]
+    return (prices * load).sum(axis=1) / load.sum(axis=1)
+
+
 def test_resolve_target_from_policy_names() -> None:
     assert resolve_target("no_dc") == 0.0
     assert resolve_target("unmatched_dc", 80.0) == 0.0
@@ -106,6 +114,64 @@ def test_unmatched_dc_imports_everything(toy_base, toy_costs) -> None:
     assert metrics["grid_import_mwh"] == pytest.approx(100.0 * HOURS, rel=1e-6)
     assert metrics["cfe_score"] == pytest.approx(0.0, abs=1e-9)
     assert metrics["load_shedding_mwh"] == pytest.approx(0.0, abs=1e-6)
+
+
+def test_unmatched_dc_pays_spanish_price_and_sees_grid_cfe(toy_base, toy_costs) -> None:
+    # congest the hub with a surplus node so nodal prices split
+    toy_base.lines.loc["hub link", "s_nom"] = 1.0
+    toy_base.loads.loc["ES0 6AC demand", "p_set"] = 100.0
+    n, conv, metrics = _solve(toy_base, toy_costs, "unmatched_dc")
+    nodal = n.buses_t.marginal_price
+    assert (nodal["ES0 6AC"] - nodal["ES0 7AC"]).abs().max() > 1.0
+    w = n.snapshot_weightings["generators"]
+    bill = float((w * 100.0 * _es_price(n)).sum())
+    assert metrics["dc_grid_cost_eur"] == pytest.approx(bill, rel=1e-9)
+    assert metrics["dc_sales_revenue_eur"] == pytest.approx(0.0, abs=1e-6)
+    assert metrics["dc_net_cost_eur_per_mwh"] == pytest.approx(
+        bill / metrics["total_load_mwh"], rel=1e-9
+    )
+    # no PPAs: the flat DC load is covered exactly by the grid's own hourly CFE
+    assert metrics["clean_coverage"] == pytest.approx(n._grid_cfe.mean(), rel=1e-9)
+
+
+def test_net_cost_and_coverage_add_up(toy_base, toy_costs) -> None:
+    n, conv, metrics = _solve(toy_base, toy_costs, "hourly_80_ppa_only")
+    w = n.snapshot_weightings["generators"]
+    links = n.links.index
+    dis = links[links.str.contains("discharger")]
+    cha = links[links.str.contains("charger") & ~links.str.contains("discharger")]
+    ppa = n.generators.index[n.generators.index.str.startswith("DC")]
+    # grid position from the physical balance: d - g - dis + cha = im - ex
+    net_grid = (
+        100.0
+        - n.generators_t.p[ppa].sum(axis=1)
+        - (n.links_t.p0[dis] * n.links.loc[dis, "efficiency"]).sum(axis=1)
+        + n.links_t.p0[cha].sum(axis=1)
+    )
+    grid_bill = float((w * _es_price(n) * net_grid).sum())
+    assets = metrics["dc_capital_cost_eur"] + metrics["dc_marginal_cost_eur"]
+    assert metrics["dc_net_cost_eur"] == pytest.approx(assets + grid_bill, rel=1e-6)
+
+    assert metrics["clean_coverage"] == pytest.approx(
+        metrics["ppa_only_score"] + metrics["grid_clean_share"], rel=1e-9
+    )
+    assert metrics["clean_coverage"] >= metrics["cfe_score"] - 1e-9
+    per_carrier = [
+        v for k, v in metrics.items() if k.startswith("dc_ppa_") and k.endswith("_mwh")
+    ]
+    assert sum(per_carrier) == pytest.approx(metrics["ppa_generation_mwh"], rel=1e-9)
+
+
+def test_grid_cfe_is_load_weighted(toy_base, toy_costs) -> None:
+    rng = np.random.default_rng(3)
+    toy_base.loads_t.p_set["ES0 6AC demand"] = pd.Series(
+        rng.uniform(200.0, 800.0, HOURS), index=toy_base.snapshots
+    )
+    n, conv, metrics = _solve(toy_base, toy_costs, "unmatched_dc")
+    load = n.loads_t.p[["ES0 6AC demand", "ES0 7AC demand"]].sum(axis=1)
+    weighted = float((n._grid_cfe * load).sum() / load.sum())
+    assert abs(weighted - n._grid_cfe.mean()) > 1e-4
+    assert metrics["mean_grid_cfe_es"] == pytest.approx(weighted, rel=1e-9)
 
 
 def test_hourly_80_ppa_only_meets_target(toy_base, toy_costs) -> None:

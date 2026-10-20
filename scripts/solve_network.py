@@ -145,10 +145,35 @@ def resolve_cfe0(
     return r_s.reindex(n.snapshots).fillna(0.0).astype(float)
 
 
-def _dc_portfolio_metrics(n: pypsa.Network, total_load_mwh: float) -> dict[str, float]:
-    """DC portfolio capacities and cost, system/ES CO2, load shedding, ES mean price."""
+def _dc_portfolio_metrics(n: pypsa.Network, acc: dict[str, Any]) -> dict[str, float]:
+    """
+    DC portfolio, net procurement cost and clean coverage; system/ES CO2, load
+    shedding, ES price and grid CFE.
+
+    ``acc`` is the ``dc_metrics`` accounting. Grid purchases ``im_t`` and sales
+    ``ex_t`` settle at the hourly Spanish price. Clean coverage credits grid
+    purchases with the solved network's own grid CFE factor for every policy, so
+    all rows share one hourly yardstick. The Spanish price and grid CFE are
+    weighted by Spanish background load.
+    """
     m: dict[str, float] = {}
     w = n.snapshot_weightings["generators"]
+    total_load_mwh = float(acc["total_load_mwh"])
+
+    es_buses = n.buses.index[
+        (n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")
+    ]
+    bg_loads = n.loads.index[
+        n.loads["bus"].isin(es_buses)
+        & (n.loads["carrier"] != "boundary")
+        & ~n.loads.index.astype(str).str.startswith("DC")
+    ]
+    load_per_bus = (
+        n.loads_t.p[bg_loads].T.groupby(n.loads.loc[bg_loads, "bus"]).sum().T
+    ).mul(w, axis=0)
+    es_load = load_per_bus.sum(axis=1)
+    prices = n.buses_t.marginal_price[load_per_bus.columns]
+    es_price = (prices * load_per_bus).sum(axis=1) / es_load
 
     dc_gens = n.generators.index[
         n.generators.index.astype(str).str.startswith("DC")
@@ -158,6 +183,9 @@ def _dc_portfolio_metrics(n: pypsa.Network, total_load_mwh: float) -> dict[str, 
     marg_cost = 0.0
     for carrier, grp in n.generators.loc[dc_gens].groupby("carrier"):
         m[f"dc_ppa_{carrier}_mw"] = float(grp["p_nom_opt"].sum())
+        m[f"dc_ppa_{carrier}_mwh"] = float(
+            n.generators_t.p[grp.index].mul(w, axis=0).sum().sum()
+        )
     m["dc_ppa_total_mw"] = float(n.generators.loc[dc_gens, "p_nom_opt"].sum())
     for g in dc_gens:
         cap_cost += float(
@@ -187,9 +215,22 @@ def _dc_portfolio_metrics(n: pypsa.Network, total_load_mwh: float) -> dict[str, 
 
     m["dc_capital_cost_eur"] = cap_cost
     m["dc_marginal_cost_eur"] = marg_cost
-    m["dc_cost_eur_per_mwh"] = (
-        (cap_cost + marg_cost) / total_load_mwh if total_load_mwh > 0.0 else 0.0
+
+    # Spain is one bidding zone: the DC trades at the Spanish price, never its nodal one
+    m["dc_grid_cost_eur"] = float((w * es_price * acc["im_t"]).sum())
+    m["dc_sales_revenue_eur"] = float((w * es_price * acc["ex_t"]).sum())
+    m["dc_net_cost_eur"] = (
+        cap_cost + marg_cost + m["dc_grid_cost_eur"] - m["dc_sales_revenue_eur"]
     )
+    cfe_grid = n._grid_cfe.reindex(n.snapshots)
+    grid_clean_mwh = float((w * cfe_grid * acc["im_t"]).sum())
+    if total_load_mwh > 0.0:
+        m["dc_net_cost_eur_per_mwh"] = m["dc_net_cost_eur"] / total_load_mwh
+        m["grid_clean_share"] = grid_clean_mwh / total_load_mwh
+    else:
+        m["dc_net_cost_eur_per_mwh"] = 0.0
+        m["grid_clean_share"] = 0.0
+    m["clean_coverage"] = float(acc["ppa_only_score"]) + m["grid_clean_share"]
 
     # CO2 (thermal input per generator x carrier intensity), total and Spain
     co2 = n.carriers["co2_emissions"]
@@ -211,21 +252,8 @@ def _dc_portfolio_metrics(n: pypsa.Network, total_load_mwh: float) -> dict[str, 
     es_shed = [g for g in shed if str(n.generators.at[g, "bus"]).startswith("ES")]
     m["es_load_shedding_mwh"] = float(shed_mwh.loc[es_shed].sum()) if es_shed else 0.0
 
-    # Load-weighted Spanish electricity price
-    es_buses = n.buses.index[
-        (n.buses["country"] == "ES") & (n.buses["carrier"] == "AC")
-    ]
-    load_cols = n.loads.index[
-        n.loads["bus"].isin(es_buses) & (n.loads["carrier"] != "boundary")
-    ].intersection(n.loads_t.p_set.columns)
-    if not load_cols.empty and not n.buses_t.marginal_price.empty:
-        load_per_bus = (
-            n.loads_t.p_set[load_cols].T.groupby(n.loads.loc[load_cols, "bus"]).sum().T
-        )
-        prices = n.buses_t.marginal_price[load_per_bus.columns]
-        m["es_mean_price_eur_mwh"] = float(
-            (prices * load_per_bus).sum().sum() / load_per_bus.sum().sum()
-        )
+    m["es_mean_price_eur_mwh"] = float((es_price * es_load).sum() / es_load.sum())
+    m["mean_grid_cfe_es"] = float((cfe_grid * es_load).sum() / es_load.sum())
     return m
 
 
@@ -339,7 +367,6 @@ def solve_network(
     solve_time_s = time.perf_counter() - t_start
 
     raw_metrics = dc_metrics(n)
-    total_load_mwh = float(raw_metrics["total_load_mwh"])
     metrics_row: dict[str, Any] = {
         "policy": str(policy),
         "target": tau,
@@ -349,12 +376,11 @@ def solve_network(
         "solver": solver_name,
         "iterations": len(convergence_df),
         "max_delta": float(convergence_df["max_delta"].iloc[-1]),
-        "mean_grid_cfe_es": float(n._grid_cfe.mean()),
     }
     for k, v in raw_metrics.items():
         if not isinstance(v, pd.Series):
             metrics_row[k] = float(v)
-    metrics_row.update(_dc_portfolio_metrics(n, total_load_mwh))
+    metrics_row.update(_dc_portfolio_metrics(n, raw_metrics))
     return n, convergence_df, metrics_row
 
 

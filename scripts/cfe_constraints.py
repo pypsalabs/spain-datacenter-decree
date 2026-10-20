@@ -358,6 +358,8 @@ def dc_metrics(
         "constraint_lhs_from_balance": constraint_lhs_from_balance,
         "model_constraint_lhs": model_constraint_lhs,
         "constraint_lhs_per_t": matched_t,
+        "im_t": im_s,
+        "ex_t": ex_s,
         "total_load_mwh": total_load_mwh,
         "ppa_generation_mwh": ppa_gen_mwh,
         "battery_discharge_mwh": float((weights * dis_s).sum()),

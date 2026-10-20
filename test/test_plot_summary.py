@@ -24,7 +24,12 @@ from scripts.solve_network import solve_network
 from scripts.summarise_network import summarise_network
 
 COLORS = Path(__file__).resolve().parents[1] / "pypsa-eur/config/plotting.default.yaml"
-META = {"planning_year": 2025, "weather_year": 2024, "resolution": "1h"}
+META = {
+    "planning_year": 2025,
+    "weather_year": 2024,
+    "resolution": "1h",
+    "sites": "aragon",
+}
 
 
 @pytest.fixture

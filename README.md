@@ -72,21 +72,21 @@ Every modelling choice favors verifiability:
 Each scenario suite in `config/config.spain.yaml` mixes and matches these ready-made
 options:
 
-- Procurement policy (`policies`): no policy at all (`unmatched_dc`); the decree, 80% in
+- Procurement policy: no policy at all (`unmatched_dc`); the decree, 80% in
   every hour (`strict_hourly_80_ppa_only`); 80% hourly matching on average over the year
   (`hourly_80_ppa_only`), optionally with credit for the grid's renewable share
   (`hourly_80_grid_credit`); or annual volume matching (`annual_80_res`). Need a different
   score? Change the number in the name: `hourly_90_ppa_only` asks for 90%,
   `annual_100_res` for 100%.
-- PPA location (the keys of `policies`): the data center signs its PPAs anywhere in
+- PPA location: the data center signs its PPAs anywhere in
   mainland Spain (`spain_wide`) or only in its own region (`local_region`).
-- Data center cluster size (`dc_mw`): a flat load of any size. The full suite runs 500,
+- Data center cluster size: a flat load of any size. The full suite runs 500,
   1000, 2000, 4000 and 6000 MW.
-- Data center site (`spain_cfe.dc.sites`): any of the 9 Spanish regions, Aragón by
+- Data center site: any of the 9 Spanish regions, Aragón by
   default.
-- Sales of surplus electricity (`excess_cap`): off by default, so the data center stores or
+- Sales of surplus electricity: off by default, so the data center stores or
   curtails what it cannot use. Switch them on to let it sell surplus back to the grid.
-- Weather year (`runs`): this version of the project uses wy2024. The PyPSA-Eur and
+- Weather year: this version of the project uses wy2024. The PyPSA-Eur and
   [atlite](https://github.com/PyPSA/atlite) workflow can build any other weather year from
   [ERA5](https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5) reanalysis data,
   with SARAH-3 satellite data for solar.

@@ -2,34 +2,45 @@
 #
 # SPDX-License-Identifier: MIT
 #
-# Shared Matplotlib style for the study figures (plot_summary.py).
+# Shared Matplotlib style for the study figures (plot_summary.py, plot_heatmap.py):
+# editorial look with one sans typeface, no chart frame and a quiet grid. Libre
+# Franklin (SIL OFL) is used if installed; DejaVu Sans covers missing glyphs.
 
 figure.dpi: 150
+figure.facecolor: white
 figure.constrained_layout.use: True
 savefig.dpi: 300
 pdf.fonttype: 42
 svg.fonttype: none
 
-font.size: 8
-axes.labelsize: 8
-axes.titlesize: 8
-xtick.labelsize: 7
-ytick.labelsize: 7
-legend.fontsize: 7
-legend.frameon: True
-legend.framealpha: 1.0
-legend.edgecolor: cccccc
+font.family: Libre Franklin, DejaVu Sans
+font.size: 8.5
+text.color: 222222
+axes.labelsize: 8.5
+axes.labelcolor: 333333
+axes.titlesize: 9
+axes.titleweight: bold
+xtick.labelsize: 7.5
+ytick.labelsize: 7.5
+xtick.color: 444444
+ytick.color: 666666
+xtick.major.size: 0
+ytick.major.size: 0
+xtick.major.pad: 5
+ytick.major.pad: 4
+legend.fontsize: 7.5
+legend.frameon: False
 
 axes.spines.top: False
 axes.spines.right: False
-axes.linewidth: 0.6
+axes.spines.left: False
+axes.edgecolor: 222222
+axes.linewidth: 0.8
 axes.axisbelow: True
 axes.grid: True
 axes.grid.axis: y
-grid.color: e6e6e6
-grid.linewidth: 0.6
-xtick.major.width: 0.6
-ytick.major.width: 0.6
+grid.color: dcdcdc
+grid.linewidth: 0.5
 hatch.linewidth: 0.6
 
 # Okabe-Ito, colorblind-safe

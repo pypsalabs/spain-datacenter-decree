@@ -28,8 +28,11 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import yaml  # noqa: E402
 from matplotlib.container import BarContainer  # noqa: E402
+from matplotlib.font_manager import FontProperties  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Patch  # noqa: E402
+from matplotlib.textpath import TextToPath  # noqa: E402
+from matplotlib.ticker import MaxNLocator  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +60,11 @@ PPA_CARRIERS: dict[str, str] = {
     "solar": "Solar PV",
     "solar-hsat": "Solar PV (tracking)",
 }
-PPA_COLOR = "#01665e"
-GRID_RES_COLOR = "#80cdc1"
-GRID_COLOR = "#7f7f7f"
-SALES_COLOR = "#bdbdbd"
-IMPORT_COLOR = "#8c8c8c"
+PPA_COLOR = "#2f6b4f"
+GRID_RES_COLOR = "#b9d3c3"
+GRID_COLOR = "#8c8c8c"
+SALES_COLOR = "#cfcfcf"
+IMPORT_COLOR = "#a0a0a0"
 
 # Spanish supply groups -> (network carriers, tech_colors key)
 SUPPLY_GROUPS: dict[str, tuple[tuple[str, ...], str]] = {
@@ -77,7 +80,8 @@ SUPPLY_GROUPS: dict[str, tuple[tuple[str, ...], str]] = {
     "Biomass & waste": (("biomass", "waste"), "biomass"),
 }
 MIN_SUPPLY_SHIFT_TWH = 0.02
-CAPTION_CHARS_PER_INCH = 21.0
+CAPTION_FONTSIZE = 6.5
+CAPTION_WIDTH = 0.98  # share of the figure width
 HOURS_PER_YEAR = 8760.0
 G_PER_KWH_PER_MT_PER_MWH = 1.0e12 / 1.0e3
 
@@ -138,6 +142,12 @@ def _policy_axis(ax: plt.Axes, policies: list[str], axis: str = "x") -> np.ndarr
     return pos
 
 
+def _zero_line(ax: plt.Axes) -> None:
+    """Zero baseline drawn as the axis line, replacing the bottom spine."""
+    ax.axhline(0.0, color="#222222", linewidth=0.8, zorder=2.5)
+    ax.spines["bottom"].set_visible(False)
+
+
 def _stack(
     ax: plt.Axes,
     pos: np.ndarray,
@@ -191,14 +201,25 @@ def _siting_note(rows: pd.DataFrame) -> str:
 
 
 def _caption(fig: plt.Figure, summary: str, points: list[str]) -> None:
-    """Caption under the figure: what is shown, then the key mechanics as bullets."""
-    width = int(CAPTION_CHARS_PER_INCH * fig.get_size_inches()[0])
+    """
+    Caption under the figure: what is shown, then the key mechanics as bullets.
+
+    Lines wrap at the figure width, measured from the caption's own characters
+    in the current font.
+    """
+    text = summary + "".join(points)
+    text_pt, _, _ = TextToPath().get_text_width_height_descent(
+        text, FontProperties(size=CAPTION_FONTSIZE), ismath=False
+    )
+    width = int(CAPTION_WIDTH * fig.get_size_inches()[0] * 72.0 * len(text) / text_pt)
     lines = textwrap.wrap(summary, width)
     for point in points:
         lines += textwrap.wrap(
             point, width, initial_indent="• ", subsequent_indent="   "
         )
-    fig.supxlabel("\n".join(lines), x=0.0, ha="left", fontsize=6.5, linespacing=1.35)
+    fig.supxlabel(
+        "\n".join(lines), x=0.0, ha="left", fontsize=CAPTION_FONTSIZE, linespacing=1.35
+    )
 
 
 def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
@@ -383,7 +404,7 @@ def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     )
     for x, v in zip(pos, net, strict=True):
         ax.text(x + 0.34, v, f"{v:.0f}", va="center", fontsize=6.5, fontweight="bold")
-    ax.axhline(0.0, color="black", linewidth=0.6)
+    _zero_line(ax)
     bottom = parts.where(parts < 0.0, 0.0).sum(axis=1).min()
     ax.set_ylim(1.25 * bottom, 1.1 * tops.max())
     ax.set_ylabel("DC cost (€ per MWh consumed)")
@@ -418,17 +439,24 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
     """Spanish system impact against no DC, absolute (left) and relative (right)."""
     policies = list(POLICIES)
     r = rows.loc[policies]
+    # labels mixing math write Delta as math: their text gets no font fallback
     panels = [
         ("cost", "Δ system cost\n(M€/yr)", "es_system_cost_eur", 1e-6, 0),
-        ("co2", "Δ CO$_2$ emissions\n(Mt/yr)", "es_total_co2_mt", 1.0, 2),
+        ("co2", "$\\Delta$ CO$_2$ emissions\n(Mt/yr)", "es_total_co2_mt", 1.0, 2),
         (
             "intensity",
-            "Δ CO$_2$ intensity\n(g/kWh)",
+            "$\\Delta$ CO$_2$ intensity\n(g/kWh)",
             "es_co2_intensity_g_per_kwh",
             1.0,
             1,
         ),
-        ("gas", "Δ gas for power\n(TWh$_{th}$/yr)", "es_gas_fuel_mwh_th", 1e-6, 2),
+        (
+            "gas",
+            "$\\Delta$ gas for power\n(TWh$_{th}$/yr)",
+            "es_gas_fuel_mwh_th",
+            1e-6,
+            2,
+        ),
         ("price", "Δ spot price\n(€/MWh)", "es_mean_price_eur_mwh", 1.0, 2),
     ]
     fig, axd = plt.subplot_mosaic(
@@ -440,7 +468,7 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         pos = _policy_axis(ax, policies)
         vals = r[f"delta_no_dc_{col}"].to_numpy(dtype=float) * scale
         ax.bar(pos, vals, width=0.62, color=bar_colors, linewidth=0)
-        ax.axhline(0.0, color="black", linewidth=0.6)
+        _zero_line(ax)
         lo, hi = min(0.0, vals.min()), max(0.0, vals.max())
         pad = 0.05 * (hi - lo)
         for x, v in zip(pos, vals, strict=True):
@@ -457,6 +485,9 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
             hi + (0.3 * (hi - lo) if hi > 0.0 else pad),
         )
         ax.set_ylabel(label)
+        top = ax.get_ylim()[1]
+        # no ticks or gridlines below zero: negative bars hang below the baseline
+        ax.set_yticks([t for t in ax.get_yticks() if 0.0 <= t <= top])
         base = float(rows.at[BASELINE, col]) * scale
         relative = ax.secondary_yaxis(
             "right",
@@ -466,6 +497,12 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
             ),
         )
         relative.set_ylabel("% of baseline")
+        relative.spines["right"].set_visible(False)
+        top_pct = 100.0 * top / base
+        pct_ticks = MaxNLocator(nbins=5, steps=[1, 2, 2.5, 5, 10]).tick_values(
+            0.0, top_pct
+        )
+        relative.set_yticks([q for q in pct_ticks if 0.0 <= q <= top_pct])
 
     no = "unmatched_dc"
     site = site_name(r.at[no, "sites"])
@@ -509,7 +546,7 @@ def plot_generation_shift(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Fig
     fig, ax = plt.subplots(figsize=(5.4, 4.4))
     pos = _policy_axis(ax, policies)
     _stack(ax, pos, shown, {k: {"color": seg_colors[k]} for k in shown})
-    ax.axhline(0.0, color="black", linewidth=0.6)
+    _zero_line(ax)
     load = float(r["total_load_mwh"].iloc[0]) / 1.0e6
     ax.axhline(
         load,
@@ -568,7 +605,7 @@ def plot_dc_emission_intensity(
         linewidth=1.2,
         zorder=3,
     )
-    ax.axhline(0.0, color="black", linewidth=0.6)
+    _zero_line(ax)
     grid = float(rows.loc[BASELINE, "es_grid_ef_g_per_kwh"])
     grid_line = ax.axhline(grid, color=GRID_COLOR, linewidth=0.6, linestyle=(0, (4, 3)))
     ax.set_xlim(-0.5, len(policies) - 0.5)

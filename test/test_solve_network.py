@@ -202,6 +202,16 @@ def test_grid_credit_iterates_and_relaxes_build(toy_base, toy_costs) -> None:
     assert metrics["objective"] <= metrics_ppa["objective"] + 1e-3
 
 
+def test_no_same_hour_buy_and_sell(toy_base, toy_costs) -> None:
+    # uncapped sales leave the im/ex split degenerate: a free solver may buy and sell at once
+    n, conv, metrics = _solve(
+        toy_base, toy_costs, "strict_hourly_80_ppa_only", excess_share=None
+    )
+    im = n.model.solution["DC-im"].to_pandas()
+    ex = n.model.solution["DC-ex"].to_pandas()
+    assert float(np.minimum(im, ex).max()) < 1e-6
+
+
 def test_strict_hourly_meets_every_hour(toy_base, toy_costs) -> None:
     n, conv, metrics = _solve(toy_base, toy_costs, "strict_hourly_80_ppa_only")
     # per-hour check from the solved primal: matched share >= 80% of load in every hour

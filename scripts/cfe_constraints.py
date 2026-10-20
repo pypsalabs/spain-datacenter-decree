@@ -33,7 +33,9 @@ PPA-only policies set :math:`CFE_t \equiv 0`; grid-credit policies take the
 hourly grid CFE factor from ``calculate_grid_cfe`` (resolved with fixed forward
 passes in ``iterate``), which counts **renewables only** by default — nuclear
 enters only under the ``_cfe`` policy suffix. The optional excess cap limits annual sales to the
-grid: :math:`\sum_t ex_t \le \sigma \sum_t d_t`. Battery grid-charging
+grid: :math:`\sum_t ex_t \le \sigma \sum_t d_t`. A tiny objective cost on
+:math:`ex_t` rules out buying and selling in the same snapshot.
+Battery grid-charging
 enters through :math:`\underline{g}_{s,t}` in the balance and increases
 :math:`im_t`, so no post-processing clipping is ever performed.
 """
@@ -48,6 +50,9 @@ import pypsa
 logger = logging.getLogger(__name__)
 
 DEFAULT_DC_PREFIX: str = "DC"
+# EUR/MWh on sales ex_t: rules out buying and selling in the same snapshot (a cost
+# on one leg suffices) while staying negligible next to the policy costs
+EX_COST: float = 0.01
 
 
 def _resolve_dc_components(
@@ -176,6 +181,9 @@ def add_dc_cfe_constraints(
 
     im = n.model.add_variables(lower=0.0, coords=[snapshots], name="DC-im")
     ex = n.model.add_variables(lower=0.0, coords=[snapshots], name="DC-ex")
+    obj_weights = n.snapshot_weightings["objective"].copy()
+    obj_weights.index = snapshots
+    n.model.objective += (obj_weights * EX_COST * ex).sum()
 
     # Consumer balance: sum_r g_{r,t} + (dis - cha) - ex_t + im_t = d_t
     lhs_balance = im - ex

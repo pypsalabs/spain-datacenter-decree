@@ -36,7 +36,7 @@ effect.
 We do this work in the open, for the public record. Every input number is cited and its
 primary source vendored in this repository; every correction to the model is documented,
 switchable and re-validated; every figure and table in the report can be reproduced from
-scratch with the included scripts. Anyone, from a ministry analyst to a competing research
+scratch with the included scripts. Anyone, from a ministry analyst to an independent research
 group, can check the numbers, challenge them, and build on them.
 
 ## Model

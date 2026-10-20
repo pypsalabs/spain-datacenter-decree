@@ -148,9 +148,7 @@ rule solve_network:
             if config["spain_cfe"]["accounting"]["excess_cap"] is None
             else config["spain_cfe"]["accounting"]["excess_cap"]
         ),
-        max_iter=lambda w: config["spain_cfe"]["iteration"]["max_iter"],
-        tol=lambda w: config["spain_cfe"]["iteration"]["tol"],
-        damping=lambda w: config["spain_cfe"]["iteration"]["damping"],
+        n_iterations=lambda w: config["spain_cfe"]["iteration"]["n_iterations"],
         meta=lambda w: (
             f"planning_year={w.year},weather_year={str(w.run).removeprefix('wy')},variant={w.variant},"
             f"sites={'+'.join(config['spain_cfe']['dc']['sites'])}"
@@ -176,9 +174,7 @@ rule solve_network:
             --dc-nodes "{params.dc_nodes}" \
             --siting "{wildcards.siting}" \
             --excess-share "{params.excess_share}" \
-            --max-iter "{params.max_iter}" \
-            --tol "{params.tol}" \
-            --damping "{params.damping}" \
+            --n-iterations "{params.n_iterations}" \
             --meta "{params.meta}" \
             {params.r0_arg}
         """

@@ -218,7 +218,9 @@ spain_cfe:
     cfe_extra_carriers: [nuclear]
     excluded: [PHS, battery]
   iteration:
-    max_iter: 6
-    tol: 1.0e-3
-    damping: 0.5
+    # Forward passes for the endogenous grid CFE factor (Riepin & Brown 2023:
+    # plain replacement, no damping or stopping criterion; one forward pass
+    # converges well). The convergence table reports objective and max |dCFE_t|
+    # per pass as the signal that a scenario might need more passes.
+    n_iterations: 2
     init: unmatched_dc

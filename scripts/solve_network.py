@@ -38,9 +38,7 @@ from scripts.calculate_grid_res import calculate_grid_share
 from scripts.cfe_constraints import add_dc_cfe_constraints, dc_kpis
 from scripts.data_center import DEFAULT_DISCOUNT_RATE, attach_data_center, load_costs
 from scripts.iterate import (
-    DEFAULT_DAMPING,
-    DEFAULT_MAX_ITER,
-    DEFAULT_TOL,
+    DEFAULT_N_ITERATIONS,
     solve_with_grid_iteration,
 )
 
@@ -226,9 +224,7 @@ def solve_network(
     excess_share: float | None = None,
     r0_source: str | Path | pd.Series | float | None = None,
     clean_carriers: str = "res",
-    max_iter: int = DEFAULT_MAX_ITER,
-    tol: float = DEFAULT_TOL,
-    damping: float = DEFAULT_DAMPING,
+    n_iterations: int = DEFAULT_N_ITERATIONS,
     solver_options: dict[str, Any] | None = None,
     load_shedding_cost: float = DEFAULT_LOAD_SHEDDING_COST,
 ) -> tuple[pypsa.Network, pd.DataFrame, dict[str, Any]]:
@@ -282,9 +278,7 @@ def solve_network(
                 n=n,
                 build_fn=build_fn,
                 r0=r0_series,
-                max_iter=max_iter,
-                tol=tol,
-                damping=damping,
+                n_iterations=n_iterations,
                 solver_options=iter_opts,
                 country="ES",
                 clean_carriers=clean_carriers,
@@ -321,9 +315,8 @@ def solve_network(
                     "iteration": 0,
                     "max_delta": 0.0,
                     "objective": float(n.objective),
-                    "mean_r_in": float(np.mean(r_single)),
-                    "mean_r_out": float(r_out.mean()),
-                    "converged": True,
+                    "mean_cfe_in": float(np.mean(r_single)),
+                    "mean_cfe_out": float(r_out.mean()),
                 }
             ]
         )
@@ -338,7 +331,6 @@ def solve_network(
         "objective": float(n.objective),
         "solve_time_s": solve_time_s,
         "iterations": len(convergence_df),
-        "converged": bool(convergence_df["converged"].iloc[-1]),
         "max_delta": float(convergence_df["max_delta"].iloc[-1]),
         "mean_grid_share_es": float(n._grid_share.mean()),
     }
@@ -382,9 +374,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="",
         help="Sales cap sigma (sum ex_t <= sigma * sum d_t); empty or 'none' = unlimited.",
     )
-    parser.add_argument("--max-iter", type=int, default=DEFAULT_MAX_ITER)
-    parser.add_argument("--tol", type=float, default=DEFAULT_TOL)
-    parser.add_argument("--damping", type=float, default=DEFAULT_DAMPING)
+    parser.add_argument("--n-iterations", type=int, default=DEFAULT_N_ITERATIONS)
     parser.add_argument(
         "--meta", type=str, default="", help="key=value,... appended to the KPI row."
     )
@@ -436,9 +426,7 @@ def main(argv: list[str] | None = None) -> None:
                 ),
             },
             "iteration": {
-                "max_iter": args.max_iter,
-                "tol": args.tol,
-                "damping": args.damping,
+                "n_iterations": args.n_iterations,
             },
             "dc": {
                 "site_buses": [
@@ -473,9 +461,7 @@ def main(argv: list[str] | None = None) -> None:
         ),
         r0_source=r0_in,
         clean_carriers="cfe" if policy.endswith("_cfe") else "res",
-        max_iter=int(iter_cfg.get("max_iter", DEFAULT_MAX_ITER)),
-        tol=float(iter_cfg.get("tol", DEFAULT_TOL)),
-        damping=float(iter_cfg.get("damping", DEFAULT_DAMPING)),
+        n_iterations=int(iter_cfg.get("n_iterations", DEFAULT_N_ITERATIONS)),
     )
     kpi_row = {**meta, **kpi_row}
 

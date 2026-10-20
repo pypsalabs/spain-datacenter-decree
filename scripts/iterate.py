@@ -2,13 +2,16 @@
 #
 # SPDX-License-Identifier: MIT
 """
-Fixed-point iteration loop for the endogenous grid CFE factor ``CFE_t``.
+Forward-pass iteration for the endogenous grid CFE factor ``CFE_t``.
 
-Resolves the bilinear coupling between the data center's grid import ``m_t``
-and the background grid CFE factor ``CFE_t`` by iteratively building the
-Linopy model with ``r^(k)``, solving with HiGHS Simplex, and recomputing
-``r^(k+1)`` from the solved dispatch (excluding DC assets) until
-``max_t |r_new - r| < tol``.
+Resolves the bilinear coupling between the data center's grid imports ``im_t``
+and the grid CFE factor ``CFE_t`` the way Riepin & Brown (2023) do: solve with
+``CFE_t`` fixed, recompute it from the solved dispatch (excluding DC assets),
+and repeat for a **fixed number of forward passes** (default 2) with plain
+replacement — no damping, no stopping criterion. One forward pass converges
+well in practice; the per-iteration objective and ``max_t |ΔCFE_t|`` are
+reported in the convergence table as the signal that a scenario (e.g. a very
+large DC) might need more passes.
 """
 
 import logging
@@ -22,42 +25,38 @@ from scripts.calculate_grid_res import calculate_grid_share
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MAX_ITER: int = 6
-DEFAULT_TOL: float = 1.0e-3
-DEFAULT_DAMPING: float = 1.0
+DEFAULT_N_ITERATIONS: int = 2
 DEFAULT_SOLVER_NAME: str = "highs"
 DEFAULT_SOLVER_OPTIONS: dict[str, Any] = {"solver": "simplex"}
 
 
-def _coerce_initial_r(
+def _coerce_initial_cfe(
     n: pypsa.Network,
-    r0: pd.Series | float | None,
+    cfe0: pd.Series | float | None,
     grid_share_kwargs: Mapping[str, Any],
 ) -> pd.Series:
-    """Return initial hourly grid share series ``r^(0)`` indexed by ``n.snapshots``."""
+    """Return the initial hourly grid CFE series ``CFE^(0)`` indexed by ``n.snapshots``."""
     snapshots = n.snapshots
-    if r0 is None:
+    if cfe0 is None:
         if not n.generators_t.p.empty:
-            r_init = calculate_grid_share(n, **grid_share_kwargs)
+            cfe_init = calculate_grid_share(n, **grid_share_kwargs)
         else:
-            r_init = pd.Series(0.0, index=snapshots, dtype=float)
-    elif isinstance(r0, (int, float)):
-        r_init = pd.Series(float(r0), index=snapshots, dtype=float)
+            cfe_init = pd.Series(0.0, index=snapshots, dtype=float)
+    elif isinstance(cfe0, (int, float)):
+        cfe_init = pd.Series(float(cfe0), index=snapshots, dtype=float)
     else:
-        r_init = r0.reindex(snapshots).fillna(0.0).astype(float)
+        cfe_init = cfe0.reindex(snapshots).fillna(0.0).astype(float)
 
-    r_init.index = snapshots
-    r_init.index.name = snapshots.name
-    return r_init
+    cfe_init.index = snapshots
+    cfe_init.index.name = snapshots.name
+    return cfe_init
 
 
 def solve_with_grid_iteration(
     n: pypsa.Network,
     build_fn: Callable[[pypsa.Network, pd.Series], Any],
     r0: pd.Series | float | None = None,
-    max_iter: int = DEFAULT_MAX_ITER,
-    tol: float = DEFAULT_TOL,
-    damping: float = DEFAULT_DAMPING,
+    n_iterations: int = DEFAULT_N_ITERATIONS,
     solver_options: Mapping[str, Any] | None = None,
     country: str = "ES",
     clean_carriers: Iterable[str] | str | None = None,
@@ -67,23 +66,21 @@ def solve_with_grid_iteration(
     grid_share_fn: Callable[[pypsa.Network], pd.Series] | None = None,
 ) -> tuple[pypsa.Network, pd.DataFrame]:
     """
-    Run the fixed-point iteration loop for ``CFE_t`` with HiGHS Simplex.
+    Solve ``n_iterations`` forward passes for ``CFE_t`` with HiGHS Simplex.
 
     Parameters
     ----------
     n : pypsa.Network
         Network to optimize.
     build_fn : Callable[[pypsa.Network, pd.Series], Any]
-        Callback ``build_fn(n, r)`` that adds CFE constraints for the current
-        grid share series ``r`` (and optionally creates the model).
+        Callback ``build_fn(n, cfe_t)`` that adds the CFE constraints for the
+        current grid CFE series (and optionally creates the model).
     r0 : pd.Series | float | None, optional
-        Initial hourly grid clean share ``r^(0)``.
-    max_iter : int, default 6
-        Maximum number of fixed-point iterations.
-    tol : float, default 1e-3
-        Convergence threshold on ``max_t |r_new - r|``.
-    damping : float, default 1.0
-        Damping factor ``alpha`` in ``(0, 1]`` for ``r = alpha * r_new + (1 - alpha) * r``.
+        Initial hourly grid CFE series ``CFE^(0)`` (e.g. from the solved
+        ``unmatched_dc`` network; zeros if the network is unsolved).
+    n_iterations : int, default 2
+        Number of forward passes. Each pass solves once and recomputes
+        ``CFE_t`` from the solved dispatch by plain replacement.
     solver_options : Mapping[str, Any] | None, optional
         Additional options passed to ``n.optimize.solve_model(solver_name="highs", ...)``.
         Defaults to ``{"solver": "simplex"}``.
@@ -104,13 +101,11 @@ def solve_with_grid_iteration(
     Returns
     -------
     tuple[pypsa.Network, pd.DataFrame]
-        Solved ``(n, convergence_df)`` with columns
-        ``["iteration", "max_delta", "objective", "mean_r_in", "mean_r_out", "converged"]``.
+        Solved ``(n, convergence_df)`` with one row per pass and columns
+        ``["iteration", "max_delta", "objective", "mean_cfe_in", "mean_cfe_out"]``.
     """
-    if max_iter < 1:
-        raise ValueError(f"max_iter must be >= 1; got {max_iter}.")
-    if not (0.0 < damping <= 1.0):
-        raise ValueError(f"damping must be in (0, 1]; got {damping}.")
+    if n_iterations < 1:
+        raise ValueError(f"n_iterations must be >= 1; got {n_iterations}.")
 
     eff_exclude = set(exclude_assets) if exclude_assets is not None else {"DC"}
     eff_exclude.add("DC")
@@ -123,7 +118,7 @@ def solve_with_grid_iteration(
         "neighbours": neighbours,
     }
 
-    r = _coerce_initial_r(n, r0, grid_kwargs)
+    cfe = _coerce_initial_cfe(n, r0, grid_kwargs)
 
     opts: dict[str, Any] = dict(DEFAULT_SOLVER_OPTIONS)
     if solver_options is not None:
@@ -132,9 +127,9 @@ def solve_with_grid_iteration(
 
     records: list[dict[str, Any]] = []
 
-    for iteration in range(max_iter):
+    for iteration in range(n_iterations):
         n.optimize.create_model()
-        build_fn(n, r)
+        build_fn(n, cfe)
 
         status, condition = n.optimize.solve_model(
             solver_name=solver_name,
@@ -146,40 +141,33 @@ def solve_with_grid_iteration(
             )
 
         if grid_share_fn is not None:
-            r_new = grid_share_fn(n).reindex(n.snapshots).fillna(0.0).astype(float)
+            cfe_new = grid_share_fn(n).reindex(n.snapshots).fillna(0.0).astype(float)
         else:
-            r_new = calculate_grid_share(n, **grid_kwargs)
+            cfe_new = calculate_grid_share(n, **grid_kwargs)
 
-        r_new.index = n.snapshots
-        r_new.index.name = n.snapshots.name
+        cfe_new.index = n.snapshots
+        cfe_new.index.name = n.snapshots.name
 
-        max_delta = float((r_new - r).abs().max())
+        max_delta = float((cfe_new - cfe).abs().max())
         objective = float(n.objective)
-        converged = bool(max_delta < tol)
 
         records.append(
             {
                 "iteration": iteration,
                 "max_delta": max_delta,
                 "objective": objective,
-                "mean_r_in": float(r.mean()),
-                "mean_r_out": float(r_new.mean()),
-                "converged": converged,
+                "mean_cfe_in": float(cfe.mean()),
+                "mean_cfe_out": float(cfe_new.mean()),
             }
         )
 
         logger.info(
-            f"Grid CFE iteration {iteration}: max_delta={max_delta:.6f}, "
-            f"objective={objective:.4f}, mean_r={r_new.mean():.4f}, converged={converged}"
+            f"Grid CFE pass {iteration}: max_delta={max_delta:.6f}, "
+            f"objective={objective:.4f}, mean_cfe={cfe_new.mean():.4f}"
         )
 
-        n._grid_share = r_new
-        if converged:
-            break
-
-        r = float(damping) * r_new + (1.0 - float(damping)) * r
-        r.index = n.snapshots
-        r.index.name = n.snapshots.name
+        n._grid_share = cfe_new
+        cfe = cfe_new
 
     convergence_df = pd.DataFrame(records)
     return n, convergence_df

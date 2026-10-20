@@ -1,14 +1,14 @@
 # Spain Hourly Matching
 
 A study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
-centers: a PyPSA model of today's Spanish electricity system (2025/26 fleet),
-built on [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with datacenter PPA & 24/7-CFE procurement
-model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
+centers: a PyPSA model of today's Spanish electricity system (2025/26 fleet), built on
+[PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with data center PPA & 24/7-CFE
+procurement model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
 
 ## Why this study?
 
 The next decade of digital infrastructure will be built somewhere and powered by
-something. Spain is deciding how. A 
+something. Spain is deciding how. A
 [draft royal decree](https://www.miteco.gob.es/es/energia/participacion/2026/detalle-participacion-publica-k-851.html)
 would require new data centers (from 1 MW of grid access) to back, in every hour, at
 least 80% of their consumption with renewable electricity generated that same hour by
@@ -27,17 +27,17 @@ center operators themselves.
 
 This study provides a transparent, quantitative assessment of the policy's impact. The
 repository contains a dispatch model of today's Spanish electricity system, validated
-against actual data, in which a new data center procures 24/7 carbon-free energy under
-the proposed 80% hourly matching rule. It measures system costs, emissions, prices and
-the procurement portfolio against an unmatched baseline, so that both the Spanish
-government and the data center industry can see what the policy does before it takes
-effect.
+against actual data, in which a new data center procures renewable electricity under the
+proposed 80% hourly matching rule and alternative procurement policies. It measures system
+costs, emissions, prices and the procurement portfolio against a baseline without the data
+center, so that both the Spanish government and the data center industry can see what the
+policy does before it takes effect.
 
 We do this work in the open, for the public record. Every input number is cited and its
 primary source vendored in this repository; every correction to the model is documented,
-switchable and re-validated; every figure and table in the report can be reproduced from
-scratch with the included scripts. Anyone, from a ministry analyst to an independent research
-group, can check the numbers, challenge them, and build on them.
+switchable and re-validated; every figure and table in this repository can be reproduced
+from scratch with the included scripts. Anyone, from a ministry analyst to an independent
+research group, can check the numbers, challenge them, and build on them.
 
 ## Model
 
@@ -56,32 +56,55 @@ Every modelling choice favors verifiability:
   [technology-data v0.15.0](https://github.com/PyPSA/technology-data/tree/v0.15.0) in EUR2025.
 - Renewable resources: five
   [resource classes](https://pypsa-eur.readthedocs.io/en/latest/configuration/#renewable)
-  per modelled region for onshore wind and utility solar PV (split into fixed optimally
-  tilted and single-axis tracking), each with its own profile and potential. Existing
-  plants are spatially joined to the class where they stand. The data center procurement model contracts renewable assets in merit order of their
-  generation profiles, subject to remaining land availability, with an optional switch between two
-  procurement scopes: `local_region` (contract only in the data center's own region) and
-  `spain_wide` (contract anywhere in mainland Spain, letting the optimizer choose the locations;
-  the Balearics, linked by a single HVDC cable, are a separate system).
+  per modelled region for onshore wind and utility solar PV (split into fixed optimally tilted
+  and single-axis tracking), each with its own profile and potential. Existing plants are
+  spatially joined to the class where they stand. PPA candidates take the best class with
+  remaining potential at each node; the optimizer chooses what to contract.
 - Fleet: frozen background fleet, calibrated to cited national data
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
   center's PPA and battery assets are extendable.
-- Solver: HiGHS by default, so anyone can reproduce a study without a license; Gurobi via `spain_cfe.solving.solver`. One full-year dispatch solves in ~2 min (HiGHS) or ~25 s (Gurobi) at ~4 GB RAM.
+- Solver: HiGHS by default, so anyone can reproduce a study without a license; Gurobi via
+  `spain_cfe.solving.solver`. One full-year dispatch solves in ~2 min (HiGHS) or ~25 s
+  (Gurobi) at ~4 GB RAM; a data center policy scenario takes ~2–4 min with Gurobi.
+
+## Scenario options
+
+Each scenario suite in `config/config.spain.yaml` mixes and matches these ready-made
+options:
+
+- Procurement policy (`policies`): no policy at all (`unmatched_dc`); the decree, 80% in
+  every hour (`strict_hourly_80_ppa_only`); 80% hourly matching on average over the year
+  (`hourly_80_ppa_only`), optionally with credit for the grid's renewable share
+  (`hourly_80_grid_credit`); or annual volume matching (`annual_80_res`). Need a different
+  score? Change the number in the name: `hourly_90_ppa_only` asks for 90%,
+  `annual_100_res` for 100%.
+- PPA location (the keys of `policies`): the data center signs its PPAs anywhere in
+  mainland Spain (`spain_wide`) or only in its own region (`local_region`).
+- Data center cluster size (`dc_mw`): a flat load of any size. The full suite runs 500,
+  1000, 2000, 4000 and 6000 MW.
+- Data center site (`spain_cfe.dc.sites`): any of the 9 Spanish regions, Aragón by
+  default.
+- Sales of surplus electricity (`excess_cap`): off by default, so the data center stores or
+  curtails what it cannot use. Switch them on to let it sell surplus back to the grid.
+- Weather year (`runs`): this version of the project uses wy2024. The PyPSA-Eur and
+  [atlite](https://github.com/PyPSA/atlite) workflow can build any other weather year from
+  [ERA5](https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5) reanalysis data,
+  with SARAH-3 satellite data for solar.
 
 ## Study stages
 
 The study keeps what we measure strictly separate from what we assume. The `{year}`
 wildcard is the data vintage; the run is the weather year. Fleet, demand, price and NTC
 patches read rows for `{year}`; hydro inflow keys on the run's weather year; the France
-border flows are the measured 2024 series in every run; the wind-bias factor is derived on the back-cast and applied to other
-data years as fixed cited constants.
+border flows are the measured 2024 series in every run; the wind-bias factor is derived on
+the back-cast and applied to other data years as fixed cited constants.
 
 | Stage | run (weather) | `{year}` (data) | variant | artifacts |
 |---|---|---|---|---|
 | (i) raw + validation | wy2024 | 2024 | raw | `base_2024_raw.nc` → `validation_raw` |
 | (ii) back-cast calibration + validation | wy2024 | 2024 | patched | `base_2024_patched.nc` → `validation_patched` |
-| (iii) case study | wy2024 | 2025 | patched | `base_2025_patched.nc` → DC + 24/7 CFE solves → `scenarios.csv` |
-| (iv) weather-year sensitivities | wy2010 / wy2013 / wy2020 | 2025 | patched | planned; the 2024-measured closures and the wind factor become out-of-sample transfers (stated caveat) |
+| (iii) case study | wy2024 | 2025 | patched | `base_2025_patched.nc` → DC procurement-policy solves → `scenarios.csv` |
+| (iv) weather-year sensitivities (open for extension) | wy2010 / wy2013 / wy2020 | 2025 | patched | `base_2025_patched.nc` per run → DC procurement-policy solves (`full` suite) → `scenarios.csv` |
 
 On the wy2024 reference the case study uses every weather-dependent closure in-sample:
 measured 2024 border flows with 2024 weather, observed 2024 hydro energy, and the
@@ -114,49 +137,21 @@ pixi run --manifest-path pypsa-eur/pixi.toml snakemake -c all
 pixi run --manifest-path pypsa-eur/pixi.toml snakemake validation -c all
 ```
 
-France's measured border flows ship with the repository
-(`data/custom/fr_boundary_flows_2024.csv`, regenerable with
-`scripts/retrieve_fr_boundary_flows.py --download`). Every intermediate target (prepared
-network, single scenario solve, report) stays addressable by its filename; see
-`Snakefile`. For interactive work, activate the environment with
-`pixi shell --manifest-path pypsa-eur/pixi.toml`.
+Every intermediate target (prepared network, single scenario solve, report) stays
+addressable by its filename; see `Snakefile`. For interactive work, activate the
+environment with `pixi shell --manifest-path pypsa-eur/pixi.toml`.
 
-What those two commands execute:
+## Validation
 
-```
-composed_2025.nc    (pypsa-eur submodule, config-driven: clustering, profiles, 3h averaging)
-   └► prepare_network.py   + data/custom + spain_cfe.patches      →  base.nc (per run, data year, variant)
-        │
-        ├─ snakemake all         (case study: 2025 data, DC policy scenarios)
-        │    └► solve_network.py   attach DC, 24/7 CFE constraints,
-        │         │                grid CFE iteration (grid-credit)   →  solved.nc, metrics
-        │         └► summarise_network.py  national + DC metrics     →  summary row, hourly DC series
-        │              ├► plot_heatmap.py   per policy                →  hourly heatmaps (PDF)
-        │              └► make_summary.py   all scenarios             →  scenarios.csv (+ baseline deltas)
-        │                   └► plot_summary.py                        →  figures (PDF)
-        │
-        └─ snakemake validation  (back-cast: 2024 data, raw + patched)
-             └► solve_network.py   same solver path, no_dc:
-                  │                plain dispatch, DC machinery inert →  solved.nc
-                  └► validate_network.py  vs Redeia 2024 actuals      →  validation reports
-```
+`prepare_network.py` corrects the PyPSA-Eur network with cited data, each patch switchable
+under `spain_cfe.patches`: build the system, validate it against 2024 actuals, correct
+only what the validation demands, and re-validate through the same pipeline.
 
-`prepare_network.py` is a patch engine: a config-controlled list of cited
-corrections, each individually switchable. The method is: (i) build the
-electricity system with the PyPSA-Eur workflow, (ii) validate it against 2024
-actuals (the back-cast), (iii) correct only what the validation demands, every
-correction cited, and (iv) re-validate through the same pipeline.
-
-The patch set (France border closure, fleet capacities, wind correction, PHS split,
-CHP, CSP, biomass availability, prices, NTC caps, demand, hydro inflow, FR nuclear
-seasonality, MA/AD exports) is defined in
-`config/config.spain.yaml` under `spain_cfe.patches`; what each patch does, why it
-exists and what it changed in the 2024 back-cast is documented in
-[doc/validation_log.md](doc/validation_log.md).
-
-## Validation preview
-
-*placeholder*
+Raw PyPSA-Eur ([validation_raw.csv](results/validation/validation_raw.csv)) and the model
+patched with cited data corrections
+([validation_patched.csv](results/validation/validation_patched.csv)) are compared against
+Redeia's reported 2024 numbers. Both reports are tracked and regenerated with `snakemake
+validation` whenever the model changes.
 
 ## License
 
@@ -169,5 +164,5 @@ registered per file in [doc/data_sources.md](doc/data_sources.md).
 
 This project is independent work: Iegor Riepin and PyPSA Labs gGmbH received no funding,
 no grant and no direction for it, from any government, company or interest group. The
-modelling work was done because Spain is about to take a decision of lasting consequence, and a
-decision of that weight deserves open, verifiable evidence that belongs to everyone.
+modelling work was done because Spain is about to take a decision of lasting consequence,
+and a decision of that weight deserves open, verifiable evidence that belongs to everyone.

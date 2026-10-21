@@ -1,4 +1,4 @@
-# Spain Hourly Matching
+# Spain Datacenter Decree
 
 A study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
 centers: a PyPSA model of today's Spanish electricity system (2025 fleet), built on
@@ -43,9 +43,31 @@ group, can check the numbers, challenge them, and build on them.
 
 ## Results
 
-A showcase snapshot of the study figures and the raw summary csv is in
-[doc/showcase](doc/showcase). Running the [workflow](#workflow) writes the full set to
-`results/`: solved networks, summary CSVs and plots for every scenario.
+A showcase snapshot of the study figures for a selected case, a 500 MW data center in
+Aragon, each with its caption, is in [doc/showcase](doc/showcase):
+
+- [Spanish system impact](doc/showcase/system_impact.png): system cost, emissions,
+  electricity sector gas burn and spot price against a baseline without the data center
+- [Hourly clean coverage](doc/showcase/dc_clean_coverage.png): the share of the data
+  center's consumption covered by renewables in the same hour
+- [Procurement portfolio](doc/showcase/dc_portfolio.png): contracted wind, solar and
+  battery, and their electricity yield and curtailment
+- [Data center cost](doc/showcase/dc_cost.png): the cost per MWh consumed
+- [Emission intensity](doc/showcase/dc_emission_intensity.png): consequential and
+  attributional CO2 per kWh consumed
+- [Shift in Spanish supply](doc/showcase/system_generation_shift.png): what serves the
+  data center's consumption
+- Hourly CFE score and emission intensity of the data center's consumption:
+  [no policy](doc/showcase/heatmap_unmatched_dc_spain_wide.png),
+  [decree](doc/showcase/heatmap_strict_hourly_80_ppa_only_spain_wide.png),
+  [hourly 80% on average](doc/showcase/heatmap_hourly_80_ppa_only_spain_wide.png),
+  [with grid credit](doc/showcase/heatmap_hourly_80_grid_credit_spain_wide.png),
+  [local](doc/showcase/heatmap_hourly_80_ppa_only_local_region.png),
+  [annual 80%](doc/showcase/heatmap_annual_80_res_spain_wide.png)
+- [Raw summary csv](doc/showcase/scenarios.csv)
+
+Running the [workflow](#workflow) writes the full set to `results/`: solved networks,
+summary CSVs and plots for every scenario.
 
 ## Model
 

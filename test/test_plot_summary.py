@@ -72,6 +72,8 @@ def test_every_figure_renders(toy_summary: Path, tmp_path: Path, fmt: str) -> No
             "0.2",
             "--weather-year",
             "2024",
+            "--dc-mw",
+            "100",
             "--plots-dir",
             str(plots),
             "--format",
@@ -89,13 +91,19 @@ def test_multi_run_suite_fails_fast() -> None:
 
 
 @pytest.mark.parametrize("sigma", [0.0, 0.2])
-def test_select_rows_takes_one_cap_and_shared_baselines(sigma: float) -> None:
+@pytest.mark.parametrize("dc_mw", [500.0, 2000.0])
+def test_select_rows_takes_one_size_and_cap_and_shared_baselines(
+    sigma: float, dc_mw: float
+) -> None:
     keys = [k for k in POLICIES if k != "unmatched_dc"]
-    baselines = [("no_dc", "spain_wide", 0.0), ("unmatched_dc", "spain_wide", 0.0)]
-    rows = baselines + [(*_split(k), cap) for k in keys for cap in (0.0, 0.2)]
-    df = pd.DataFrame(rows, columns=["policy", "siting", "excess_cap"])
+    rows = [("no_dc", "spain_wide", 0.0, 0.0)]
+    for size in (500.0, 2000.0):
+        rows += [("unmatched_dc", "spain_wide", 0.0, size)]
+        rows += [(*_split(k), cap, size) for k in keys for cap in (0.0, 0.2)]
+    df = pd.DataFrame(rows, columns=["policy", "siting", "excess_cap", "dc_mw"])
     df = df.assign(weather_year=2024)
     other_year = df.assign(weather_year=2013)
-    selected = select_rows(pd.concat([df, other_year]), sigma, 2024)
+    selected = select_rows(pd.concat([df, other_year]), sigma, 2024, dc_mw)
     assert sorted(selected.index) == sorted(["no_dc", *POLICIES])
     assert (selected.loc[keys, "excess_cap"] == sigma).all()
+    assert (selected.loc[list(POLICIES), "dc_mw"] == dc_mw).all()

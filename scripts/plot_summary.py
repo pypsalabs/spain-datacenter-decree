@@ -116,11 +116,14 @@ def reference_rows(df: pd.DataFrame) -> pd.DataFrame:
     return df.set_index(keys).fillna(0.0)
 
 
-def select_rows(df: pd.DataFrame, excess_cap: float, weather_year: int) -> pd.DataFrame:
-    """One run's rows: the policies at ``excess_cap`` plus the shared baselines."""
+def select_rows(
+    df: pd.DataFrame, excess_cap: float, weather_year: int, dc_mw: float
+) -> pd.DataFrame:
+    """One run and DC size: the policies at ``excess_cap`` plus the baselines."""
     run = df[df["weather_year"] == weather_year]
-    baseline = run["policy"].isin([BASELINE, "unmatched_dc"])
-    return reference_rows(run[baseline | np.isclose(run["excess_cap"], excess_cap)])
+    size = run[(run["policy"] == BASELINE) | np.isclose(run["dc_mw"], dc_mw)]
+    baseline = size["policy"].isin([BASELINE, "unmatched_dc"])
+    return reference_rows(size[baseline | np.isclose(size["excess_cap"], excess_cap)])
 
 
 def _policy_axis(ax: plt.Axes, policies: list[str], axis: str = "x") -> np.ndarray:
@@ -673,13 +676,15 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--colors", type=Path, required=True)
     parser.add_argument("--excess-cap", type=float, required=True)
     parser.add_argument("--weather-year", type=int, required=True)
+    parser.add_argument("--dc-mw", type=float, required=True)
     parser.add_argument("--plots-dir", type=Path, required=True)
     parser.add_argument("--format", choices=FORMATS, default="pdf")
     args = parser.parse_args(argv)
 
     logging.getLogger("fontTools").setLevel(logging.WARNING)
     plt.style.use(STYLE)
-    rows = select_rows(pd.read_csv(args.summary), args.excess_cap, args.weather_year)
+    summary = pd.read_csv(args.summary)
+    rows = select_rows(summary, args.excess_cap, args.weather_year, args.dc_mw)
     if args.excess_cap > 0.0:
         logger.warning("Captions describe the no-sales case; review them for sales.")
     colors = load_colors(args.colors)

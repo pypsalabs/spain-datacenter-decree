@@ -38,11 +38,12 @@ def ex_tag(sigma):
 
 
 def suite_plots(wildcards):
-    """Figure files of the selected suite: one folder per run and sales cap."""
+    """Figure files of the selected suite: one folder per run, DC size and sales cap."""
     plots = PLOTS + [f"heatmap_{policy}_{siting}" for policy, siting in SCENARIOS]
     return [
-        f"results/{run}/plots/ex{ex_tag(sigma)}/{plot}.pdf"
+        f"results/{run}/plots/{dc_mw}mw_ex{ex_tag(sigma)}/{plot}.pdf"
         for run in SUITE["runs"]
+        for dc_mw in SUITE["dc_mw"]
         for sigma in SUITE["excess_cap"]
         for plot in plots
     ]
@@ -313,7 +314,9 @@ rule plot_summary:
         colors="pypsa-eur/config/plotting.default.yaml",
         style="scripts/plots.mplstyle",
     output:
-        expand("results/{{run}}/plots/ex{{excess}}/{plot}.{{ext}}", plot=PLOTS),
+        expand(
+            "results/{{run}}/plots/{{dc_mw}}mw_ex{{excess}}/{plot}.{{ext}}", plot=PLOTS
+        ),
     threads: 1
     params:
         excess_cap=lambda w: int(w.excess) / 100,
@@ -325,17 +328,16 @@ rule plot_summary:
             --colors "{input.colors}" \
             --excess-cap {params.excess_cap} \
             --weather-year {params.weather_year} \
-            --plots-dir "results/{wildcards.run}/plots/ex{wildcards.excess}" \
+            --dc-mw {wildcards.dc_mw} \
+            --plots-dir "results/{wildcards.run}/plots/{wildcards.dc_mw}mw_ex{wildcards.excess}" \
             --format {wildcards.ext}
         """
 
 
 def heatmap_inputs(wildcards):
-    """Summary row and hourly series of one scenario in a single-size suite."""
-    if len(SUITE["dc_mw"]) > 1:
-        raise ValueError("Heatmaps cover suites with one DC size.")
+    """Summary row and hourly series of one scenario."""
     sigma = int(wildcards.excess) / 100
-    stem = scenario_stem(wildcards.policy, SUITE["dc_mw"][0], wildcards.siting, sigma)
+    stem = scenario_stem(wildcards.policy, wildcards.dc_mw, wildcards.siting, sigma)
     return {
         "summary": f"results/{wildcards.run}/summaries/summary_{stem}.csv",
         "hourly": f"results/{wildcards.run}/hourly/hourly_{stem}.csv",
@@ -348,7 +350,7 @@ rule plot_heatmap:
         unpack(heatmap_inputs),
         style="scripts/plots.mplstyle",
     output:
-        "results/{run}/plots/ex{excess}/heatmap_{policy}_{siting}.{ext}",
+        "results/{run}/plots/{dc_mw}mw_ex{excess}/heatmap_{policy}_{siting}.{ext}",
     threads: 1
     shell:
         """

@@ -39,6 +39,12 @@ switchable and re-validated; every figure and table in this repository can be re
 from scratch with the included scripts. Anyone, from a ministry analyst to an independent
 research group, can check the numbers, challenge them, and build on them.
 
+## Results
+
+A showcase snapshot of the study figures and the raw summary csv is in
+[doc/showcase](doc/showcase). Running the [workflow](#workflow) writes the full set to
+`results/`: solved networks, summary CSVs and plots for every scenario.
+
 ## Model
 
 Every modelling choice favors verifiability:

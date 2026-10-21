@@ -59,7 +59,8 @@ def toy_summary(toy_base, toy_costs, tmp_path: Path) -> Path:
 
 
 @pytest.mark.skipif(not COLORS.exists(), reason="pypsa-eur submodule not checked out")
-def test_every_figure_renders(toy_summary: Path, tmp_path: Path) -> None:
+@pytest.mark.parametrize("fmt", FORMATS)
+def test_every_figure_renders(toy_summary: Path, tmp_path: Path, fmt: str) -> None:
     plots = tmp_path / "plots"
     main(
         [
@@ -73,11 +74,12 @@ def test_every_figure_renders(toy_summary: Path, tmp_path: Path) -> None:
             "2024",
             "--plots-dir",
             str(plots),
+            "--format",
+            fmt,
         ]
     )
     for name in FIGURES:
-        for ext in FORMATS:
-            assert (plots / f"{name}.{ext}").stat().st_size > 0
+        assert (plots / f"{name}.{fmt}").stat().st_size > 0
 
 
 def test_multi_run_suite_fails_fast() -> None:

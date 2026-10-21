@@ -6,6 +6,7 @@ SPDX-PackageSupplier = "Iegor Riepin (TU Berlin, PyPSA Labs gGmbH) <iegor.riepin
 path = [
     "README.md",
     "doc/*.md",
+    "doc/showcase/**",
     "data/custom/*.csv",
     "resources/**",
     "results/**",

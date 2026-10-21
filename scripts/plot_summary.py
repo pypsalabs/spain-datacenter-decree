@@ -37,7 +37,7 @@ from matplotlib.ticker import MaxNLocator  # noqa: E402
 logger = logging.getLogger(__name__)
 
 STYLE = Path(__file__).with_name("plots.mplstyle")
-FORMATS = ("pdf",)
+FORMATS = ("pdf", "png")
 
 SPAIN_WIDE = "spain_wide"
 LOCAL = "hourly_80_ppa_only@local_region"
@@ -666,7 +666,7 @@ FIGURES: dict[str, Callable[[pd.DataFrame, dict[str, str]], plt.Figure]] = {
 
 
 def main(argv: list[str] | None = None) -> None:
-    """CLI entry point: write every study figure as PDF."""
+    """CLI entry point: write every study figure as PDF (study) or PNG (showcase)."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summary", type=Path, required=True)
@@ -674,6 +674,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--excess-cap", type=float, required=True)
     parser.add_argument("--weather-year", type=int, required=True)
     parser.add_argument("--plots-dir", type=Path, required=True)
+    parser.add_argument("--format", choices=FORMATS, default="pdf")
     args = parser.parse_args(argv)
 
     logging.getLogger("fontTools").setLevel(logging.WARNING)
@@ -685,8 +686,7 @@ def main(argv: list[str] | None = None) -> None:
     args.plots_dir.mkdir(parents=True, exist_ok=True)
     for name, plot in FIGURES.items():
         fig = plot(rows, colors)
-        for ext in FORMATS:
-            fig.savefig(args.plots_dir / f"{name}.{ext}")
+        fig.savefig(args.plots_dir / f"{name}.{args.format}")
         plt.close(fig)
         logger.info("Wrote %s", args.plots_dir / name)
 

@@ -109,6 +109,7 @@ wildcard_constraints:
     dc_mw=r"\d+(?:\.\d+)?",
     siting=r"spain_wide|local_region",
     excess=r"\d+",
+    ext=r"pdf|png",
 
 
 rule prepare_network:
@@ -312,7 +313,7 @@ rule plot_summary:
         colors="pypsa-eur/config/plotting.default.yaml",
         style="scripts/plots.mplstyle",
     output:
-        expand("results/{{run}}/plots/ex{{excess}}/{plot}.pdf", plot=PLOTS),
+        expand("results/{{run}}/plots/ex{{excess}}/{plot}.{{ext}}", plot=PLOTS),
     threads: 1
     params:
         excess_cap=lambda w: int(w.excess) / 100,
@@ -324,7 +325,8 @@ rule plot_summary:
             --colors "{input.colors}" \
             --excess-cap {params.excess_cap} \
             --weather-year {params.weather_year} \
-            --plots-dir "results/{wildcards.run}/plots/ex{wildcards.excess}"
+            --plots-dir "results/{wildcards.run}/plots/ex{wildcards.excess}" \
+            --format {wildcards.ext}
         """
 
 
@@ -346,7 +348,7 @@ rule plot_heatmap:
         unpack(heatmap_inputs),
         style="scripts/plots.mplstyle",
     output:
-        "results/{run}/plots/ex{excess}/heatmap_{policy}_{siting}.pdf",
+        "results/{run}/plots/ex{excess}/heatmap_{policy}_{siting}.{ext}",
     threads: 1
     shell:
         """

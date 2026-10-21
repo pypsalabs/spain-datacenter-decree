@@ -35,11 +35,11 @@ costs, emissions, prices and the procurement portfolio against a baseline withou
 center, so that both the Spanish government and the data center industry can see what the
 policy does before it takes effect.
 
-We do this work in the open, for the public record. Every input number is cited and linked
-to its primary source; every correction to the model is documented,
-switchable and re-validated; every figure and table in this repository can be reproduced
-from scratch with the included scripts. Anyone, from a ministry analyst to an independent
-research group, can check the numbers, challenge them, and build on them.
+This work is done in the open and in the public interest. Every input number is cited and
+linked to its primary source; every correction to the model is documented, switchable and
+re-validated; every figure and table in this repository can be reproduced from scratch
+with the included scripts. Anyone, from a ministry analyst to an independent research
+group, can check the numbers, challenge them, and build on them.
 
 ## Results
 
@@ -131,11 +131,11 @@ cd spain-hourly-matching
 The study deliberately has no environment of its own: it runs entirely in the submodule's
 pixi environment (`pypsa-eur/pixi.toml` + lock file), so the upstream build and the study
 workflow always use exactly the package versions the pinned PyPSA-Eur release was tested
-with. The path must contain no spaces.
+with.
 
 ## Workflow
 
-Two commands run everything. The first call also installs the pinned environment.
+Two commands run everything (incl. installation of the pinned environment).
 
 ```bash
 # full case study: upstream build, scenario solves, summary, figures

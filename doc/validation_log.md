@@ -100,7 +100,8 @@ patched, no_dc):
    is marginally cheaper, which in the model is ~70% of all hours (mean spread ~4
    EUR/MWh).
 4. **PT gas misordering — found and fixed with cited inputs.** Portugal's cheapest CCGT
-   (87.87 EUR/MWh) undercut Spain's cheapest (88.24) by an inventory-noise efficiency
+   (87.87 EUR/MWh) undercut Spain's cheapest (88.24; fuel prices of that run, now 96.07 vs
+   94.56 with the fix and the realized MIBGAS prices) by an inventory-noise efficiency
    edge, so the model ran PT gas at 12.9 TWh (CF 38%) against ~3 TWh real, suppressing
    both ES→PT exports and Spanish CCGT/CO2. Two corrections from the ERSE gas tariff
    decision 2025–26 (`erse_tep_gas_2025_2026`): (a) the Portuguese **gas network
@@ -140,7 +141,8 @@ component-level numbers are reported alongside the total in §4.
 - The net-exports gate passes on the total; the ES→FR and ES→PT components carry
   compensating errors (±~6 TWh) rooted in the price-duration flatness of §5.5.
 - The average price level is informational only; grid-purchase costs reported from the
-  model inherit its +33% bias (€84.0 vs €63 OMIE average). Decomposition on the solved
+  model inherit its bias: +33% in the 2024 back-cast (€84.0 vs €63 OMIE average), +13% in
+  the 2025 case study (€73.8 vs €65.3). Decomposition on the solved
   back-cast: the weighting convention is immaterial (arithmetic 83.4 vs load-weighted
   84.0) and there are no scarcity spikes (max 95); the entire gap is a cheap-hour
   deficit — the model prices below 1 EUR in 0.3% of snapshots against ~8.5% of real

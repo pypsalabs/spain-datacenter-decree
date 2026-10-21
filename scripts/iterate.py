@@ -5,7 +5,7 @@
 Forward-pass iteration for the endogenous grid CFE factor ``CFE_t``.
 
 Resolves the bilinear coupling between the data center's grid imports ``im_t``
-and the grid CFE factor ``CFE_t`` the way Riepin & Brown (2023) do: solve with
+and the grid CFE factor ``CFE_t`` the way Riepin & Brown (2024) do: solve with
 ``CFE_t`` fixed, recompute it from the solved dispatch (excluding DC assets),
 and repeat for a **fixed number of forward passes** (default 2) with plain
 replacement — no damping, no stopping criterion. One forward pass converges

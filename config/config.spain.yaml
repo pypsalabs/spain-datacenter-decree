@@ -135,7 +135,7 @@ spain_cfe:
   # data center's own region only.
   # A no_dc baseline row is added automatically for every run in the suite.
   # excess_cap: caps sigma on annual sales back to the grid,
-  # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2023 convention), one scenario
+  # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2024 convention), one scenario
   # per value. Study focus: 0.0 (no sales; surplus is stored or curtailed). Pre-built:
   # add 0.20 to a suite's list for the sales-allowed scenario (results under ex20).
   # Unlimited sales are deliberately not offered: the optimizer
@@ -152,10 +152,11 @@ spain_cfe:
         local_region: [hourly_80_ppa_only]
       dc_mw: [500]
       excess_cap: [0.0]
-    # Full matrix: all policies x all DC sizes x all weather years. The non-2024
-    # weather years need their upstream builds first (study stage iv).
+    # Full matrix: all policies x all DC sizes on the 2024 reference weather year. Other
+    # weather years are stage iv: they need their upstream builds and a remap of the
+    # 2024 France border flows (decision log C2, C6).
     full:
-      runs: [wy2024, wy2010, wy2013, wy2020]
+      runs: [wy2024]
       policies:
         spain_wide: [unmatched_dc, annual_80_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
         local_region: [hourly_80_ppa_only]
@@ -197,12 +198,12 @@ spain_cfe:
     # Aragon is the study default: the GW-scale new-build pipeline is there (AWS 33.7bn EUR
     # Zaragoza/Huesca/Teruel, Microsoft Villamayor de Gallego, QTS/Blackstone campus).
     sites: [aragon]
-    # Study dc_mw levels: 500 / 1000 / 2000 / 4000 / 6000 MW. Context (news, Oct 2026):
-    # Red Electrica has granted data centers ~6.3 GW of transmission access (~34% of all
-    # demand access) with ~15.8 GW of requests pending; MITECO cites >12 GW of access and
-    # connection rights granted since 2021; SpainDC expects 2-3 GW installed by 2030.
-    # So 500 MW = near-term single-hub build-out, 2000 MW = realistic 2030 national fleet,
-    # 6000 MW = all granted access materializes (stress case).
+    # Study dc_mw levels: 500 / 1000 / 2000 / 4000 / 6000 MW. Context (cited in the decision
+    # log): Red Eléctrica has granted data centers 6.33 GW of transmission access (34% of
+    # demand access); MITECO counts >12 GW of access and connection rights since 2021;
+    # SpainDC projects 2.6 GW installed by 2030. So 500 MW = near-term single-hub
+    # build-out, 2000 MW ~ the 2030 national fleet, 6000 MW = all granted transmission
+    # access materializes (stress case).
     nodes:
       andalusia: ES0 0AC
       catalonia: ES0 1AC
@@ -221,7 +222,7 @@ spain_cfe:
     # gurobi (plain out-of-the-box defaults; ~5x faster, see README).
     solver: highs
   iteration:
-    # Forward passes for the endogenous grid CFE factor (Riepin & Brown 2023:
+    # Forward passes for the endogenous grid CFE factor (Riepin & Brown 2024:
     # plain replacement, no damping or stopping criterion; one forward pass
     # converges well). The convergence table reports objective and max |dCFE_t|
     # per pass as the signal that a scenario might need more passes.

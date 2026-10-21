@@ -3,7 +3,8 @@
 A study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
 centers: a PyPSA model of today's Spanish electricity system (2025/26 fleet), built on
 [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with data center PPA & 24/7-CFE
-procurement model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe).
+procurement model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe) and the
+previous research of [Riepin & Brown (2024)](https://doi.org/10.1016/j.esr.2024.101488).
 
 ## Why this study?
 
@@ -13,9 +14,10 @@ something. Spain is deciding how. A
 would require new data centers (from 1 MW of grid access) to back, in every hour, at
 least 80% of their consumption with renewable electricity generated that same hour by
 new Spanish installations, with forfeiture of grid access on non-compliance. The stakes
-are measured in gigawatts: data centers already hold
-~6.3 GW of granted transmission access, about a third of all granted demand access, with
-a further ~16 GW of requests pending.
+are measured in gigawatts: data centers hold 6.3 GW of granted transmission access
+([Red Eléctrica access map via pv magazine](https://www.pv-magazine.es/2026/10/02/red-electrica-asigna-633-gw-de-acceso-a-centros-de-datos-el-34-de-los-1852-gw-otorgados-a-la-demanda/), Oct 2026), and
+more than 12 GW of access and connection rights granted since 2021 ([MITECO](https://www.miteco.gob.es/content/dam/miteco/es/prensa/20260827_NdP_El_Gobierno_plantea_impulsar_los_centros_de_datos_sostenibles.pdf),
+Aug 2026).
 
 The policy's logic: additional demand must bring additional clean supply, matched at the
 hours it actually consumes. Done right, this makes new load a system asset. It finances
@@ -33,8 +35,8 @@ costs, emissions, prices and the procurement portfolio against a baseline withou
 center, so that both the Spanish government and the data center industry can see what the
 policy does before it takes effect.
 
-We do this work in the open, for the public record. Every input number is cited and its
-primary source vendored in this repository; every correction to the model is documented,
+We do this work in the open, for the public record. Every input number is cited and linked
+to its primary source; every correction to the model is documented,
 switchable and re-validated; every figure and table in this repository can be reproduced
 from scratch with the included scripts. Anyone, from a ministry analyst to an independent
 research group, can check the numbers, challenge them, and build on them.
@@ -110,7 +112,7 @@ the back-cast and applied to other data years as fixed cited constants.
 | (i) raw + validation | wy2024 | 2024 | raw | `base_2024_raw.nc` → `validation_raw` |
 | (ii) back-cast calibration + validation | wy2024 | 2024 | patched | `base_2024_patched.nc` → `validation_patched` |
 | (iii) case study | wy2024 | 2025 | patched | `base_2025_patched.nc` → DC procurement-policy solves → `scenarios.csv` |
-| (iv) weather-year sensitivities (open for extension) | wy2010 / wy2013 / wy2020 | 2025 | patched | `base_2025_patched.nc` per run → DC procurement-policy solves (`full` suite) → `scenarios.csv` |
+| (iv) weather-year sensitivities (open for extension) | wy2010 / wy2013 / wy2020 | 2025 | patched | `base_2025_patched.nc` per run → DC procurement-policy solves → `scenarios.csv` |
 
 On the wy2024 reference the case study uses every weather-dependent closure in-sample:
 measured 2024 border flows with 2024 weather, observed 2024 hydro energy, and the

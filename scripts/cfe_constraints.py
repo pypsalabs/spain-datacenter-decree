@@ -4,8 +4,8 @@
 r"""
 Linopy constraints and primal metrics extraction for 24/7 CFE procurement.
 
-Notation follows Riepin & Brown (2023), "System-level impacts of 24/7
-carbon-free electricity procurement in Europe" (247-procurement-paper):
+Notation follows Riepin & Brown (2024), "On the means, costs, and system-level
+impacts of 24/7 carbon-free energy procurement" (doi:10.1016/j.esr.2024.101488):
 demand :math:`d_t`, contracted generation :math:`g_{r,t}` for
 :math:`r \in CFE`, storage discharge/charge
 :math:`\bar{g}_{s,t} / \underline{g}_{s,t}`, grid imports :math:`im_t`,
@@ -29,7 +29,7 @@ Policy constraints:
 - ``annual_res``: :math:`\sum_{r,t} a_{r,t} G_r = x \sum_t d_t`, the contracted
   PPA yield (availability :math:`a_{r,t}` times capacity :math:`G_r`, whether the
   output is used, sold or curtailed) equals the target volume, as in Riepin &
-  Brown (2023); the residual load is bought from the grid.
+  Brown (2024); the residual load is bought from the grid.
 
 PPA-only policies set :math:`CFE_t \equiv 0`; grid-credit policies take the
 hourly grid CFE factor from ``calculate_grid_cfe`` (resolved with fixed forward

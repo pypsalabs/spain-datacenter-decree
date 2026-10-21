@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import yaml  # noqa: E402
+from matplotlib.colors import to_rgb  # noqa: E402
 from matplotlib.container import BarContainer  # noqa: E402
 from matplotlib.font_manager import FontProperties  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
@@ -63,6 +64,8 @@ GRID_RES_COLOR = "#b9d3c3"
 GRID_COLOR = "#8c8c8c"
 SALES_COLOR = "#cfcfcf"
 IMPORT_COLOR = "#a0a0a0"
+OPERATING = "Spanish plants and storage (operating cost)"
+DC_COSTS = "Data center PPAs and battery"
 
 # Spanish supply groups -> (network carriers, tech_colors key)
 SUPPLY_GROUPS: dict[str, tuple[tuple[str, ...], str]] = {
@@ -168,6 +171,19 @@ def _stack(
         up += np.where(v >= 0.0, v, 0.0)
         down += np.where(v < 0.0, v, 0.0)
     return up
+
+
+def _tint(color: str | tuple, share: float = 0.55) -> tuple[float, float, float]:
+    """``color`` blended towards white by ``share``."""
+    rgb = np.array(to_rgb(color))
+    return tuple(rgb + (1.0 - rgb) * share)
+
+
+def _cost_parts(r: pd.DataFrame) -> pd.DataFrame:
+    """Change in Spanish system cost (M€/yr): background operating cost and DC costs."""
+    dc = r.filter(regex=r"^dc_(ppa_.+|battery)_cost_eur$").fillna(0.0).sum(axis=1)
+    operating = r["delta_no_dc_es_system_cost_eur"] - dc
+    return pd.DataFrame({OPERATING: operating, DC_COSTS: dc}) * 1e-6
 
 
 def _signed(v: float, decimals: int) -> str:
@@ -392,21 +408,51 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         ax = axd[key]
         pos = _policy_axis(ax, policies)
         vals = r[f"delta_no_dc_{col}"].to_numpy(dtype=float) * scale
-        ax.bar(pos, vals, width=0.62, color=bar_colors, linewidth=0)
+        label_x = pos
+        if key == "cost":
+            # waterfall: operating cost, then the DC costs on top, ending at the total
+            parts = _cost_parts(r)
+            operating = parts[OPERATING].to_numpy()
+            w = 0.31
+            light = [_tint(c) for c in bar_colors]
+            ax.bar(pos - w / 2, operating, w, color=light, linewidth=0)
+            ax.bar(
+                pos + w / 2,
+                parts[DC_COSTS],
+                w,
+                bottom=operating,
+                color=bar_colors,
+                linewidth=0,
+            )
+            ax.hlines(operating, pos, pos + w, color="#444444", linewidth=0.6)
+            ax.legend(
+                handles=[
+                    Patch(color=_tint(GRID_COLOR), label=OPERATING),
+                    Patch(color=GRID_COLOR, label=DC_COSTS),
+                ],
+                loc="lower center",
+                bbox_to_anchor=(0.5, 1.0),
+                ncol=2,
+            )
+            label_x = pos + w / 2
+            tops, bottom = np.maximum(vals, operating), operating.min()
+        else:
+            ax.bar(pos, vals, width=0.62, color=bar_colors, linewidth=0)
+            tops, bottom = vals, vals.min()
         _zero_line(ax)
-        lo, hi = min(0.0, vals.min()), max(0.0, vals.max())
+        lo, hi = min(0.0, bottom), max(0.0, tops.max())
         pad = 0.05 * (hi - lo)
-        for x, v in zip(pos, vals, strict=True):
+        for x, v, top in zip(label_x, vals, tops, strict=True):
             ax.text(
                 x,
-                v + np.sign(v) * pad,
+                (top if v >= 0.0 else v) + np.sign(v) * pad,
                 _signed(v, decimals),
                 ha="center",
                 va="bottom" if v >= 0.0 else "top",
                 fontsize=6,
             )
         ax.set_ylim(
-            lo - (0.3 * (hi - lo) if lo < 0.0 else 0.0),
+            lo - (0.3 * (hi - lo) if vals.min() < 0.0 else 0.0),
             hi + (0.3 * (hi - lo) if hi > 0.0 else pad),
         )
         ax.set_ylabel(label)
@@ -436,7 +482,8 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         f"Change in the Spanish power system with a {r.at[no, 'dc_mw']:.0f} MW data "
         f"center in {site} against a baseline without it, absolute (left axes) and in "
         "percent of the baseline level (right axes). System cost: operating cost of "
-        "Spanish plants and storage plus the data center's annuities. CO2: fuel burnt "
+        "Spanish plants and storage (light), then the data center's PPA and battery "
+        "costs on top (dark), ending at the total. CO2: fuel burnt "
         "in Spanish plants times its carbon content. CO2 intensity: Spanish CO2 per "
         "kWh of Spanish generation, the data center's PPAs included. Gas: fuel burnt "
         "in Spanish gas-fired power plants (CCGT, OCGT). Spot price: hourly nodal "

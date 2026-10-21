@@ -103,6 +103,9 @@ def test_annual_score_is_contracted_yield(toy_base, toy_costs) -> None:
     assert s["ppa_yield_mwh"] == pytest.approx(s["total_load_mwh"], rel=1e-6)
     assert s["annual_res_score"] == pytest.approx(1.0, rel=1e-6)
     assert not s.index.duplicated().any()
+    # no sales: surplus is curtailed, yet it counts, so the DC still buys from the grid
+    losses = s["battery_charge_mwh"] - s["battery_discharge_mwh"]
+    assert s["grid_import_mwh"] > losses + 1.0
 
 
 def test_inconsistent_grid_purchases_fail_fast(toy_base, toy_costs) -> None:

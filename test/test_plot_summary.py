@@ -59,29 +59,29 @@ def toy_summary(toy_base, toy_costs, tmp_path: Path) -> Path:
     return path
 
 
-@pytest.mark.parametrize("fmt", FORMATS)
-def test_every_figure_renders(toy_summary: Path, tmp_path: Path, fmt: str) -> None:
+def test_every_figure_renders(toy_summary: Path, tmp_path: Path) -> None:
     plots = tmp_path / "plots"
-    main(
-        [
-            "--summary",
-            str(toy_summary),
-            "--colors",
-            str(COLORS),
-            "--excess-cap",
-            "0.2",
-            "--weather-year",
-            "2024",
-            "--dc-mw",
-            "100",
-            "--plots-dir",
-            str(plots),
-            "--format",
-            fmt,
-        ]
-    )
-    for name in FIGURES:
-        assert (plots / f"{name}.{fmt}").stat().st_size > 0
+    for fmt in FORMATS:
+        main(
+            [
+                "--summary",
+                str(toy_summary),
+                "--colors",
+                str(COLORS),
+                "--excess-cap",
+                "0.2",
+                "--weather-year",
+                "2024",
+                "--dc-mw",
+                "100",
+                "--plots-dir",
+                str(plots),
+                "--format",
+                fmt,
+            ]
+        )
+        for name in FIGURES:
+            assert (plots / f"{name}.{fmt}").stat().st_size > 0
 
 
 def test_multi_run_suite_fails_fast() -> None:

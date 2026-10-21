@@ -12,7 +12,7 @@ import pytest
 
 from scripts.cfe_constraints import dc_metrics
 from scripts.data_center import attach_data_center
-from scripts.solve_network import resolve_target, solve_network
+from scripts.solve_network import resolve_cfe0, resolve_target, solve_network
 
 
 def _solve(n: pypsa.Network, costs: pd.DataFrame, policy: str, **kw):
@@ -39,6 +39,12 @@ def test_resolve_target_from_policy_names() -> None:
     assert resolve_target("hourly_80_grid_credit", 80.0) == pytest.approx(0.80)
     with pytest.raises(ValueError, match="embeds target"):
         resolve_target("hourly_80_grid_credit", 60.0)
+
+
+def test_grid_cfe_on_other_snapshots_fails_fast(toy_base) -> None:
+    other_year = pd.date_range("2013-01-01", periods=len(toy_base.snapshots), freq="h")
+    with pytest.raises(ValueError, match="snapshots"):
+        resolve_cfe0(toy_base, pd.Series(0.5, index=other_year))
 
 
 def test_unmatched_dc_imports_everything(toy_base, toy_costs) -> None:

@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 import pypsa
 
-from scripts.calculate_grid_cfe import calculate_grid_cfe
+from scripts.calculate_grid_cfe import align_to_snapshots, calculate_grid_cfe
 from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics
 from scripts.data_center import DEFAULT_DISCOUNT_RATE, attach_data_center, load_costs
 from scripts.iterate import (
@@ -137,12 +137,12 @@ def resolve_cfe0(
     if isinstance(cfe0_source, (int, float, np.floating)):
         return pd.Series(float(cfe0_source), index=n.snapshots, dtype=float)
     if isinstance(cfe0_source, pd.Series):
-        return cfe0_source.reindex(n.snapshots).fillna(0.0).astype(float)
+        return align_to_snapshots(cfe0_source, n.snapshots)
     if isinstance(cfe0_source, (str, Path)):
         logger.info("Computing r0 from solved network %s", cfe0_source)
         cfe0_source = pypsa.Network(str(cfe0_source))
     r_s = calculate_grid_cfe(cfe0_source, country="ES", clean_carriers=clean_carriers)
-    return r_s.reindex(n.snapshots).fillna(0.0).astype(float)
+    return align_to_snapshots(r_s, n.snapshots)
 
 
 def _dc_portfolio_metrics(n: pypsa.Network, acc: dict[str, Any]) -> dict[str, float]:
@@ -414,8 +414,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--excess-share",
         type=str,
-        default="",
-        help="Sales cap sigma (sum ex_t <= sigma * sum d_t); empty or 'none' = unlimited.",
+        default="0",
+        help="Sales cap sigma (sum ex_t <= sigma * sum d_t); default 0 = no sales, "
+        "'none' = unlimited.",
     )
     parser.add_argument("--n-iterations", type=int, default=DEFAULT_N_ITERATIONS)
     parser.add_argument(
@@ -471,6 +472,7 @@ def main(argv: list[str] | None = None) -> None:
             "variant": str(w.variant),
             "dc_mw": dc_mw,
             "siting": siting,
+            "sites": "+".join(dc_block.get("sites", [])),
         }
     else:
         args = _parse_args(argv)

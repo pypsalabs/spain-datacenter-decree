@@ -4,10 +4,10 @@
 """
 Collect scenario metrics rows into one summary table with baseline deltas.
 
-Reads the one-row metrics CSVs written by ``solve_network.py``, concatenates them and
-attaches deltas relative to two distinct baselines:
-- ``no_dc``: matched on ``(planning_year, weather_year, resolution)``
-- ``unmatched_dc``: matched on ``(planning_year, weather_year, resolution, dc_mw)``
+Reads the per-scenario summary rows written by ``summarise_network.py``,
+concatenates them and attaches deltas relative to two distinct baselines:
+- ``no_dc``: matched on ``(planning_year, weather_year, resolution, variant)``
+- ``unmatched_dc``: matched on the same keys plus ``dc_mw``
 """
 
 import argparse
@@ -24,13 +24,9 @@ NO_DC_BASELINE_KEYS: tuple[str, ...] = (
     "planning_year",
     "weather_year",
     "resolution",
+    "variant",
 )
-UNMATCHED_DC_BASELINE_KEYS: tuple[str, ...] = (
-    "planning_year",
-    "weather_year",
-    "resolution",
-    "dc_mw",
-)
+UNMATCHED_DC_BASELINE_KEYS: tuple[str, ...] = (*NO_DC_BASELINE_KEYS, "dc_mw")
 # Scenario identifiers and run bookkeeping: excluded from delta metrics
 IDENTIFIER_COLUMNS: frozenset[str] = frozenset(
     {
@@ -80,9 +76,8 @@ def attach_baseline_deltas(
     """
     Attach deltas against ``no_dc`` and ``unmatched_dc`` baselines to ``df``.
 
-    - ``no_dc`` baseline matches on ``(planning_year, weather_year, resolution)``.
-    - ``unmatched_dc`` baseline matches on
-      ``(planning_year, weather_year, resolution, dc_mw)``.
+    - ``no_dc`` baseline matches on ``NO_DC_BASELINE_KEYS``.
+    - ``unmatched_dc`` baseline matches on ``UNMATCHED_DC_BASELINE_KEYS``.
 
     For each numeric metric column ``col``, creates ``delta_no_dc_{col}`` and
     ``delta_unmatched_dc_{col}``.

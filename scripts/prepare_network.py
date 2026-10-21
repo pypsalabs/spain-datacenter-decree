@@ -638,7 +638,11 @@ def _patch_biomass_availability(n: pypsa.Network, ctx: Mapping[str, Any]) -> Non
 
 
 def _patch_prices(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
-    """Recompute thermal marginal costs: VOM + fuel/eta + ETS x thermal intensity/eta."""
+    """
+    Recompute thermal marginal costs: VOM + fuel/eta + ETS x thermal intensity/eta.
+
+    A fuel without a price row for the data year takes its 2025 price (logged).
+    """
     prices = _custom(ctx, "prices.csv")
     year = int(ctx["data_year"])
     costs = pd.read_csv(ctx["costs"], index_col=0)
@@ -649,6 +653,10 @@ def _patch_prices(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
                 for country in ("EU", "ES"):
                     v = _value(prices, country, y, metric)
                     if v is not None:
+                        if y != year:
+                            logger.info(
+                                "No %d price for %s; using 2025.", year, metrics[0]
+                            )
                         return v
         raise ValueError(f"No price row found for {metrics}.")
 

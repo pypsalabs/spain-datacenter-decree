@@ -51,8 +51,6 @@ POLICIES: dict[str, tuple[str, str]] = {
     "annual_80_res": ("Annual\n80%", "#009E73"),
 }
 DECREE = "strict_hourly_80_ppa_only"
-ANNUAL = "annual_80_res"
-SUM_RULES = ("hourly_80_ppa_only", "hourly_80_grid_credit", ANNUAL)
 BASELINE = "no_dc"
 
 PPA_CARRIERS: dict[str, str] = {
@@ -82,7 +80,6 @@ SUPPLY_GROUPS: dict[str, tuple[tuple[str, ...], str]] = {
 MIN_SUPPLY_SHIFT_TWH = 0.02
 CAPTION_FONTSIZE = 6.5
 CAPTION_WIDTH = 0.98  # share of the figure width
-HOURS_PER_YEAR = 8760.0
 G_PER_KWH_PER_MT_PER_MWH = 1.0e12 / 1.0e3
 
 
@@ -173,18 +170,12 @@ def _stack(
     return up
 
 
-def _span(values: pd.Series, decimals: int = 0) -> str:
-    """'lo–hi' of ``values`` as rounded, or one number when both ends round alike."""
-    lo, hi = f"{values.min():.{decimals}f}", f"{values.max():.{decimals}f}"
-    return lo if lo == hi else f"{lo}–{hi}"
-
-
 def _signed(v: float, decimals: int) -> str:
     return f"{v:+.{decimals}f}".replace("-", "−")
 
 
 def _legend(fig: plt.Figure, handles: list, labels: list[str], ncol: int) -> None:
-    """Framed multi-column legend above the plot area, bar series first."""
+    """Frameless multi-column legend above the plot area, bar series first."""
     entries = sorted(
         zip(handles, labels, strict=True),
         key=lambda e: not isinstance(e[0], BarContainer),
@@ -192,34 +183,25 @@ def _legend(fig: plt.Figure, handles: list, labels: list[str], ncol: int) -> Non
     fig.legend(*zip(*entries, strict=True), loc="outside upper left", ncol=ncol)
 
 
-def _curtailed_share(r: pd.DataFrame) -> pd.Series:
-    """Share of the contracted PPA yield curtailed (%), per policy."""
-    curtailed = r.filter(regex=r"^dc_ppa_.*_curtailed_mwh$").sum(axis=1)
-    return 100.0 * curtailed / r["ppa_yield_mwh"]
-
-
 def _siting_note(rows: pd.DataFrame) -> str:
     site = site_name(rows.at[LOCAL, "sites"])
     return f" PPAs anywhere in mainland Spain unless marked local ({site} only)."
 
 
-def _caption(fig: plt.Figure, summary: str, points: list[str]) -> None:
+def _caption(fig: plt.Figure, summary: str) -> None:
     """
-    Caption under the figure: what is shown, then the key mechanics as bullets.
+    Caption under the figure: what is shown and how each quantity is defined.
 
     Lines wrap at the figure width, measured from the caption's own characters
     in the current font.
     """
-    text = summary + "".join(points)
     text_pt, _, _ = TextToPath().get_text_width_height_descent(
-        text, FontProperties(size=CAPTION_FONTSIZE), ismath=False
+        summary, FontProperties(size=CAPTION_FONTSIZE), ismath=False
     )
-    width = int(CAPTION_WIDTH * fig.get_size_inches()[0] * 72.0 * len(text) / text_pt)
+    width = int(
+        CAPTION_WIDTH * fig.get_size_inches()[0] * 72.0 * len(summary) / text_pt
+    )
     lines = textwrap.wrap(summary, width)
-    for point in points:
-        lines += textwrap.wrap(
-            point, width, initial_indent="• ", subsequent_indent="   "
-        )
     fig.supxlabel(
         "\n".join(lines), x=0.0, ha="left", fontsize=CAPTION_FONTSIZE, linespacing=1.35
     )
@@ -246,36 +228,11 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
     ax.set_ylabel("Hourly renewable share\nof DC consumption (%)")
     _legend(fig, *ax.get_legend_handles_labels(), ncol=3)
 
-    coverage = r["clean_coverage"].mul(100.0)
-    ppa = r["ppa_only_score"].mul(100.0)
-    curtailed = _curtailed_share(r.loc[[ANNUAL]]).iloc[0]
-    annual = 100.0 * r.at[ANNUAL, "target"]
     _caption(
         fig,
         "Share of the data center's consumption covered by renewables in the same "
         "hour: by its own PPAs and battery (dark), or by the renewable share of its "
         "grid purchases (light; import-traced, nuclear excluded)." + _siting_note(r),
-        [
-            f"No policy: the data center still gets the grid's renewable share, "
-            f"{coverage['unmatched_dc']:.0f}%.",
-            "Decree: 80% is a floor in every hour, and surplus in one hour cannot "
-            "offset a shortfall in another. The portfolio is sized for the worst hours "
-            "(winter lulls in wind and sun), so it fully covers most other hours: "
-            f"{coverage[DECREE]:.0f}% on average.",
-            "Hourly 80%: matched energy is summed over the year, so surplus hours "
-            "offset short ones and the rule lands exactly on 80%.",
-            f"Annual {annual:.0f}%: the PPAs yield {annual:.0f}% of the energy the data "
-            f"center consumes, but {curtailed:.0f}% of it arrives when it is not needed "
-            f"and is curtailed: they match {ppa[ANNUAL]:.0f}% of consumption hour by "
-            "hour.",
-            "Grid credit: the grid's renewable share counts toward the 80%, and its "
-            f"PPAs alone match {ppa['hourly_80_grid_credit']:.0f}%.",
-            f"Annual {annual:.0f}% and grid credit ask for little more than a data "
-            "center contracts without any rule, as PPAs cost less than grid power: "
-            "grid credit does not bind (score "
-            f"{100 * r.at['hourly_80_grid_credit', 'cfe_score']:.0f}%), annual "
-            f"{annual:.0f}% barely does.",
-        ],
     )
     return fig
 
@@ -339,30 +296,11 @@ def plot_portfolio(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     labels += ["Curtailed", "DC load"]
     _legend(fig, handles, labels, ncol=3)
 
-    yield_share = r["annual_res_score"].mul(100.0)
-    others = list(SUM_RULES)
     _caption(
         fig,
         "The data center's contracted assets (a) and their output (b); hatched: "
         "output curtailed, as surplus cannot be sold; dashed: the data center's load, "
         "as capacity (a) and annual consumption (b)." + _siting_note(r),
-        [
-            "Decree: covering every hour takes solar plus a battery that carries it "
-            "into the night, overbuilt for winter lulls: "
-            f"{r.at[DECREE, 'dc_ppa_total_mw'] / 1e3:.1f} GW of PPAs and "
-            f"{r.at[DECREE, 'dc_battery_mwh'] / 1e3:.1f} GWh of storage for a "
-            f"{r.at[DECREE, 'total_load_mwh'] / HOURS_PER_YEAR:.0f} MW load, with "
-            f"{_curtailed_share(r).loc[DECREE]:.0f}% of their output curtailed.",
-            "The other Spain-wide rules are met with onshore wind plus tracking solar "
-            "and no storage: wind also blows at night, and their targets need not hold "
-            "in every hour.",
-            "Local: without Spain's windiest sites, the same hourly 80% on average "
-            f"takes {r.at[LOCAL, 'dc_ppa_total_mw'] / 1e3:.1f} GW of PPAs, mostly solar, "
-            f"and {r.at[LOCAL, 'dc_battery_mwh'] / 1e3:.1f} GWh of storage, with "
-            f"{_curtailed_share(r).loc[LOCAL]:.0f}% of their output curtailed.",
-            f"Contracted yield: {yield_share[DECREE]:.0f}% of consumption under the "
-            f"decree, {_span(yield_share[others])}% under the other Spain-wide rules.",
-        ],
     )
     return fig
 
@@ -413,27 +351,11 @@ def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     ax.set_ylabel("DC cost (€ per MWh consumed)")
     _legend(fig, *ax.get_legend_handles_labels(), ncol=4)
 
-    others = net[list(SUM_RULES)]
     _caption(
         fig,
         "The data center's cost per MWh it consumes: PPA and battery annuities plus "
         "grid purchases (bold line: net cost). Surplus PPA output cannot be sold, so "
         "no revenue offsets it." + _siting_note(r),
-        [
-            "No policy: the data center buys every MWh at the modelled hourly Spanish "
-            f"spot price; {net['unmatched_dc']:.0f} €/MWh is the annual average of "
-            "these hourly purchases.",
-            "Spain-wide annual and hourly rules: wind and solar PPAs cost less than the "
-            f"grid even with {_span(_curtailed_share(r.loc[others.index]))}% of their "
-            f"output curtailed, so the bill falls to {_span(others)} €/MWh.",
-            f"Decree: the solar overbuild and battery raise it to {net[DECREE]:.0f} "
-            "€/MWh, above buying from the grid and "
-            f"{_span(net[DECREE] - others)} €/MWh above these rules.",
-            f"Local: the same hourly 80% on average costs {net[LOCAL]:.0f} €/MWh with "
-            f"PPAs in {site_name(r.at[LOCAL, 'sites'])} only, "
-            f"{net[LOCAL] - net['hourly_80_ppa_only']:.0f} €/MWh more than with "
-            "Spain-wide PPAs.",
-        ],
     )
     return fig
 
@@ -520,7 +442,6 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         "in Spanish gas-fired power plants (CCGT, OCGT). Spot price: hourly nodal "
         "prices weighted by Spanish demand, the data center excluded."
         + _siting_note(r),
-        [],
     )
     return fig
 
@@ -561,23 +482,12 @@ def plot_generation_shift(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Fig
     ax.set_ylabel("Δ Spanish supply vs. no DC (TWh/yr)")
     _legend(fig, *ax.get_legend_handles_labels(), ncol=4)
 
-    no = parts.loc["unmatched_dc"]
     _caption(
         fig,
         "Change in Spanish electricity supply against no data center; dashed line: "
         "the data center's consumption. Surplus cannot be sold, so the data center's "
         "PPAs supply at most its own consumption (plus battery losses)."
         + _siting_note(r),
-        [
-            f"No policy: the extra load is served by gas ({no.get('Gas', 0.0):.1f} TWh), "
-            f"more nuclear output ({no.get('Nuclear', 0.0):.1f} TWh) and imports "
-            f"({no['Net imports']:.1f} TWh).",
-            "Spain-wide annual and hourly rules: the PPAs supply "
-            f"{_span(parts.loc[list(SUM_RULES), 'DC PPAs'], 1)} TWh of the data center's "
-            f"{load:.1f} TWh; gas serves most of the rest, in hours of low wind and sun.",
-            "Decree: its PPAs and battery supply the whole load, so the rest of the "
-            "system barely changes.",
-        ],
     )
     return fig
 
@@ -621,10 +531,6 @@ def plot_dc_emission_intensity(
     ]
     _legend(fig, handles, ["Consequential", "Attributional", "Spanish grid average"], 3)
 
-    i = policies.index(DECREE)
-    sums = [policies.index(p) for p in SUM_RULES]
-    loc, sw = policies.index(LOCAL), policies.index("hourly_80_ppa_only")
-    imports = r["delta_no_dc_es_net_import_mwh"] / 1e6
     _caption(
         fig,
         "CO2 per kWh the data center consumes, measured two ways. Consequential "
@@ -632,28 +538,6 @@ def plot_dc_emission_intensity(
         "kWh it consumes. Attributional (hollow): the emissions of its grid purchases, "
         "valued at the hourly emission factor of Spanish supply (imports traced to "
         "their exporter's mix), divided by all its consumption." + _siting_note(r),
-        [
-            f"No policy: consequential {consequential[0]:.0f} g/kWh against "
-            f"attributional {attributional[0]:.0f} g/kWh, "
-            f"{consequential[0] / attributional[0]:.1f}× higher: new load is served by "
-            "gas at the margin, not by the average mix.",
-            "Spain-wide annual and hourly rules: consequential "
-            f"{_span(consequential[sums])} g/kWh "
-            f"against attributional {_span(attributional[sums])} g/kWh: their residual "
-            "purchases fall in hours when gas sets the margin.",
-            "Decree: attributional nearly zero "
-            f"({attributional[i]:.0f} g/kWh), consequential slightly negative "
-            f"({_signed(consequential[i], 0)} g/kWh): it buys only "
-            f"{r.at[DECREE, 'grid_import_mwh'] / 1e6:.2f} TWh from the grid, and with "
-            f"the shifted grid flows Spain imports {imports[DECREE]:.2f} TWh more and "
-            f"burns {-r.at[DECREE, 'delta_no_dc_es_gas_fuel_mwh_th'] / 1e6:.2f} TWh "
-            "less gas.",
-            f"Local: attributional {attributional[loc]:.0f} g/kWh, below the "
-            f"Spain-wide {attributional[sw]:.0f}, yet consequential "
-            f"{consequential[loc]:.0f} against {consequential[sw]:.0f} g/kWh: Spain "
-            f"imports {imports[LOCAL]:.2f} TWh more, so part of the extra emissions "
-            "lands in France and Portugal.",
-        ],
     )
     return fig
 

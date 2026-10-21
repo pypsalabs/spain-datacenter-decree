@@ -28,6 +28,7 @@ META = {
     "planning_year": 2025,
     "weather_year": 2024,
     "resolution": "1h",
+    "variant": "patched",
     "sites": "aragon",
 }
 

@@ -10,7 +10,7 @@ version: v2026.09.0
 tutorial: false
 
 run:
-  name: wy2013
+  name: wy2024
   scenarios:
     enable: true
     file: ../config/scenarios.yaml
@@ -29,8 +29,8 @@ countries:
 - PT
 
 snapshots:
-  start: "2013-01-01"
-  end: "2014-01-01"
+  start: "2024-01-01"
+  end: "2025-01-01"
   inclusive: left
 
 enable:
@@ -65,7 +65,7 @@ electricity:
     year: 2024
 
 atlite:
-  default_cutout: europe-2013-sarah3-era5
+  default_cutout: europe-2024-sarah3-era5
   nprocesses: 4
   show_progress: false
 
@@ -110,6 +110,8 @@ data:
     source: archive
     version: v1.0
 
+# Upstream PyPSA-Eur settings (its build records the solver, e.g. in time aggregation);
+# the study solves read spain_cfe.solving instead.
 solving:
   options:
     load_shedding:

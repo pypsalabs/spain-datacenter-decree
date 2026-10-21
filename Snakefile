@@ -121,6 +121,7 @@ rule prepare_network:
     (hydro inflow, wind-factor derivation) key on the run's weather year instead.
     """
     input:
+        code=["scripts/prepare_network.py"],
         network=lambda w: f"pypsa-eur/resources/{w.run}/networks/composed_{HORIZON}.nc",
         costs=lambda w: f"pypsa-eur/resources/{w.run}/costs_{HORIZON}_processed.csv",
         boundary_flows="data/custom/fr_boundary_flows_2024.csv",
@@ -160,6 +161,13 @@ rule prepare_network:
 rule solve_network:
     """Attaches the data center, adds the 24/7 CFE policy constraint and solves."""
     input:
+        code=[
+            "scripts/solve_network.py",
+            "scripts/calculate_grid_cfe.py",
+            "scripts/cfe_constraints.py",
+            "scripts/data_center.py",
+            "scripts/iterate.py",
+        ],
         network="resources/{run}/networks/base_{year}_{variant}.nc",
         costs=lambda w: f"pypsa-eur/resources/{w.run}/costs_{HORIZON}_processed.csv",
         cfe0_network=solve_cfe0_input,
@@ -213,6 +221,7 @@ rule solve_network:
 rule validate_network:
     """Compares the solved no-DC 2024 network with Redeia actuals in one report."""
     input:
+        code=["scripts/validate_network.py", "scripts/calculate_grid_cfe.py"],
         network="results/wy2024/networks/solved_2024_{variant}_no_dc_t0_0mw_spain_wide_ex0.nc",
         actuals="data/custom/validation_2024_es.csv",
     output:
@@ -240,6 +249,11 @@ def policy_target(policy):
 rule summarise_network:
     """Postprocesses one solved scenario into national and data center metrics."""
     input:
+        code=[
+            "scripts/summarise_network.py",
+            "scripts/calculate_grid_cfe.py",
+            "scripts/cfe_constraints.py",
+        ],
         network="results/{run}/networks/solved_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.nc",
         metrics="results/{run}/metrics/metrics_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
     output:
@@ -295,6 +309,7 @@ def suite_summaries(wildcards):
 rule make_summary:
     """Collects all scenario summary rows into one tidy table with baseline deltas."""
     input:
+        code=["scripts/make_summary.py"],
         metrics=suite_summaries,
     output:
         summary="results/scenarios.csv",
@@ -310,6 +325,7 @@ rule make_summary:
 rule plot_summary:
     """Produces the study figures of one run and sales cap from the summary table."""
     input:
+        code=["scripts/plot_summary.py"],
         summary="results/scenarios.csv",
         colors="pypsa-eur/config/plotting.default.yaml",
         style="scripts/plots.mplstyle",
@@ -348,6 +364,7 @@ rule plot_heatmap:
     """Plots the hourly CFE score and CO2 intensity of one scenario's DC consumption."""
     input:
         unpack(heatmap_inputs),
+        code=["scripts/plot_heatmap.py", "scripts/plot_summary.py"],
         style="scripts/plots.mplstyle",
     output:
         "results/{run}/plots/{dc_mw}mw_ex{excess}/heatmap_{policy}_{siting}.{ext}",

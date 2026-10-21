@@ -21,7 +21,7 @@ from typing import Any
 import pandas as pd
 import pypsa
 
-from scripts.calculate_grid_cfe import calculate_grid_cfe
+from scripts.calculate_grid_cfe import align_to_snapshots, calculate_grid_cfe
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ def _coerce_initial_cfe(
     elif isinstance(cfe0, (int, float)):
         cfe_init = pd.Series(float(cfe0), index=snapshots, dtype=float)
     else:
-        cfe_init = cfe0.reindex(snapshots).fillna(0.0).astype(float)
+        cfe_init = align_to_snapshots(cfe0, snapshots)
 
     cfe_init.index = snapshots
     cfe_init.index.name = snapshots.name

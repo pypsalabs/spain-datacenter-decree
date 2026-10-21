@@ -77,7 +77,7 @@ def plot_heatmap(hourly: pd.DataFrame, row: pd.Series) -> plt.Figure:
         fig.colorbar(image, ax=ax, label=label, extend=extend)
         ax.grid(False)
         ax.set_yticks(range(0, 25, 6))
-        ax.set_ylabel("Time of day (h)")
+        ax.set_ylabel("Time of day (h, UTC)")
         ax.set_title(letter, loc="left", fontweight="bold")
     days = grid.columns
     starts = np.flatnonzero(days.day == 1)
@@ -92,7 +92,7 @@ def plot_heatmap(hourly: pd.DataFrame, row: pd.Series) -> plt.Figure:
         fig,
         f"Hourly CFE score (a) and emission intensity (b) of the consumption of a "
         f"{row['dc_mw']:.0f} MW data center in {site}, one cell per {step}-hour "
-        f"snapshot.{local} CFE score: the share of consumption covered by the data center's "
+        f"snapshot (UTC).{local} CFE score: the share of consumption covered by the data center's "
         "PPAs and battery plus the renewable share of its grid purchases "
         "(import-traced, nuclear excluded); annual mean "
         f"{100.0 * row['clean_coverage']:.0f}%. Emission intensity: its grid "
@@ -100,7 +100,6 @@ def plot_heatmap(hourly: pd.DataFrame, row: pd.Series) -> plt.Figure:
         "emission factor of Spanish supply (imports traced to their exporter's mix), "
         "per kWh consumed; annual mean "
         f"{row['dc_attributional_intensity_g_per_kwh']:.0f} gCO2/kWh.",
-        [],
     )
     return fig
 

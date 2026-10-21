@@ -114,6 +114,17 @@ def _country_buses(
     return n.buses.index[bus_mask & ~excl_mask]
 
 
+def align_to_snapshots(cfe: pd.Series, snapshots: pd.Index) -> pd.Series:
+    """``cfe`` on ``snapshots``; fails fast where it does not cover a snapshot."""
+    aligned = cfe.reindex(snapshots).astype(float)
+    missing = int(aligned.isna().sum())
+    if missing:
+        raise ValueError(
+            f"Grid CFE factor does not cover {missing} of {len(snapshots)} network snapshots."
+        )
+    return aligned
+
+
 def _positive_part(series: pd.Series) -> pd.Series:
     """Return ``max(series, 0.0)`` without calling ``.clip``."""
     return series.where(series > 0.0, 0.0)

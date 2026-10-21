@@ -49,6 +49,8 @@ from typing import Any
 import pandas as pd
 import pypsa
 
+from scripts.calculate_grid_cfe import align_to_snapshots
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_DC_PREFIX: str = "DC"
@@ -128,7 +130,7 @@ def _effective_cfe_factor(
     elif isinstance(cfe_t, (int, float)):
         cfe = pd.Series(float(cfe_t), index=snapshots, dtype=float)
     else:
-        cfe = cfe_t.reindex(snapshots).fillna(0.0).astype(float)
+        cfe = align_to_snapshots(cfe_t, snapshots)
     cfe.index = snapshots
     cfe.index.name = snapshots.name
     return cfe
@@ -294,7 +296,7 @@ def dc_metrics(
     eff_policy = policy if policy is not None else str(meta.get("policy", "hourly"))
 
     if cfe_t is None and "cfe_t" in meta:
-        cfe_s = meta["cfe_t"].reindex(n.snapshots).fillna(0.0).astype(float)
+        cfe_s = align_to_snapshots(meta["cfe_t"], n.snapshots)
     else:
         cfe_s = _effective_cfe_factor(n, cfe_t, eff_policy)
 

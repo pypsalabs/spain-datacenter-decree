@@ -169,7 +169,7 @@ def add_dc_cfe_constraints(
         Cap ``sigma`` on annual sales to the grid relative to total DC demand,
         ``sum_t ex_t <= sigma * sum_t d_t``; ``None`` leaves sales unlimited.
     """
-    if not hasattr(n, "model") or n.model is None:
+    if n.model is None:
         n.optimize.create_model()
 
     comp = _resolve_dc_components(n, dc_cfg)
@@ -288,8 +288,8 @@ def dc_metrics(
     Compute DC CFE metrics from solved primal values using the exact constraint LHS.
 
     Never applies ``.clip`` to any time series. Both ``d_t - (1 - CFE_t) * im_t``
-    and ``g_t + dis_t - cha_t - ex_t + CFE_t * im_t`` are evaluated and verified
-    to match the solved Linopy constraint LHS expression.
+    and ``g_t + dis_t - cha_t - ex_t + CFE_t * im_t`` are returned with the solved
+    Linopy constraint LHS, so tests can check that all three agree.
     """
     meta: dict[str, Any] = getattr(n, "_dc_cfe_meta", {})
     eff_cfg = dc_cfg if dc_cfg is not None else meta.get("dc_cfg", {})
@@ -311,7 +311,7 @@ def dc_metrics(
     weights.index = snapshots
 
     # Solved primal variables im_t and ex_t
-    if hasattr(n, "model") and n.model is not None and "DC-im" in n.model.solution:
+    if n.model is not None and "DC-im" in n.model.solution:
         im_s = n.model.solution["DC-im"].to_pandas().reindex(snapshots).astype(float)
         ex_s = n.model.solution["DC-ex"].to_pandas().reindex(snapshots).astype(float)
     else:
@@ -352,7 +352,7 @@ def dc_metrics(
     ppa_only_lhs = float((weights * ppa_only_t).sum())
     ppa_gen_mwh = float((weights * g_s).sum())
 
-    if "matched_expr" in meta and hasattr(meta["matched_expr"], "solution"):
+    if "matched_expr" in meta:
         # Re-evaluate with cfe_s if it matches meta['cfe_t'], else use formula
         if (cfe_s - meta["cfe_t"]).abs().max() <= 1e-12:
             model_constraint_lhs = float(meta["matched_expr"].solution.item())

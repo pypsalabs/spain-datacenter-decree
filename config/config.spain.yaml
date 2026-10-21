@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 # PyPSA-Eur v2026.09.0 overlay: 15-node ES/FR/PT electricity-only model for the
-# Spain 80% hourly matching study. Scope: today's system (2025/26 fleet), no
+# Spain 80% hourly matching study. Scope: today's system (2025 fleet), no
 # capacity-expansion year. Temporal resolution: 3-hourly averaged snapshots.
 
 version: v2026.09.0
@@ -123,27 +123,19 @@ solving:
     options: highs-simplex
 
 spain_cfe:
-  # Scenario suites (cross products; make_summary collects the suite named by `suite`).
-  # Policy set (agreed 2026-10-19): unmatched_dc = no-policy counterfactual;
-  # annual_80_res = volumetric matching (the decree's Art. 8 alone);
-  # hourly_80_ppa_only = 24/7 CFE score; strict_hourly_80_ppa_only = the decree's
-  # Art. 9 (every hour); hourly_80_grid_credit = beyond-decree design alternative.
-  # The _cfe (nuclear-as-clean) variants stay out of the matrix: the decree is
-  # renewable-only. Target sweep (90/100) is pre-built via the policy names, as is
-  # annual_100_res (voluntary industry practice; swapped for annual_80_res on
-  # 2026-10-20 so every policy shares the 80% target).
-  # `policies` maps each PPA siting to the policies solved with it: spain_wide =
-  # anywhere in mainland Spain (the site's synchronous area), local_region = the
-  # data center's own region only.
-  # A no_dc baseline row is added automatically for every run in the suite.
-  # excess_cap: caps sigma on annual sales back to the grid,
-  # sum_t ex_t <= sigma * sum_t d_t (Riepin & Brown 2024 convention), one scenario
-  # per value. Study focus: 0.0 (no sales; surplus is stored or curtailed). Pre-built:
-  # add 0.20 to a suite's list for the sales-allowed scenario (results under ex20).
-  # Unlimited sales are deliberately not offered: the optimizer
-  # would overbuild at the DC node to sell into a background system that is not in
-  # equilibrium. The no_dc and unmatched_dc baselines have no surplus and are
-  # solved once, under ex0.
+  # Scenario suites; `suite` selects the one to run (see doc/decision_log.md).
+  # Policies: unmatched_dc = no policy; strict_hourly_80_ppa_only = the decree's
+  # Art. 9 (80% every hour); hourly_80_ppa_only = 80% on average (24/7 CFE score);
+  # hourly_80_grid_credit = the same with grid credit; annual_80_res = the decree's
+  # Art. 8 alone. Other targets are pre-built through the policy name (e.g.
+  # annual_100_res, voluntary practice), as is the _cfe suffix (nuclear as clean).
+  # `policies` maps each PPA siting to its policies: spain_wide = anywhere in
+  # mainland Spain (the site's synchronous area), local_region = the site's region.
+  # A no_dc baseline row is added for every run.
+  # excess_cap: the cap sigma on annual sales back to the grid,
+  # sum_t ex_t <= sigma * sum_t d_t, one scenario per value. The study uses 0.0
+  # (surplus is stored or curtailed); add 0.20 for a sales-allowed scenario (ex20).
+  # The no_dc and unmatched_dc baselines have no surplus and are solved once, under ex0.
   suite: core
   suites:
     # Working subset: the 2024 reference weather year, one DC size, all policies.
@@ -156,7 +148,7 @@ spain_cfe:
       excess_cap: [0.0]
     # Full matrix: all policies x all DC sizes on the 2024 reference weather year. Other
     # weather years are stage iv: they need their upstream builds and a remap of the
-    # 2024 France border flows (decision log C2, C6).
+    # 2024 France border flows (decision log C5).
     full:
       runs: [wy2024]
       policies:
@@ -225,7 +217,7 @@ spain_cfe:
     solver: highs
   iteration:
     # Forward passes for the endogenous grid CFE factor (Riepin & Brown 2024:
-    # plain replacement, no damping or stopping criterion; one forward pass
-    # converges well). The convergence table reports objective and max |dCFE_t|
-    # per pass as the signal that a scenario might need more passes.
+    # plain replacement, no damping or stopping criterion). Toy networks settle
+    # after the second pass; the convergence table reports the objective and
+    # max |dCFE_t| per pass, flagging a scenario that needs more.
     n_iterations: 2

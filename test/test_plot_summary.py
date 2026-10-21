@@ -59,7 +59,6 @@ def toy_summary(toy_base, toy_costs, tmp_path: Path) -> Path:
     return path
 
 
-@pytest.mark.skipif(not COLORS.exists(), reason="pypsa-eur submodule not checked out")
 @pytest.mark.parametrize("fmt", FORMATS)
 def test_every_figure_renders(toy_summary: Path, tmp_path: Path, fmt: str) -> None:
     plots = tmp_path / "plots"

@@ -38,6 +38,7 @@ from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics
 from scripts.data_center import DEFAULT_DISCOUNT_RATE, attach_data_center, load_costs
 from scripts.iterate import (
     DEFAULT_N_ITERATIONS,
+    DEFAULT_SOLVER_NAME,
     solve_with_grid_iteration,
 )
 
@@ -45,7 +46,6 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TARGET: float = 0.80
 DEFAULT_LOAD_SHEDDING_COST: float = 10000.0
-DEFAULT_SOLVER_NAME: str = "highs"
 # Per-solver defaults: HiGHS dual simplex (study default, open); Gurobi w/ out-of-the-box defaults ~5x faster on the full-year dispatch.
 SOLVER_DEFAULTS: dict[str, dict[str, Any]] = {
     "highs": {"solver": "simplex", "threads": 2},

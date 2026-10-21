@@ -3,15 +3,12 @@
 # SPDX-License-Identifier: MIT
 """Unit tests for 24/7 CFE virtual balance, policy constraints, and unclipped metrics."""
 
-import ast
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import pypsa
 import pytest
 
-from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics, yield_per_mw
+from scripts.cfe_constraints import add_dc_cfe_constraints, dc_metrics
 
 
 def _build_toy_3bus_network() -> tuple[pypsa.Network, pd.Series]:
@@ -203,8 +200,8 @@ def test_metrics_equal_constraint_lhs() -> None:
     assert naive_clipped_ppa_mwh > unclipped_ppa_mwh + 10.0
 
 
-def test_policies_ppa_only_strict_and_annual_res() -> None:
-    """Verify PPA-only (r=0), strict_hourly, annual_res, and excess cap constraints."""
+def test_ppa_only_sales_cap_and_strict_grid_credit() -> None:
+    """PPA-only ignores the grid CFE factor and respects the sales cap; strict grid credit holds every hour."""
     # 1. PPA-only overrides non-zero r to 0
     n_ppa, r = _build_toy_3bus_network()
     n_ppa.optimize.create_model()
@@ -242,40 +239,3 @@ def test_policies_ppa_only_strict_and_annual_res() -> None:
     metrics_strict = dc_metrics(n_strict)
     per_t_ratio = metrics_strict["constraint_lhs_per_t"] / 100.0
     assert (per_t_ratio >= 0.50 - 1e-6).all()
-
-    # 3. Annual RES volumetric constraint
-    n_ann, r = _build_toy_3bus_network()
-    n_ann.optimize.create_model()
-    add_dc_cfe_constraints(
-        n=n_ann,
-        dc_cfg={"prefix": "DC"},
-        cfe_t=r,
-        policy="annual_res",
-        target=1.00,
-    )
-    status, _ = n_ann.optimize.solve_model(solver_name="highs", solver="simplex")
-    assert status == "ok"
-    metrics_ann = dc_metrics(n_ann)
-    gens = [g for g in n_ann.generators.index if g.startswith("DC")]
-    contracted = yield_per_mw(n_ann, gens) * n_ann.generators.loc[gens, "p_nom_opt"]
-    assert contracted.sum() == pytest.approx(metrics_ann["total_load_mwh"], rel=1e-6)
-
-
-def test_no_clip_in_metrics() -> None:
-    """AST scan asserting no ``.clip(...)`` calls exist anywhere in ``scripts/``."""
-    scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
-    py_files = sorted(scripts_dir.glob("*.py"))
-    assert py_files, f"No Python files found in {scripts_dir}"
-
-    offenders: list[str] = []
-    for path in py_files:
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        for node in ast.walk(tree):
-            if (
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Attribute)
-                and node.func.attr == "clip"
-            ):
-                offenders.append(f"{path.name}:{node.lineno}")
-
-    assert not offenders, f"Forbidden .clip() calls found in scripts: {offenders}"

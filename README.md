@@ -1,7 +1,7 @@
 # Spain Hourly Matching
 
 A study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
-centers: a PyPSA model of today's Spanish electricity system (2025/26 fleet), built on
+centers: a PyPSA model of today's Spanish electricity system (2025 fleet), built on
 [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with data center PPA & 24/7-CFE
 procurement model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe) and the
 previous research of [Riepin & Brown (2024)](https://doi.org/10.1016/j.esr.2024.101488).

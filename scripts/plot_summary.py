@@ -4,8 +4,8 @@
 """
 Plot the study figures from the scenario summary table.
 
-Reads ``results/scenarios.csv`` from ``make_summary.py`` and writes one PDF per
-figure. The figures cover a single-run suite (one row per policy): hourly
+Reads ``results/scenarios.csv`` from ``make_summary.py`` and writes one file per
+figure (PDF, or PNG with ``--format``) for one run, DC size and sales cap: hourly
 clean coverage of DC consumption, the DC's PPA portfolio and net cost, the Spanish
 system impact, the shift in Spanish supply, and the CO2 intensity of DC
 consumption. Carrier colours come from PyPSA-Eur's ``tech_colors``.

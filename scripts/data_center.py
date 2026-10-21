@@ -165,6 +165,12 @@ def _best_class_gens(
     mean_cf = n.generators_t.p_max_pu[bg_gens].mean()
 
     with_room = remaining[remaining > 0.0]
+    if with_room.empty:
+        logger.warning(
+            "No %s class with room at %s: the candidate gets zero potential.",
+            carrier,
+            bus,
+        )
     pool = with_room.index if not with_room.empty else bg_gens
     best = mean_cf.loc[pool].idxmax()
     return str(best), float(remaining.at[best])
@@ -175,13 +181,6 @@ def _ensure_carriers(n: pypsa.Network, carriers: Sequence[str]) -> None:
     missing = [c for c in carriers if c not in n.carriers.index]
     if missing:
         n.add("Carrier", missing)
-
-
-def _ensure_base_carriers(n: pypsa.Network) -> None:
-    """Ensure study carriers (CHP, csp, boundary, load) exist."""
-    for car, co2 in (("CHP", 0.369), ("csp", 0.0), ("boundary", 0.0), ("load", 0.0)):
-        if car not in n.carriers.index:
-            n.add("Carrier", car, co2_emissions=co2)
 
 
 def attach_data_center(
@@ -229,8 +228,6 @@ def attach_data_center(
     pypsa.Network
         The modified network ``n``.
     """
-    _ensure_base_carriers(n)
-
     policy_norm = str(policy).strip().lower()
     if policy_norm == "no_dc":
         logger.info(

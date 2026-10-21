@@ -6,8 +6,8 @@
 
 The upstream PyPSA-Eur network build runs inside the ``pypsa-eur/`` submodule with
 ``--configfile ../config/config.spain.yaml`` (see README); the rules here take over
-from the composed networks: prepare (patch engine), solve (DC + 24/7 CFE),
-validate, summarize, plot. See README for the architecture.
+from the composed networks: prepare (patch engine), solve (DC procurement
+policies), validate, summarise, plot.
 """
 
 
@@ -17,19 +17,14 @@ configfile: "config/config.spain.yaml"
 
 import re
 
+from scripts.plot_summary import FIGURES
+
 HORIZON = config["planning_horizons"][0]
 SUITE = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
 # (policy, PPA siting) pairs of the selected suite
 SCENARIOS = [(p, siting) for siting, ps in SUITE["policies"].items() for p in ps]
 NO_SURPLUS_POLICIES = ("no_dc", "unmatched_dc")
-PLOTS = [
-    "dc_clean_coverage",
-    "dc_portfolio",
-    "dc_cost",
-    "system_impact",
-    "system_generation_shift",
-    "dc_emission_intensity",
-]
+PLOTS = list(FIGURES)  # file names of the summary figures
 
 
 def ex_tag(sigma):
@@ -323,7 +318,7 @@ rule make_summary:
 
 
 rule plot_summary:
-    """Produces the study figures of one run and sales cap from the summary table."""
+    """Produces the study figures of one run, DC size and sales cap from the summary table."""
     input:
         code=["scripts/plot_summary.py"],
         summary="results/scenarios.csv",

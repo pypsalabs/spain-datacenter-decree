@@ -542,7 +542,12 @@ def _patch_chp_profile(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
 
 
 def _patch_csp(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
-    """Concentrated solar power: cited capacity, nodal solar profile rescaled to cited output."""
+    """
+    Concentrated solar power: cited capacity, solar profile rescaled to cited output.
+
+    The profile is the first solar resource class at each bus; only its shape matters
+    after rescaling.
+    """
     natcap = _custom(ctx, "national_capacities.csv")
     val = _custom(ctx, "validation_2024_es.csv")
     year = int(ctx["data_year"])
@@ -597,7 +602,8 @@ def _patch_biomass_availability(n: pypsa.Network, ctx: Mapping[str, Any]) -> Non
 
     Spanish biomass and waste plants run fuel-limited at roughly 40-50% of capacity;
     an unconstrained LP would dispatch them near-baseload. The cap is derived from
-    the cited annual output and installed capacity, not tuned.
+    the cited annual output and installed capacity, not tuned. The 2024 actuals are
+    used in every data year.
     """
     year = int(ctx["data_year"])
     natcap = _custom(ctx, "national_capacities.csv")
@@ -785,8 +791,10 @@ def _patch_ntc_caps(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
         (
             es0,
             set(_country_buses(n, "ES1")),
-            _value(df, "ES1-ES4", year, "ntc_peninsula_to_baleares"),
-            "ES1-ES4",
+            _value(
+                df, "ES1-ES4", year, "ntc_peninsula_to_baleares"
+            ),  # REE system codes
+            "peninsula-Balearics",
         ),
     ]
     for buses_a, buses_b, ntc, label in corridors:
@@ -927,7 +935,7 @@ def _patch_fr_nuclear_profile(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
 
 
 def _patch_ma_ad_exports(n: pypsa.Network, ctx: Mapping[str, Any]) -> None:
-    """Fixed ES exports to Morocco and Andorra as flat loads at the nearest nodes."""
+    """Fixed ES exports to Morocco and Andorra as flat loads at the nearest nodes (2024 actuals)."""
     val = _custom(ctx, "validation_2024_es.csv")
     _ensure_carrier(n, "boundary")
     hours = float(n.snapshot_weightings["generators"].sum())

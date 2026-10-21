@@ -178,7 +178,7 @@ def _domestic_supply(
             if carrier in clean_set:
                 clean_supply = clean_supply + p_series
 
-    # 2. StorageUnits (natural-inflow hydro/ror/csp counted; PHS and battery excluded)
+    # 2. StorageUnits (reservoir hydro counted; PHS and battery excluded)
     if not n.storage_units.empty:
         su_df = n.storage_units
         in_country = su_df["bus"].isin(c_buses)

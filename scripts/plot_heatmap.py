@@ -105,7 +105,7 @@ def plot_heatmap(hourly: pd.DataFrame, row: pd.Series) -> plt.Figure:
 
 
 def main(argv: list[str] | None = None) -> None:
-    """CLI entry point: write the heatmap PDF of one scenario."""
+    """CLI entry point: write the heatmap of one scenario (format from the file suffix)."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--hourly", type=Path, required=True)

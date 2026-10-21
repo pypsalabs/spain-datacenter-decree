@@ -85,8 +85,6 @@ def test_no_dc_adds_zero_assets(
     }
     attach_data_center(toy_grid, dc_mw=1000.0, costs=toy_costs, policy="no_dc")
     assert {c: len(getattr(toy_grid, c)) for c in before} == before
-    for car in ("CHP", "csp", "boundary", "load"):
-        assert car in toy_grid.carriers.index
 
 
 def test_unmatched_dc_adds_loads_only(

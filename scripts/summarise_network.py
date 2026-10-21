@@ -228,6 +228,7 @@ def dc_hourly(n: pypsa.Network) -> pd.DataFrame:
     the intensity values the purchases at the import-traced grid emission factor.
     Their consumption-weighted means are ``clean_coverage`` and
     ``dc_attributional_intensity_g_per_kwh``. Both are NaN without a data center.
+    The grid CFE factor counts renewables only, also for the ``_cfe`` policies.
     """
     d, im = dc_grid_purchases(n)
     bought = im / d
@@ -245,8 +246,7 @@ def summarise_network(n: pypsa.Network, row: pd.Series) -> pd.Series:
     """
     Return the solve metrics ``row`` extended by the postprocessing metrics.
 
-    Postprocessing owns its metric names: where a solve row from an older run
-    carries the same name, the definition computed here replaces it.
+    A metric computed here replaces any solve-row metric of the same name.
     """
     extra = {
         **spanish_system_metrics(n, row),

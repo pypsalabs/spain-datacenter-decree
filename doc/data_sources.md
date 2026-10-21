@@ -89,9 +89,9 @@ Cross-referencing **Redeia (*Informe del Sistema Eléctrico 2025*)**, **MITECO (
 
 The Spain-wide calibration and validation CSVs (`national_capacities.csv`, `annual_demand.csv`, `chp.csv`, `validation_2024_es.csv`) provide four explicit geographic keys (REE electric-system labels, not model bus prefixes: in the network, `ES0*` is the peninsula and `ES1 0AC` the Balearics):
 - `ES` — Spain National total (Peninsular + Balearic Islands + Canary Islands + Ceuta + Melilla)
-- `ES_peninsular` — Iberian Mainland (`ES1`, `geo_id=8741`)
+- `ES_peninsular` — Peninsular Spain (`ES1`, `geo_id=8741`)
 - `ES_baleares` — Balearic Islands (`ES4`, `geo_id=8743`)
-- `ES_mainland_baleares` — Sum of `ES_peninsular + ES_baleares` (`ES1 + ES4`), which is the exact geographic scope of the 15-node study model (Canary Islands, Ceuta, and Melilla are not in the model).
+- `ES_mainland_baleares` — Sum of `ES_peninsular + ES_baleares` (`ES1 + ES4`), the model's Spanish scope (the Canary Islands, Ceuta and Melilla are not in the model).
 
 Official Redeia and MITECO primary data require three scope distinctions that commonly cited national ballpark figures blur:
 

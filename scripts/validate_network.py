@@ -301,7 +301,7 @@ def main(argv: list[str] | None = None) -> None:
         summary["gates_total"],
         report_out,
     )
-    print(report.to_string(index=False))
+    logger.info("\n%s", report.to_string(index=False))
 
 
 if __name__ == "__main__":

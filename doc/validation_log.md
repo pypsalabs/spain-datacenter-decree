@@ -16,6 +16,7 @@ construction".
 | Solar +46% | 41.3 GW vs 32.5 GW grid-connected | the inventory counts total PV including ~9 GW of self-consumption, which does not belong above busbar demand |
 | Hydro −30% | inflow 25.6 vs 34.9 TWh | upstream normalizes inflow to EIA statistics, which end before 2024 (a wet year), giving an average year |
 | No CO2 price | CCGT marginal cost ≈ 81 EUR/MWh (gas + VOM only) | the composed network has no ETS price (lignite at 28 EUR/MWh would run baseload) |
+| Nuclear fuel 3× too expensive | nuclear marginal cost 27.3 EUR/MWh_el, above biomass (20.0) | technology-data v0.15.0 labels its nuclear fuel price (7.45) EUR/MWh_th, but the EIA source reports it per kWh of net generation, so dividing by η = 0.326 counts the efficiency twice |
 | CHP missing | 0 vs 16.4 TWh, ~6 Mt CO2 | electricity-only PyPSA-Eur has no cogeneration |
 | CSP missing | 0 vs 4.1 TWh | carrier not built by default |
 | Borders over-trade | France pushes 28.0 TWh into Spain | ES-FR corridor capability 5.2 GW (3 AC lines × 0.7 + 2 × 1 GW INELFE) vs 2.8 GW commercial NTC |
@@ -44,7 +45,7 @@ coordinates). The wind factor below covers only the residual.
 | `chp_profile` | Cogeneration as a fixed profile: the monthly shape of the vendored Redeia cogeneration CO2 series, scaled to published annual output (16.42 TWh, 0.366 tCO2/MWh_el) and distributed by nodal load. By construction | `chp.csv`, vendored REData JSON |
 | `csp` | 2.3 GW of CSP with a solar profile rescaled to the realized 2024 capacity factor. By construction (no storage dispatch modelled) | `national_capacities.csv`, `validation_2024_es.csv` |
 | `biomass_availability` | Biomass and waste `p_max_pu` capped at the realized capacity factor (ES 0.391, PT 0.563) | cited generation ÷ capacity |
-| `prices` | Thermal marginal cost = VOM + fuel/η + ETS × intensity/η, with realized hub prices (2024: MIBGAS PVB gas 38.08, CIF-ARA coal 14.83, ETS 65.24). Portuguese gas plants also pay the gas network premium (+1.10 EUR/MWh_th, ERSE), which breaks the Iberian gas near-tie in the observed direction | `prices.csv`, technology-data (VOM), ERSE gas tariffs 2025–26 |
+| `prices` | Thermal marginal cost = VOM + fuel/η + ETS × intensity/η, with realized hub prices (2024: MIBGAS PVB gas 38.08, CIF-ARA coal 14.83, ETS 65.24). Nuclear fuel 2.43 EUR/MWh_th, the technology-data figure read per MWh_el as its EIA source reports it (marginal cost 11.9 instead of 27.3 EUR/MWh_el). Portuguese gas plants also pay the gas network premium (+1.10 EUR/MWh_th, ERSE), which breaks the Iberian gas near-tie in the observed direction | `prices.csv`, technology-data (VOM), ERSE gas tariffs 2025–26, EIA Table 8.4 |
 | `ntc_caps` | ES→FR and FR→ES 2.8 GW, ES→PT 4.2 GW and PT→ES 3.5 GW, peninsula–Balearics 0.4 GW, by per-element `s_max_pu`/`p_max_pu` scaling (impedances untouched) | `ntc.csv` |
 | `demand` | Country loads scaled to cited demand (ES 239.7 and PT 51.4 TWh busbar; FR 449.2 TWh, RTE weather-corrected) | `annual_demand.csv` |
 | `hydro_inflow` | wy2024 runs only: Spanish and Portuguese reservoir inflow scaled to observed 2024 hydro energy (ES ×1.143, PT ×2.177), closing the EIA gap. France needs none (the model hits the actual 74.7 TWh) | `validation_2024_es.csv`, `pt_actuals.csv` |
@@ -55,14 +56,14 @@ coordinates). The wind factor below covers only the residual.
 
 | Gate | Raw | Patched | Status |
 |---|---|---|---|
-| Wind (±15%) | −13.1% | **−2.5%** | PASS |
-| Solar PV (±15%) | +46.2% | **+3.4%** | PASS |
-| Nuclear (±10%) | +5.5% | −2.2% | PASS |
+| Wind (±15%) | −13.1% | **−2.8%** | PASS |
+| Solar PV (±15%) | +46.2% | **+2.5%** | PASS |
+| Nuclear (±10%) | +5.5% | −0.5% | PASS |
 | Hydro (±20%) | −30.4% | −8.4% | PASS (by construction through inflow) |
-| CCGT+CHP (±25%) | −62.3% | +10.0% | PASS |
-| CO2 (±20%) | −37.6% | **−5.1%** | PASS |
+| CCGT+CHP (±25%) | −62.3% | +10.1% | PASS |
+| CO2 (±20%) | −37.6% | **−5.2%** | PASS |
 | Load shedding (< 0.01%) | 0 | 0 | PASS |
-| Net exports (sign and ±50%) | −196% | **+9.08 vs +10.23 TWh (−11.2%)** | PASS |
+| Net exports (sign and ±50%) | −196% | **+9.17 vs +10.23 TWh (−10.3%)** | PASS |
 
 The table comes from a Gurobi solve. HiGHS reaches a different, equally optimal dispatch
 of this LP, about 0.1 TWh apart on nuclear and on the French exchange.
@@ -102,8 +103,8 @@ Each candidate cause was tested in the model (wy2024, patched, `no_dc`):
    every gross energy quantity validates within ~10%.
 
 **Result:** with the nuclear profile and the two Portuguese corrections, the gate passes:
-net exports +9.08 vs +10.23 TWh actual (−11.2%), and CO2 moves to −5.1%. The border
-components compensate (ES→PT +16.0 vs +10.5; ES→FR −9.7 vs −3.0 from the import excess in
+net exports +9.17 vs +10.23 TWh actual (−10.3%), and CO2 moves to −5.2%. The border
+components compensate (ES→PT +16.1 vs +10.5; ES→FR −9.7 vs −3.0 from the import excess in
 item 3), so they are reported alongside the total.
 
 ## 6. Known caveats
@@ -114,14 +115,14 @@ item 3), so they are reported alongside the total.
   input choices, not validation successes.
 - Coal and oil dispatch is not reproduced (non-market operation). Their ≈ 2.9 Mt CO2 are
   partly offset by the model's CCGT overshoot (+15%), so the small total CO2 deviation
-  (−5.1%) rests on compensating errors.
+  (−5.2%) rests on compensating errors.
 - The net-exports gate passes on the total; the ES→FR and ES→PT components carry
   compensating errors (±~6 TWh) from the cheap-hour shortage of §5.5.
 - The price level is informational only, and reported purchase costs inherit its bias:
-  +33% in the 2024 back-cast (84.0 vs 63 EUR/MWh OMIE), +13% in the 2025 case study (73.8
-  vs 65.3). On the back-cast, the weighting convention is immaterial (arithmetic 83.4 vs
-  load-weighted 84.0) and there are no scarcity spikes (maximum 95): the whole gap is a
-  shortage of cheap hours. The model prices below 1 EUR/MWh in 0.3% of snapshots against
+  +31% in the 2024 back-cast (82.8 vs 63 EUR/MWh OMIE), +10% in the 2025 case study (71.6
+  vs 65.3). On the back-cast, the weighting convention is immaterial (arithmetic 82.3 vs
+  load-weighted 82.8) and there are no scarcity spikes (maximum 95): the whole gap is a
+  shortage of cheap hours. The model prices below 1 EUR/MWh in 0.5% of snapshots against
   ~8.5% of real 2024 hours, and its median (94.6) sits at the CCGT marginal cost. The
   causes are hydro priced at its fossil opportunity value and the absence of zero or
   negative bids; the 3-hourly resolution is ruled out (decision log, temporal resolution).

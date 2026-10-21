@@ -122,7 +122,7 @@ constant (`data/custom/wind_correction.csv`) in stage (iii).
 Install [pixi](https://pixi.sh), then:
 
 ```bash
-git clone --recursive <this-repo>
+git clone --recursive https://github.com/Irieo/spain-hourly-matching.git
 cd spain-hourly-matching
 ```
 

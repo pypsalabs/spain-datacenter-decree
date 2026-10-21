@@ -1,7 +1,8 @@
-# large model artifacts, never in git
+# generated model artifacts; only the validation reports are tracked
 networks/
 resources/
-results/
+results/*
+!results/validation/
 cutouts/
 benchmarks/
 logs/

@@ -8,7 +8,6 @@ path = [
     "doc/*.md",
     "doc/showcase/**",
     "data/custom/*.csv",
-    "resources/**",
     "results/**",
 ]
 SPDX-FileCopyrightText = "2026 Iegor Riepin"

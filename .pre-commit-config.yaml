@@ -9,8 +9,8 @@ repos:
   hooks:
   - id: check-added-large-files
     args: ["--maxkb=2000"]
-    # vendored primary sources and the two committed wy2024 networks are deliberately large
-    exclude: ^(data/custom/sources/|resources/)
+    # vendored primary sources are deliberately large
+    exclude: ^data/custom/sources/
 
 # Run ruff to lint and format
 - repo: https://github.com/astral-sh/ruff-pre-commit

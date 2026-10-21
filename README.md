@@ -124,8 +124,8 @@ constant (`data/custom/wind_correction.csv`) in stage (iii).
 Install [pixi](https://pixi.sh), then:
 
 ```bash
-git clone --recursive https://github.com/Irieo/spain-hourly-matching.git
-cd spain-hourly-matching
+git clone --recursive https://github.com/pypsalabs/spain-datacenter-decree.git
+cd spain-datacenter-decree
 ```
 
 The study deliberately has no environment of its own: it runs entirely in the submodule's

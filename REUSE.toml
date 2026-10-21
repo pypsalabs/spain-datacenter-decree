@@ -1,5 +1,5 @@
 version = 1
-SPDX-PackageName = "spain-hourly-matching"
+SPDX-PackageName = "spain-datacenter-decree"
 SPDX-PackageSupplier = "Iegor Riepin (TU Berlin, PyPSA Labs gGmbH) <iegor.riepin@pypsalabs.org>"
 
 [[annotations]]

@@ -43,6 +43,31 @@ group, can check the numbers, challenge them, and build on them.
 
 ## Results
 
+> The results show that dropping the decree's core rule, that new data centers match
+> their consumption *hour by hour* with power from *new* renewable and storage assets,
+> is a lose-lose outcome for Spain and for data centers. Without it, the demand of a new
+> data center is met mostly by gas power plants. Take one example: a 500 MW data center
+> in Aragon (a small part of the 6.3 GW of grid access data centers already hold) makes
+> Spain burn 10% more gas for power, emit about 1 Mt more CO2 a year, and pay almost 300
+> M€ more a year to run its power system. Gas sets the price, so the spot price rises by
+> about 2 €/MWh for every consumer, the data center included. With hourly matching in
+> place, as the decree writes it or as it is usually defined, that rise and the added
+> emissions shrink by 80% or more, and the data center covers at least 80% of its use
+> with its own renewable and storage contracts, shielded from the gas-set spot price.
+> How emissions are counted matters: the average grid mix suggests about 70 gCO2/kWh for
+> the data center's consumption (attributional), while the actual change in emissions is
+> four times larger (consequential), because gas serves the new demand.
+>
+> One clause of the draft decree needs fixing: it asks for 80% *in every hour*, not 80%
+> *hour by hour* over the year, the usual meaning of hourly matching (as in
+> [Google's CFE score](https://sustainability.google/reports/24x7-carbon-free-energy-methodologies-metrics/)).
+> Meeting 80% in every hour means covering even the darkest, calmest winter hours, which
+> takes a portfolio that overshoots the rest of the time: it reaches about 98% under the
+> usual definition and costs the data center more than buying from the grid. With that
+> one fix, the decree delivers most of the social benefits at a low cost to the data
+> center industry, and cuts Spain's dependence on imported gas and the data centers'
+> exposure to gas price swings.
+
 A showcase snapshot of the study figures for a selected case, a 500 MW data center in
 Aragon, each with its caption, is in [doc/showcase](doc/showcase):
 

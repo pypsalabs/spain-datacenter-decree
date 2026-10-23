@@ -211,6 +211,9 @@ plants, resource classes, capacity, generation and emissions, and full metric ta
 cross-border flows, capacity factors and more. All are
 tracked and regenerated with `snakemake validation` whenever the model changes.
 
+Thanks to [Lukas Franken](https://github.com/LukasFrankenQ) for contributing to the
+calibration visualisation.
+
 ## License
 
 MIT © 2026 Iegor Riepin (PyPSA Labs gGmbH); see [LICENSES/](LICENSES/),

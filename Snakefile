@@ -219,6 +219,7 @@ rule validate_network:
         code=["scripts/validate_network.py", "scripts/calculate_grid_cfe.py"],
         network="results/wy2024/networks/solved_2024_{variant}_no_dc_t0_0mw_spain_wide_ex0.nc",
         actuals="data/custom/validation_2024_es.csv",
+        capacities="data/custom/national_capacities.csv",
     output:
         report="results/validation/validation_{variant}.csv",
         gates="results/validation/validation_{variant}.yaml",
@@ -230,6 +231,7 @@ rule validate_network:
         PYTHONPATH="{workflow.basedir}" python -m scripts.validate_network \
             --network "{input.network}" \
             --actuals "{input.actuals}" \
+            --capacities "{input.capacities}" \
             --output-report "{output.report}" \
             --output-gates "{output.gates}"
         """

@@ -9,9 +9,9 @@ Compares the solved 2024 ``no_dc`` network with Redeia actuals
 (peninsula + Balearics): generation per carrier, demand, installed wind/solar
 capacity factors, pumped-hydro use, power-sector CO2 and average emission
 intensity, cross-border flows, and prices. Writes one tidy CSV
-(metric / unit / model / actual / diff / gate / status) and a YAML summary of
-the headline gates. The same report runs on the raw and the patched variants,
-so the diff between reports attributes each patch.
+(metric / model / actual / diff / pct_diff / unit / year / source) and a YAML
+summary of the headline gates. The same report runs on the raw and the patched
+variants, so the diff between reports attributes each patch.
 """
 
 from __future__ import annotations
@@ -49,6 +49,28 @@ BIOMASS_WASTE_ACTUALS = (
     "gen_renewable_waste",
     "gen_nonrenewable_waste",
 )
+# model metrics compared with a sum of Redeia metrics
+ACTUAL_PARTS: dict[str, tuple[str, ...]] = {
+    "gen_biomass_waste": BIOMASS_WASTE_ACTUALS,
+    "gen_ccgt_plus_chp": ("gen_ccgt", "gen_chp"),
+    "net_export_ma_ad": ("net_export_ma", "net_export_ad"),
+}
+# metrics Redeia/OMIE publish only nationally
+NATIONAL_METRICS = frozenset(
+    {
+        "gen_phs_turbining",
+        "demand_phs_pumping",
+        "day_ahead_price_omie_avg",
+        "net_export_ma_ad",
+    }
+)
+# capacity factor -> (model carriers, Redeia generation metric, national_capacities metric)
+CF_METRICS: dict[str, tuple[tuple[str, ...], str, str]] = {
+    "cf_onwind": (("onwind",), "gen_onwind", "onwind"),
+    "cf_solar_pv": (("solar", "solar-hsat"), "gen_solar_pv", "solar PV"),
+}
+# national_capacities.csv scopes making up SCOPE
+CAPACITY_SCOPES = ("ES_peninsular", "ES_baleares")
 
 # (metric, relative tolerance) headline gates; net exports additionally checks the sign
 GATES: dict[str, float] = {
@@ -163,31 +185,48 @@ def _es_mean_price(n: pypsa.Network) -> float:
 
 
 def _wind_solar_cf(n: pypsa.Network) -> dict[str, float]:
-    """Fleet capacity factors of Spanish wind and solar (available, pre-curtailment)."""
+    """Fleet capacity factors of Spanish wind and solar (dispatched, post-curtailment)."""
     w = n.snapshot_weightings["generators"]
     hours = float(w.sum())
     out = {}
-    for name, carriers in (
-        ("cf_onwind", ("onwind",)),
-        ("cf_solar_pv", ("solar", "solar-hsat")),
-    ):
+    for name, (carriers, _, _) in CF_METRICS.items():
         gens = n.generators[
             n.generators["bus"].str.startswith("ES")
             & n.generators["carrier"].isin(carriers)
         ]
-        cols = gens.index.intersection(n.generators_t.p_max_pu.columns)
+        cols = gens.index.intersection(n.generators_t.p.columns)
         p_nom = gens.loc[cols, "p_nom"]
-        avail_mwh = float(
-            n.generators_t.p_max_pu[cols].mul(p_nom, axis=1).mul(w, axis=0).sum().sum()
-        )
-        out[name] = avail_mwh / (float(p_nom.sum()) * hours) if p_nom.sum() > 0 else 0.0
+        gen_mwh = float(n.generators_t.p[cols].mul(w, axis=0).sum().sum())
+        out[name] = gen_mwh / (float(p_nom.sum()) * hours) if p_nom.sum() > 0 else 0.0
     return out
 
 
-def validate(n: pypsa.Network, actuals: pd.DataFrame) -> pd.DataFrame:
+def _actual_cf(
+    gen_twh: float, capacities: pd.DataFrame, metric: str, year: int
+) -> tuple[float, str]:
+    """
+    Realized capacity factor and its capacity source over the modelled scope.
+
+    The denominator is the average operating capacity, the mean of the prior
+    and current year-end fleets, as the patched network sets it.
+    """
+    sel = capacities[
+        capacities["country"].isin(CAPACITY_SCOPES)
+        & (capacities["carrier_or_metric"] == metric)
+        & capacities["year"].isin([year - 1, year])
+    ]
+    mw = sel.groupby("year")["value"].sum().loc[[year - 1, year]].mean()
+    hours = pd.Timestamp(year, 12, 31).dayofyear * 24
+    return gen_twh * 1e6 / (mw * hours), " + ".join(sel["source_id"].unique())
+
+
+def validate(
+    n: pypsa.Network, actuals: pd.DataFrame, capacities: pd.DataFrame
+) -> pd.DataFrame:
     """Build the tidy validation table: model vs Redeia, with gates."""
-    act = actuals.query("country == @SCOPE").set_index("carrier_or_metric")["value"]
-    act_nat = actuals.query("country == 'ES'").set_index("carrier_or_metric")["value"]
+    year = int(actuals["year"].unique().item())
+    act = actuals.query("country == @SCOPE").set_index("carrier_or_metric")
+    act_nat = actuals.query("country == 'ES'").set_index("carrier_or_metric")
 
     model: dict[str, float] = {}
     model.update(_es_generation_twh(n))
@@ -206,27 +245,30 @@ def validate(n: pypsa.Network, actuals: pd.DataFrame) -> pd.DataFrame:
     )
 
     actual: dict[str, float] = {}
+    unit: dict[str, str] = {}
+    source: dict[str, str] = {}
     for metric in model:
-        if metric == "gen_biomass_waste":
-            actual[metric] = float(act.reindex(BIOMASS_WASTE_ACTUALS).fillna(0.0).sum())
-        elif metric == "gen_ccgt_plus_chp":
-            actual[metric] = float(act.get("gen_ccgt", 0.0) + act.get("gen_chp", 0.0))
-        elif metric in ("net_export_ma_ad",):
-            actual[metric] = float(
-                act_nat.get("net_export_ma", 0.0) + act_nat.get("net_export_ad", 0.0)
-            )
-        elif metric in (
-            "gen_phs_turbining",
-            "demand_phs_pumping",
-            "day_ahead_price_omie_avg",
-        ):
-            actual[metric] = float(act_nat.get(metric, float("nan")))
-        else:
-            actual[metric] = float(act.get(metric, act_nat.get(metric, float("nan"))))
+        parts = list(ACTUAL_PARTS.get(metric, (metric,)))
+        national = metric in NATIONAL_METRICS or not act.index.isin(parts).any()
+        hit = (act_nat if national else act).reindex(parts)
+        actual[metric] = float(hit["value"].sum(min_count=1))
+        unit[metric] = str(hit["unit"].iloc[0])
+        source[metric] = " + ".join(hit["source_id"].dropna().unique())
     actual["load_shedding_share"] = 0.0
+    unit["load_shedding_share"] = "p.u."
     actual["emission_intensity_kg_mwh"] = (
         actual["co2_power_sector_total"] / actual["demand_b_c"] * 1e3
     )
+    unit["emission_intensity_kg_mwh"] = "kgCO2/MWh"
+    source["emission_intensity_kg_mwh"] = " + ".join(
+        dict.fromkeys([source["co2_power_sector_total"], source["demand_b_c"]])
+    )
+    for metric, (_, gen_metric, cap_metric) in CF_METRICS.items():
+        actual[metric], cap_source = _actual_cf(
+            actual[gen_metric], capacities, cap_metric, year
+        )
+        unit[metric] = "p.u."
+        source[metric] = f"{source[gen_metric]} + {cap_source}"
 
     rows = []
     for metric, m_val in model.items():
@@ -250,6 +292,9 @@ def validate(n: pypsa.Network, actuals: pd.DataFrame) -> pd.DataFrame:
                 "actual": round(a_val, 4) if pd.notna(a_val) else a_val,
                 "diff": round(diff, 4) if pd.notna(a_val) else float("nan"),
                 "pct_diff": round(pct, 2) if pd.notna(pct) else pct,
+                "unit": unit[metric],
+                "year": year,
+                "source": source[metric],
                 "gate_rel_tol": gate if gate is not None else "",
                 "status": status,
             }
@@ -263,6 +308,7 @@ def main(argv: list[str] | None = None) -> None:
     if "snakemake" in globals():
         smk = globals()["snakemake"]
         net_in, act_in = Path(smk.input.network), Path(smk.input.actuals)
+        cap_in = Path(smk.input.capacities)
         report_out, gates_out = Path(smk.output.report), Path(smk.output.gates)
     else:
         parser = argparse.ArgumentParser(description=__doc__)
@@ -270,17 +316,22 @@ def main(argv: list[str] | None = None) -> None:
         parser.add_argument(
             "--actuals", type=Path, default=Path("data/custom/validation_2024_es.csv")
         )
+        parser.add_argument(
+            "--capacities",
+            type=Path,
+            default=Path("data/custom/national_capacities.csv"),
+        )
         parser.add_argument("--output-report", type=Path, required=True)
         parser.add_argument("--output-gates", type=Path, required=True)
         args = parser.parse_args(argv)
-        net_in, act_in = args.network, args.actuals
+        net_in, act_in, cap_in = args.network, args.actuals, args.capacities
         report_out, gates_out = args.output_report, args.output_gates
 
     n = pypsa.Network(str(net_in))
-    report = validate(n, pd.read_csv(act_in))
+    report = validate(n, pd.read_csv(act_in), pd.read_csv(cap_in))
 
     report_out.parent.mkdir(parents=True, exist_ok=True)
-    report.to_csv(report_out, index=False)
+    report.drop(columns=["gate_rel_tol", "status"]).to_csv(report_out, index=False)
 
     gated = report[report["status"].isin(["PASS", "FAIL"])]
     summary = {

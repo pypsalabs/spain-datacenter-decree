@@ -202,11 +202,14 @@ environment with `pixi shell --manifest-path pypsa-eur/pixi.toml`.
 under `spain_cfe.patches`: build the system, validate it against 2024 actuals, correct
 only what the validation demands, and re-validate through the same pipeline.
 
-Raw PyPSA-Eur ([validation_raw.csv](results/validation/validation_raw.csv)) and the model
-patched with cited data corrections
-([validation_patched.csv](results/validation/validation_patched.csv)) are compared against
-Redeia's reported 2024 numbers. Both reports are tracked and regenerated with `snakemake
-validation` whenever the model changes.
+Raw PyPSA-Eur and the model patched with cited data corrections are compared against
+Redeia's reported 2024 numbers in two forms: a short visual report
+([validation_report.png](results/validation/validation_report.png)) of the grid, power
+plants, resource classes, capacity, generation and emissions, and full metric tables
+([validation_raw.csv](results/validation/validation_raw.csv),
+[validation_patched.csv](results/validation/validation_patched.csv)) that also track
+cross-border flows, capacity factors and more. All are
+tracked and regenerated with `snakemake validation` whenever the model changes.
 
 ## License
 

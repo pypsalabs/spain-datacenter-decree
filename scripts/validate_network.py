@@ -69,6 +69,12 @@ CF_METRICS: dict[str, tuple[tuple[str, ...], str, str]] = {
     "cf_onwind": (("onwind",), "gen_onwind", "onwind"),
     "cf_solar_pv": (("solar", "solar-hsat"), "gen_solar_pv", "solar PV"),
 }
+# model carriers behind each Redeia CO2 split; the rest is oil, gas turbines, waste
+CO2_CARRIERS: dict[str, tuple[str, ...]] = {
+    "co2_ccgt": ("CCGT",),
+    "co2_chp": ("CHP",),
+    "co2_coal": ("coal", "lignite"),
+}
 # national_capacities.csv scopes making up SCOPE
 CAPACITY_SCOPES = ("ES_peninsular", "ES_baleares")
 
@@ -123,8 +129,12 @@ def _es_generation_twh(n: pypsa.Network) -> dict[str, float]:
     return out
 
 
-def _es_co2_mt(n: pypsa.Network) -> float:
-    """Power-sector CO2 of the Spanish fleet (Mt), thermal input x carrier intensity."""
+def _es_co2_mt(n: pypsa.Network) -> dict[str, float]:
+    """
+    Power-sector CO2 of the Spanish fleet (Mt), total and per ``CO2_CARRIERS`` split.
+
+    Thermal input x carrier intensity.
+    """
     w = n.snapshot_weightings["generators"]
     co2 = n.carriers["co2_emissions"]
     gens = n.generators[
@@ -134,7 +144,12 @@ def _es_co2_mt(n: pypsa.Network) -> float:
     cols = gens.index.intersection(n.generators_t.p.columns)
     gen_mwh = n.generators_t.p[cols].mul(w, axis=0).sum()
     eff = gens.loc[cols, "efficiency"].replace(0.0, 1.0)
-    return float((gen_mwh / eff * gens.loc[cols, "carrier"].map(co2)).sum()) / 1e6
+    carrier = gens.loc[cols, "carrier"]
+    mt = (gen_mwh / eff * carrier.map(co2)).groupby(carrier).sum() / 1e6
+    out = {"co2_power_sector_total": float(mt.sum())}
+    for metric, carriers in CO2_CARRIERS.items():
+        out[metric] = float(mt.reindex(list(carriers)).fillna(0.0).sum())
+    return out
 
 
 def _es_demand_twh(n: pypsa.Network) -> float:
@@ -231,7 +246,7 @@ def validate(
     model: dict[str, float] = {}
     model.update(_es_generation_twh(n))
     model["demand_b_c"] = _es_demand_twh(n)
-    model["co2_power_sector_total"] = _es_co2_mt(n)
+    model.update(_es_co2_mt(n))
     model["emission_intensity_kg_mwh"] = (
         model["co2_power_sector_total"] / model["demand_b_c"] * 1e3
     )

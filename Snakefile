@@ -18,6 +18,7 @@ configfile: "config/config.spain.yaml"
 import re
 
 from scripts.plot_summary import FIGURES
+from scripts.plot_validation import CF_CARRIERS
 
 HORIZON = config["planning_horizons"][0]
 SUITE = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
@@ -57,6 +58,7 @@ rule validation:
     input:
         "results/validation/validation_raw.csv",
         "results/validation/validation_patched.csv",
+        "results/validation/validation_report.png",
 
 
 rule build_upstream:
@@ -72,6 +74,28 @@ rule build_upstream:
         cd pypsa-eur && snakemake \
             resources/{wildcards.run}/networks/composed_{params.horizon}.nc \
             resources/{wildcards.run}/costs_{params.horizon}_processed.csv \
+            -j {threads} --configfile ../config/config.spain.yaml
+        """
+
+
+rule upstream_map_inputs:
+    """Upstream build files the validation maps read, built on the way to the composed network."""
+    input:
+        ancient(f"pypsa-eur/resources/{{run}}/networks/composed_{HORIZON}.nc"),
+    output:
+        base_network="pypsa-eur/resources/{run}/networks/base.nc",
+        powerplants="pypsa-eur/resources/{run}/powerplants.csv",
+        regions="pypsa-eur/resources/{run}/onshore_regions.geojson",
+        class_regions=expand(
+            "pypsa-eur/resources/{{run}}/regions_by_class_{carrier}.geojson",
+            carrier=CF_CARRIERS,
+        ),
+    threads: 1
+    params:
+        targets=lambda w, output: [f.removeprefix("pypsa-eur/") for f in output],
+    shell:
+        """
+        cd pypsa-eur && snakemake {params.targets} \
             -j {threads} --configfile ../config/config.spain.yaml
         """
 
@@ -234,6 +258,51 @@ rule validate_network:
             --capacities "{input.capacities}" \
             --output-report "{output.report}" \
             --output-gates "{output.gates}"
+        """
+
+
+rule plot_validation:
+    """Plots the validation figure of the 2024 back-cast next to its reports."""
+    input:
+        code=[
+            "scripts/plot_validation.py",
+            "scripts/plot_summary.py",
+            "scripts/prepare_network.py",
+        ],
+        base_network="pypsa-eur/resources/wy2024/networks/base.nc",
+        powerplants="pypsa-eur/resources/wy2024/powerplants.csv",
+        regions="pypsa-eur/resources/wy2024/onshore_regions.geojson",
+        class_regions=expand(
+            "pypsa-eur/resources/wy2024/regions_by_class_{carrier}.geojson",
+            carrier=CF_CARRIERS,
+        ),
+        networks=expand(
+            "resources/wy2024/networks/base_2024_{variant}.nc",
+            variant=["raw", "patched"],
+        ),
+        reports=expand(
+            "results/validation/validation_{variant}.csv", variant=["raw", "patched"]
+        ),
+        capacities="data/custom/national_capacities.csv",
+        colors="pypsa-eur/config/plotting.default.yaml",
+        style="scripts/plots.mplstyle",
+    output:
+        "results/validation/validation_report.png",
+    threads: 1
+    resources:
+        mem_mb=4000,
+    shell:
+        """
+        PYTHONPATH="{workflow.basedir}" python -m scripts.plot_validation \
+            --base-network "{input.base_network}" \
+            --powerplants "{input.powerplants}" \
+            --regions "{input.regions}" \
+            --class-regions {input.class_regions} \
+            --networks {input.networks} \
+            --reports {input.reports} \
+            --capacities "{input.capacities}" \
+            --colors "{input.colors}" \
+            --output "{output}"
         """
 
 

@@ -14,6 +14,9 @@ gen_phs_turbining,3.5454,5.4584,-1.9131,-35.05,TWh,2024,redeia_ise_2025_evolucio
 demand_phs_pumping,-4.7272,-8.6642,3.9371,45.44,TWh,2024,redeia_ise_2025_evolucion_demanda
 demand_b_c,239.692,239.6921,-0.0001,-0.0,TWh,2024,redata_2024_demanda_evolucion_peninsular
 co2_power_sector_total,20.759,21.9052,-1.1462,-5.23,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
+co2_ccgt,12.7726,11.9637,0.8089,6.76,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
+co2_chp,6.0034,6.0034,-0.0,-0.0,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
+co2_coal,0.0,2.9144,-2.9144,-100.0,MtCO2,2024,redata_2024_emisiones_co2_mensual
 emission_intensity_kg_mwh,86.6069,91.3887,-4.7818,-5.23,kgCO2/MWh,2024,redata_2024_emisiones_co2_peninsular_mensual + redata_2024_demanda_evolucion_peninsular
 net_export_fr,-9.7194,-3.0134,-6.706,-222.54,TWh,2024,redata_2024_intercambios_francia
 net_export_pt,16.1189,10.465,5.6539,54.03,TWh,2024,redata_2024_intercambios_portugal

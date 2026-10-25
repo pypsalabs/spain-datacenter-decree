@@ -208,13 +208,16 @@ under `spain_cfe.patches`: build the system, validate it against 2024 actuals, c
 only what the validation demands, and re-validate through the same pipeline.
 
 Raw PyPSA-Eur and the model patched with cited data corrections are compared against
-Redeia's reported 2024 numbers in two forms: a short visual report
-([validation_report.png](results/validation/validation_report.png)) of the grid, power
-plants, resource classes, capacity, generation and emissions, and full metric tables
+Redeia's reported 2024 numbers in two forms. The visual report below shows the
+transmission grid and power plants, the 15-node network before and after patching, the
+capacity factors of the wind and solar resource classes, and Spanish capacity,
+generation and CO2 emissions by technology. Full metric tables
 ([validation_raw.csv](results/validation/validation_raw.csv),
-[validation_patched.csv](results/validation/validation_patched.csv)) that also track
-cross-border flows, capacity factors and more. All are
-tracked and regenerated with `snakemake validation` whenever the model changes.
+[validation_patched.csv](results/validation/validation_patched.csv)) also track
+cross-border flows, capacity factors and more. All are tracked and regenerated with
+`snakemake validation` whenever the model changes.
+
+![Validation of the 2024 back-cast: raw PyPSA-Eur and the patched model against Redeia actuals](results/validation/validation_report.png)
 
 Thanks to [Lukas Franken](https://github.com/LukasFrankenQ) for contributing to the
 calibration visualisation.

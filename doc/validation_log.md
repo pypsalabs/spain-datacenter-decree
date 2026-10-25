@@ -56,17 +56,17 @@ coordinates). The wind factor below covers only the residual.
 
 | Gate | Raw | Patched | Status |
 |---|---|---|---|
-| Wind (±15%) | −13.1% | **−2.8%** | PASS |
-| Solar PV (±15%) | +46.2% | **+2.5%** | PASS |
-| Nuclear (±10%) | +5.5% | −0.5% | PASS |
+| Wind (±15%) | −13.2% | **−3.0%** | PASS |
+| Solar PV (±15%) | +46.2% | **+2.3%** | PASS |
+| Nuclear (±10%) | +4.3% | −0.9% | PASS |
 | Hydro (±20%) | −30.4% | −8.4% | PASS (by construction through inflow) |
-| CCGT+CHP (±25%) | −62.3% | +10.1% | PASS |
-| CO2 (±20%) | −37.6% | **−5.2%** | PASS |
+| CCGT+CHP (±25%) | −60.5% | +11.7% | PASS |
+| CO2 (±20%) | −36.5% | **−4.0%** | PASS |
 | Load shedding (< 0.01%) | 0 | 0 | PASS |
-| Net exports (sign and ±50%) | −196% | **+9.17 vs +10.23 TWh (−10.3%)** | PASS |
+| Net exports (sign and ±50%) | −196% | **+9.49 vs +10.23 TWh (−7.2%)** | PASS |
 
-The table comes from a Gurobi solve. HiGHS reaches a different, equally optimal dispatch
-of this LP, about 0.1 TWh apart on nuclear and on the French exchange.
+The table comes from an hourly Gurobi barrier solve. At 3h, HiGHS reached a different, equally
+optimal dispatch of this LP, about 0.1 TWh apart on nuclear and on the French exchange.
 
 ## 5. The net-exports gate
 
@@ -97,14 +97,14 @@ Each candidate cause was tested in the model (wy2024, patched, `no_dc`):
    and is held in security-of-supply reserve until 2026-03-31, so it leaves the
    market-dispatched fleet. With the fix and the realized MIBGAS prices, the cheapest CCGTs
    now sit at 94.56 (ES) and 96.07 EUR/MWh (PT).
-5. **Residual: accepted as a model limitation.** A 15-node, 3-hourly, cost-based LP has
+5. **Residual: accepted as a model limitation.** A 15-node, cost-based LP has
    too few very cheap hours on either side of the border (no negative bids, hydro at its
    opportunity value), so gross flows in both directions over- and undershoot even when
    every gross energy quantity validates within ~10%.
 
 **Result:** with the nuclear profile and the two Portuguese corrections, the gate passes:
-net exports +9.17 vs +10.23 TWh actual (−10.3%), and CO2 moves to −5.2%. The border
-components compensate (ES→PT +16.1 vs +10.5; ES→FR −9.7 vs −3.0 from the import excess in
+net exports +9.49 vs +10.23 TWh actual (−7.2%), and CO2 moves to −4.0%. The border
+components compensate (ES→PT +16.1 vs +10.5; ES→FR −9.4 vs −3.0 from the import excess in
 item 3), so they are reported alongside the total.
 
 ## 6. Known caveats
@@ -114,15 +114,15 @@ item 3), so they are reported alongside the total.
 - Hydro inflow (wy2024 runs), CHP output and CSP output match actuals **by construction**:
   input choices, not validation successes.
 - Coal and oil dispatch is not reproduced (non-market operation). Their ≈ 2.9 Mt CO2 are
-  partly offset by the model's CCGT overshoot (+15%), so the small total CO2 deviation
-  (−5.2%) rests on compensating errors.
+  partly offset by the model's CCGT overshoot (+18%), so the small total CO2 deviation
+  (−4.0%) rests on compensating errors.
 - The net-exports gate passes on the total; the ES→FR and ES→PT components carry
   compensating errors (±~6 TWh) from the cheap-hour shortage of §5.5.
 - The price level is informational only, and reported purchase costs inherit its bias:
-  +31% in the 2024 back-cast (82.8 vs 63 EUR/MWh OMIE), +10% in the 2025 case study (71.6
-  vs 65.3). On the back-cast, the weighting convention is immaterial (arithmetic 82.3 vs
-  load-weighted 82.8) and there are no scarcity spikes (maximum 95): the whole gap is a
-  shortage of cheap hours. The model prices below 1 EUR/MWh in 0.5% of snapshots against
+  +31% in the 2024 back-cast (82.5 vs 63 EUR/MWh OMIE), +10% in the 2025 case study (71.9
+  vs 65.3). On the back-cast, the weighting convention is immaterial (arithmetic 82.0 vs
+  load-weighted 82.5) and there are no scarcity spikes (maximum 96): the whole gap is a
+  shortage of cheap hours. The model prices below 1 EUR/MWh in 0.6% of hours against
   ~8.5% of real 2024 hours, and its median (94.6) sits at the CCGT marginal cost. The
   causes are hydro priced at its fossil opportunity value and the absence of zero or
-  negative bids; the 3-hourly resolution is ruled out (decision log, temporal resolution).
+  negative bids; temporal resolution is ruled out (3-hourly and hourly runs agree).

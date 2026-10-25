@@ -104,9 +104,11 @@ Every modelling choice favors verifiability:
   2 in Portugal.
 - France's outer borders (GB, IT, CH, DE+BE combined): fixed to measured hourly
   2024 flows (RTE eCO2mix via ODRE).
-- Temporal resolution: full year at 3-hourly resolution (2920 snapshots,
-  averaged from hourly inputs upstream; each
-  snapshot carries a weight of 3 hours in dispatch, storage and cost accounting).
+- Temporal resolution: full year at hourly resolution (8760 snapshots). For quick runs,
+  average to 3 hours with `clustering.temporal.averaging: 3h` in `config/config.spain.yaml`
+  before the upstream build, or with PyPSA's
+  [temporal clustering](https://docs.pypsa.org/latest/user-guide/clustering/#temporal-clustering)
+  (`n.cluster.temporal.resample("3h")`) on a built network.
 - Techno-economic assumptions:
   [technology-data v0.15.0](https://github.com/PyPSA/technology-data/tree/v0.15.0) in EUR2025.
 - Renewable resources: five
@@ -119,8 +121,11 @@ Every modelling choice favors verifiability:
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
   center's PPA and battery assets are extendable.
 - Solver: HiGHS by default, so anyone can reproduce a study without a license; Gurobi via
-  `spain_cfe.solving.solver`. One full-year dispatch solves in ~2 min (HiGHS) or ~25 s
-  (Gurobi) at ~4 GB RAM; a data center policy scenario takes ~2–4 min with Gurobi.
+  `spain_cfe.solving.solver` (barrier without crossover, PyPSA-Eur's `gurobi-default`).
+  At 3-hourly resolution, one full-year dispatch solves in ~2 min (HiGHS) or ~25 s
+  (Gurobi) at ~4 GB RAM. The study results are hourly Gurobi runs: ~1 min for the
+  dispatch and 2–7 min per data center scenario at ~10 GB RAM; the full suite of 47
+  solves takes ~1 h on 8 cores.
 
 ## Scenario options
 
@@ -136,7 +141,7 @@ options:
 - PPA location: the data center signs its PPAs anywhere in
   mainland Spain (`spain_wide`) or only in its own region (`local_region`).
 - Data center cluster size: a flat load of any size. The full suite runs 500,
-  1000, 2000, 4000 and 6000 MW.
+  2000, 4000 and 6000 MW.
 - Data center site: any of the 9 Spanish regions, Aragón by
   default.
 - Sales of surplus electricity: off by default, so the data center stores or

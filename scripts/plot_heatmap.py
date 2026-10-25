@@ -24,6 +24,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from scripts.plot_summary import (  # noqa: E402
+    DECREE,
     POLICIES,
     SPAIN_WIDE,
     STYLE,
@@ -83,7 +84,8 @@ def plot_heatmap(hourly: pd.DataFrame, row: pd.Series) -> plt.Figure:
     starts = np.flatnonzero(days.day == 1)
     ax.set_xticks(starts, days[starts].strftime("%b"))
 
-    name = POLICIES[scenario_key(row["policy"], row["siting"])][0].replace("\n", " ")
+    key = scenario_key(row["policy"], row["siting"])
+    name = ("Decree: " if key == DECREE else "") + POLICIES[key].name
     fig.suptitle(name, x=0.0, ha="left", fontweight="bold")
     step = 24 // len(grid.index)
     site = site_name(row["sites"])

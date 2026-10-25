@@ -18,6 +18,7 @@ import logging
 import textwrap
 from collections.abc import Callable
 from pathlib import Path
+from typing import NamedTuple
 
 import matplotlib
 
@@ -41,18 +42,51 @@ STYLE = Path(__file__).with_name("plots.mplstyle")
 FORMATS = ("pdf", "png")
 
 SPAIN_WIDE = "spain_wide"
-LOCAL = "hourly_80_ppa_only@local_region"
-# scenario key (see scenario_key) -> (label, Okabe-Ito colour), in order of relevance
-POLICIES: dict[str, tuple[str, str]] = {
-    "unmatched_dc": ("No policy", "#999999"),
-    "strict_hourly_80_ppa_only": ("Decree:\n80% every hour", "#D55E00"),
-    "hourly_80_ppa_only": ("Hourly 80%\non average", "#0072B2"),
-    "hourly_80_grid_credit": ("Hourly 80%\navg. + credit", "#56B4E9"),
-    LOCAL: ("Hourly 80%\navg., local", "#CC79A7"),
-    "annual_80_res": ("Annual\n80%", "#009E73"),
+
+
+class Policy(NamedTuple):
+    group: str  # axis label shared by the targets of one policy
+    target: int | None
+    name: str
+    color: str  # Okabe-Ito
+
+
+TARGETS = (80, 90)  # the decree's 80%, and 90% as a sensitivity
+# policy key template -> (axis group label, name template, colour), in order of relevance
+FAMILIES: dict[str, tuple[str, str, str]] = {
+    "strict_hourly_{t}_ppa_only": (
+        "Every hour\n(decree: 80%)",
+        "{t}% every hour",
+        "#D55E00",
+    ),
+    "hourly_{t}_ppa_only": ("Hourly\non average", "Hourly {t}% on average", "#0072B2"),
+    "hourly_{t}_grid_credit": (
+        "Hourly avg.\n+ credit",
+        "Hourly {t}% avg. + credit",
+        "#56B4E9",
+    ),
+    "hourly_{t}_ppa_only@local_region": (
+        "Hourly avg.,\nlocal",
+        "Hourly {t}% avg., local",
+        "#CC79A7",
+    ),
+    "annual_{t}_res": ("Annual", "Annual {t}%", "#009E73"),
 }
+# scenario key (see scenario_key) -> Policy, grouped by family
+POLICIES: dict[str, Policy] = {
+    "unmatched_dc": Policy("No policy", None, "No policy", "#999999")
+} | {
+    key.format(t=t): Policy(group, t, name.format(t=t), color)
+    for key, (group, name, color) in FAMILIES.items()
+    for t in TARGETS
+}
+# the decree's target: every figure shows it; other targets join when solved
+REQUIRED = [k for k, p in POLICIES.items() if p.target in (None, TARGETS[0])]
 DECREE = "strict_hourly_80_ppa_only"
+LOCAL = "hourly_80_ppa_only@local_region"
 BASELINE = "no_dc"
+GROUP_GAP = 0.4  # extra space between policy groups, in bar slots
+SLOT_IN = 0.5  # figure width per bar slot (inches)
 
 PPA_CARRIERS: dict[str, str] = {
     "onwind": "Onshore wind",
@@ -110,10 +144,15 @@ def reference_rows(df: pd.DataFrame) -> pd.DataFrame:
             "plot_summary covers single-run suites (one row per scenario); "
             "the full suite needs its own figures."
         )
-    missing = (set(POLICIES) | {BASELINE}) - set(keys)
+    missing = (set(REQUIRED) | {BASELINE}) - set(keys)
     if missing:
         raise ValueError(f"Summary lacks scenarios {sorted(missing)}.")
     return df.set_index(keys).fillna(0.0)
+
+
+def shown_policies(rows: pd.DataFrame, exclude: tuple[str, ...] = ()) -> list[str]:
+    """``POLICIES`` keys solved in ``rows``, in plotting order."""
+    return [p for p in POLICIES if p in rows.index and p not in exclude]
 
 
 def select_rows(
@@ -126,22 +165,42 @@ def select_rows(
     return reference_rows(size[baseline | np.isclose(size["excess_cap"], excess_cap)])
 
 
-def _policy_axis(ax: plt.Axes, policies: list[str], axis: str = "x") -> np.ndarray:
-    """Categorical policy axis with the decree highlighted."""
-    pos = np.arange(len(policies))
-    labels = [POLICIES[p][0] for p in policies]
+def _positions(policies: list[str]) -> tuple[np.ndarray, np.ndarray]:
+    """Bar positions of ``policies``, a gap between groups, and each one's group index."""
+    groups = pd.Series([POLICIES[p].group for p in policies])
+    group_id = ((groups != groups.shift()).cumsum() - 1).to_numpy()
+    return np.arange(len(policies)) + GROUP_GAP * group_id, group_id
+
+
+def _width(policies: list[str], margin: float = 1.0) -> float:
+    """Figure width (inches): ``margin`` for the axis labels plus one slot per bar."""
+    pos, _ = _positions(policies)
+    return margin + SLOT_IN * (pos[-1] + 1.0)
+
+
+def _policy_axis(ax: plt.Axes, policies: list[str]) -> np.ndarray:
+    """Policy axis: targets as ticks, policy groups below them, the decree highlighted."""
+    pos, group_id = _positions(policies)
+    targets = [POLICIES[p].target for p in policies]
+    ax.set_xticks(pos, ["" if t is None else f"{t}%" for t in targets])
     i = policies.index(DECREE)
-    band = {"color": POLICIES[DECREE][1], "alpha": 0.08, "linewidth": 0, "zorder": 0}
-    if axis == "x":
-        ax.set_xticks(pos, labels)
-        ax.axvspan(i - 0.5, i + 0.5, **band)
-        ticks = ax.get_xticklabels()
-    else:
-        ax.set_yticks(pos, labels)
-        ax.axhspan(i - 0.5, i + 0.5, **band)
-        ticks = ax.get_yticklabels()
-    if ticks:  # inner panels of a shared axis carry no labels
-        ticks[i].set_fontweight("bold")
+    band = {"color": POLICIES[DECREE].color, "alpha": 0.08, "linewidth": 0}
+    ax.axvspan(pos[i] - 0.5, pos[i] + 0.5, zorder=0, **band)
+    ticks = ax.get_xticklabels()
+    if not ticks:  # inner panels of a shared axis carry no labels
+        return pos
+    ticks[i].set_fontweight("bold")
+    for g in np.unique(group_id):
+        members = np.flatnonzero(group_id == g)
+        ax.annotate(
+            POLICIES[policies[members[0]]].group,
+            xy=(pos[members].mean(), 0.0),
+            xycoords=("data", "axes fraction"),
+            xytext=(0.0, -16.0),
+            textcoords="offset points",
+            ha="center",
+            va="top",
+        )
     return pos
 
 
@@ -225,9 +284,9 @@ def _caption(fig: plt.Figure, summary: str) -> None:
 
 def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     """Hourly renewable coverage of DC consumption: PPA-matched plus grid renewables."""
-    policies = list(POLICIES)
+    policies = shown_policies(rows)
     r = rows.loc[policies]
-    fig, ax = plt.subplots(figsize=(5.4, 4.3))
+    fig, ax = plt.subplots(figsize=(_width(policies), 4.3))
     pos = _policy_axis(ax, policies)
     parts = pd.DataFrame(
         {"PPA matched": r["ppa_only_score"], "Grid renewables": r["grid_clean_share"]}
@@ -237,8 +296,15 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
     for x, top in zip(pos, tops, strict=True):
         ax.text(x, top + 1.5, f"{top:.0f}%", ha="center", va="bottom", fontsize=7)
 
-    ax.axhline(
-        80.0, color="black", linewidth=0.6, linestyle=(0, (4, 3)), label="80% target"
+    targets = np.array([POLICIES[p].target or np.nan for p in policies], dtype=float)
+    ax.hlines(
+        targets,
+        pos - 0.31,
+        pos + 0.31,
+        color="black",
+        linewidth=0.8,
+        linestyle=(0, (2, 1)),
+        label="Target",
     )
     ax.set_ylim(0.0, 110.0)
     ax.set_ylabel("Hourly renewable share\nof DC consumption (%)")
@@ -255,10 +321,10 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
 
 def plot_portfolio(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     """DC PPA and battery capacity, and PPA output with its curtailment."""
-    policies = [p for p in POLICIES if p != "unmatched_dc"]
+    policies = shown_policies(rows, exclude=("unmatched_dc",))
     r = rows.loc[policies]
     fig, axd = plt.subplot_mosaic(
-        [["capacity"], ["energy"]], figsize=(5.4, 6.6), sharex=True
+        [["capacity"], ["energy"]], figsize=(_width(policies), 6.6), sharex=True
     )
     carriers = {c: label for c, label in PPA_CARRIERS.items() if f"dc_ppa_{c}_mw" in r}
     carrier_colors = {label: colors[c] for c, label in carriers.items()}
@@ -323,7 +389,7 @@ def plot_portfolio(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
 
 def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     """DC net cost per MWh consumed: PPAs, battery, grid purchases, minus sales."""
-    policies = list(POLICIES)
+    policies = shown_policies(rows)
     r = rows.loc[policies]
     mwh = r["total_load_mwh"]
     parts = pd.DataFrame(
@@ -347,7 +413,7 @@ def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
         "Grid purchases": GRID_COLOR,
         "Sales revenue": SALES_COLOR,
     }
-    fig, ax = plt.subplots(figsize=(5.4, 4.6))
+    fig, ax = plt.subplots(figsize=(_width(policies), 4.6))
     pos = _policy_axis(ax, policies)
     tops = _stack(ax, pos, parts, {k: {"color": seg_colors[k]} for k in parts})
     ax.hlines(
@@ -378,7 +444,7 @@ def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
 
 def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     """Spanish system impact against no DC, absolute (left) and relative (right)."""
-    policies = list(POLICIES)
+    policies = shown_policies(rows)
     r = rows.loc[policies]
     # labels mixing math write Delta as math: their text gets no font fallback
     panels = [
@@ -401,9 +467,9 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         ("price", "Δ spot price\n(€/MWh)", "es_mean_price_eur_mwh", 1.0, 2),
     ]
     fig, axd = plt.subplot_mosaic(
-        [[p[0]] for p in panels], figsize=(6.4, 9.4), sharex=True
+        [[p[0]] for p in panels], figsize=(_width(policies, 2.0), 9.4), sharex=True
     )
-    bar_colors = [POLICIES[p][1] for p in policies]
+    bar_colors = [POLICIES[p].color for p in policies]
     for key, label, col, scale, decimals in panels:
         ax = axd[key]
         pos = _policy_axis(ax, policies)
@@ -495,7 +561,7 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
 
 def plot_generation_shift(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
     """Change in Spanish supply against no DC: what serves the DC's consumption."""
-    policies = list(POLICIES)
+    policies = shown_policies(rows)
     r = rows.loc[policies]
     ppa = [f"dc_ppa_{c}_mwh" for c in PPA_CARRIERS if f"dc_ppa_{c}_mwh" in r]
     parts = pd.DataFrame({"DC PPAs": r[ppa].sum(axis=1)})
@@ -514,7 +580,7 @@ def plot_generation_shift(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Fig
     parts = parts / 1.0e6
     shown = parts.loc[:, parts.abs().max() >= MIN_SUPPLY_SHIFT_TWH]
 
-    fig, ax = plt.subplots(figsize=(5.4, 4.4))
+    fig, ax = plt.subplots(figsize=(_width(policies), 4.4))
     pos = _policy_axis(ax, policies)
     _stack(ax, pos, shown, {k: {"color": seg_colors[k]} for k in shown})
     _zero_line(ax)
@@ -543,15 +609,15 @@ def plot_dc_emission_intensity(
     rows: pd.DataFrame, colors: dict[str, str]
 ) -> plt.Figure:
     """Emission intensity of DC consumption: consequential vs. attributional."""
-    policies = list(POLICIES)
+    policies = shown_policies(rows)
     r = rows.loc[policies]
     consequential = (
         r["delta_no_dc_emissions"] / r["total_load_mwh"] * G_PER_KWH_PER_MT_PER_MWH
     ).to_numpy(dtype=float)
     attributional = r["dc_attributional_intensity_g_per_kwh"].to_numpy(dtype=float)
-    point_colors = [POLICIES[p][1] for p in policies]
+    point_colors = [POLICIES[p].color for p in policies]
 
-    fig, ax = plt.subplots(figsize=(5.4, 4.4))
+    fig, ax = plt.subplots(figsize=(_width(policies), 4.4))
     pos = _policy_axis(ax, policies)
     for x, a, b, c in zip(pos, attributional, consequential, point_colors, strict=True):
         ax.plot([x, x], [a, b], color=c, linewidth=1.2, zorder=2)
@@ -568,7 +634,7 @@ def plot_dc_emission_intensity(
     _zero_line(ax)
     grid = float(rows.loc[BASELINE, "es_grid_ef_g_per_kwh"])
     grid_line = ax.axhline(grid, color=GRID_COLOR, linewidth=0.6, linestyle=(0, (4, 3)))
-    ax.set_xlim(-0.5, len(policies) - 0.5)
+    ax.set_xlim(pos[0] - 0.5, pos[-1] + 0.5)
     ax.set_ylabel("Emission intensity of DC\nconsumption (gCO$_2$/kWh)")
     dot = {"marker": "o", "linestyle": "none", "markersize": 5}
     handles = [

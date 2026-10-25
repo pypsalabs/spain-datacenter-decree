@@ -16,9 +16,11 @@ from scripts.plot_summary import (
     FIGURES,
     FORMATS,
     POLICIES,
+    REQUIRED,
     main,
     reference_rows,
     select_rows,
+    shown_policies,
 )
 from scripts.solve_network import solve_network
 from scripts.summarise_network import summarise_network
@@ -82,6 +84,19 @@ def test_every_figure_renders(toy_summary: Path, tmp_path: Path) -> None:
         )
         for name in FIGURES:
             assert (plots / f"{name}.{fmt}").stat().st_size > 0
+
+
+@pytest.mark.parametrize("keys", [REQUIRED, list(POLICIES)])
+def test_figures_show_the_solved_targets(keys: list[str]) -> None:
+    df = pd.DataFrame(map(_split, ["no_dc", *keys]), columns=["policy", "siting"])
+    assert shown_policies(reference_rows(df)) == keys
+
+
+def test_missing_decree_target_fails_fast() -> None:
+    keys = [k for k in POLICIES if k != "strict_hourly_80_ppa_only"]
+    df = pd.DataFrame(map(_split, ["no_dc", *keys]), columns=["policy", "siting"])
+    with pytest.raises(ValueError, match="strict_hourly_80_ppa_only"):
+        reference_rows(df)
 
 
 def test_multi_run_suite_fails_fast() -> None:

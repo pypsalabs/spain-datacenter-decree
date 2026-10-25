@@ -69,6 +69,7 @@ rule build_upstream:
     threads: workflow.cores
     params:
         horizon=HORIZON,
+        temporal=config["clustering"]["temporal"],  # rebuild when the resolution changes
     shell:
         """
         cd pypsa-eur && snakemake \
@@ -196,7 +197,7 @@ rule solve_network:
         convergence="results/{run}/convergence/conv_{year}_{variant}_{policy}_t{target}_{dc_mw}mw_{siting}_ex{excess}.csv",
     threads: 2
     resources:
-        mem_mb=8000,
+        mem_mb=12000,  # hourly solves peak at ~11 GB
     params:
         excess_share=lambda w: int(w.excess) / 100,
         n_iterations=lambda w: config["spain_cfe"]["iteration"]["n_iterations"],

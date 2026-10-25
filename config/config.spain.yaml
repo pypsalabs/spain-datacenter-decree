@@ -4,7 +4,7 @@
 
 # PyPSA-Eur v2026.09.0 overlay: 15-node ES/FR/PT electricity-only model for the
 # Spain 80% hourly matching study. Scope: today's system (2025 fleet), no
-# capacity-expansion year. Temporal resolution: 3-hourly averaged snapshots.
+# capacity-expansion year. Temporal resolution: hourly (averaging: 3h for quick runs).
 
 version: v2026.09.0
 tutorial: false
@@ -92,7 +92,7 @@ clustering:
     FR: 0.2667
     PT: 0.1333
   temporal:
-    averaging: "3h"
+    averaging: false
     segmentation: false
     representative: false
 
@@ -152,9 +152,18 @@ spain_cfe:
     full:
       runs: [wy2024]
       policies:
-        spain_wide: [unmatched_dc, annual_80_res, hourly_80_ppa_only, strict_hourly_80_ppa_only, hourly_80_grid_credit]
-        local_region: [hourly_80_ppa_only]
-      dc_mw: [500, 1000, 2000, 4000, 6000]
+        spain_wide:
+        - unmatched_dc
+        - annual_80_res
+        - hourly_80_ppa_only
+        - strict_hourly_80_ppa_only
+        - hourly_80_grid_credit
+        - annual_90_res
+        - hourly_90_ppa_only
+        - strict_hourly_90_ppa_only
+        - hourly_90_grid_credit
+        local_region: [hourly_80_ppa_only, hourly_90_ppa_only]
+      dc_mw: [500, 2000, 4000, 6000]
       excess_cap: [0.0]
   # prepare_network.py patch engine: cited corrections, each individually switchable.
   patches:
@@ -213,7 +222,7 @@ spain_cfe:
     carriers: [onwind, solar, solar-hsat]
   solving:
     # LP solver for the study solves: highs (default; open-source, reproducible) or
-    # gurobi (plain out-of-the-box defaults; ~5x faster, see README).
+    # gurobi (barrier without crossover, PyPSA-Eur's gurobi-default; see README).
     solver: highs
   iteration:
     # Forward passes for the endogenous grid CFE factor (Riepin & Brown 2024:

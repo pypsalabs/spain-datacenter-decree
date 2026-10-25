@@ -46,10 +46,20 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TARGET: float = 0.80
 DEFAULT_LOAD_SHEDDING_COST: float = 10000.0
-# Per-solver defaults: HiGHS dual simplex (study default, open); Gurobi w/ out-of-the-box defaults ~5x faster on the full-year dispatch.
+# Per-solver defaults: HiGHS dual simplex (study default, open); Gurobi barrier without
+# crossover (PyPSA-Eur's gurobi-default), ~7x faster than its crossover on the hourly LP.
 SOLVER_DEFAULTS: dict[str, dict[str, Any]] = {
     "highs": {"solver": "simplex", "threads": 2},
-    "gurobi": {},
+    "gurobi": {
+        "threads": 2,
+        "method": 2,
+        "crossover": 0,
+        "BarConvTol": 1.0e-5,
+        "Seed": 123,
+        "AggFill": 0,
+        "PreDual": 0,
+        "GURO_PAR_BARDENSETHRESH": 200,
+    },
 }
 NO_TARGET_POLICIES: frozenset[str] = frozenset({"no_dc", "unmatched_dc"})
 
@@ -436,7 +446,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=str,
         default=DEFAULT_SOLVER_NAME,
         choices=sorted(SOLVER_DEFAULTS),
-        help="LP solver: highs (default, open) or gurobi (plain defaults).",
+        help="LP solver: highs (default, open) or gurobi (barrier, no crossover).",
     )
     parser.add_argument(
         "--meta",

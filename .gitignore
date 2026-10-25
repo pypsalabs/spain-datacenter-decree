@@ -1,8 +1,17 @@
-# generated model artifacts; only the validation reports are tracked
+# generated model artifacts; tracked: validation reports, scenario summaries, PDF figures
 networks/
 resources/
 results/*
 !results/validation/
+!results/scenarios.csv
+!results/wy2024/
+results/wy2024/*
+!results/wy2024/metrics/
+!results/wy2024/convergence/
+!results/wy2024/summaries/
+!results/wy2024/hourly/
+!results/wy2024/plots/
+results/wy2024/plots/**/*.png
 cutouts/
 benchmarks/
 logs/

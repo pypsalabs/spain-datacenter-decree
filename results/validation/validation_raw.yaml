@@ -2,8 +2,8 @@ network: results/wy2024/networks/solved_2024_raw_no_dc_t0_0mw_spain_wide_ex0.nc
 gates_passed: 3
 gates_total: 8
 failed:
-  gen_solar_pv: model 64.6195 vs actual 44.1935 (+46.2%)
-  gen_hydro: model 24.3297 vs actual 34.9464 (-30.4%)
-  gen_ccgt_plus_chp: model 18.2484 vs actual 48.4374 (-62.3%)
-  co2_power_sector_total: model 13.6724 vs actual 21.9052 (-37.6%)
-  net_export_total: model -9.8139 vs actual 10.227 (-196.0%)
+  gen_solar_pv: model 64.6186 vs actual 44.1935 (+46.2%)
+  gen_hydro: model 24.3295 vs actual 34.9464 (-30.4%)
+  gen_ccgt_plus_chp: model 19.1117 vs actual 48.4374 (-60.5%)
+  co2_power_sector_total: model 13.9037 vs actual 21.9052 (-36.5%)
+  net_export_total: model -9.7681 vs actual 10.227 (-195.5%)

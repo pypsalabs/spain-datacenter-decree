@@ -1,28 +1,28 @@
 metric,model,actual,diff,pct_diff,unit,year,source
-gen_onwind,57.8533,59.5038,-1.6505,-2.77,TWh,2024,redata_2024_estructura_generacion_peninsular
-gen_solar_pv,45.3028,44.1935,1.1093,2.51,TWh,2024,redata_2024_estructura_generacion_peninsular
-gen_solar_thermal_csp,4.1267,4.1274,-0.0007,-0.02,TWh,2024,redata_2024_estructura_generacion_peninsular
-gen_nuclear,52.1057,52.3908,-0.2851,-0.54,TWh,2024,redata_2024_estructura_generacion_peninsular
-gen_hydro,32.0165,34.9464,-2.9299,-8.38,TWh,2024,redata_2024_estructura_generacion_peninsular
-gen_ccgt,36.89,32.0194,4.8705,15.21,TWh,2024,redata_2024_estructura_generacion_peninsular
+gen_onwind,57.71,59.5038,-1.7937,-3.01,TWh,2024,redata_2024_estructura_generacion_peninsular
+gen_solar_pv,45.2276,44.1935,1.0342,2.34,TWh,2024,redata_2024_estructura_generacion_peninsular
+gen_solar_thermal_csp,4.1225,4.1274,-0.0049,-0.12,TWh,2024,redata_2024_estructura_generacion_peninsular
+gen_nuclear,51.9313,52.3908,-0.4595,-0.88,TWh,2024,redata_2024_estructura_generacion_peninsular
+gen_hydro,32.0143,34.9464,-2.9321,-8.39,TWh,2024,redata_2024_estructura_generacion_peninsular
+gen_ccgt,37.6649,32.0194,5.6454,17.63,TWh,2024,redata_2024_estructura_generacion_peninsular
 gen_chp,16.418,16.418,0.0,0.0,TWh,2024,redata_2024_estructura_generacion
 gen_coal,0.0,3.0304,-3.0304,-100.0,TWh,2024,redata_2024_estructura_generacion
 gen_oil_diesel_gt_st,0.0,0.6758,-0.6758,-100.0,TWh,2024,redata_2024_estructura_generacion_baleares
-gen_biomass_waste,5.3358,5.8219,-0.4861,-8.35,TWh,2024,redata_2024_estructura_generacion_peninsular
-gen_ccgt_plus_chp,53.3079,48.4374,4.8705,10.06,TWh,2024,redata_2024_estructura_generacion_peninsular + redata_2024_estructura_generacion
-gen_phs_turbining,3.5454,5.4584,-1.9131,-35.05,TWh,2024,redeia_ise_2025_evolucion_demanda
-demand_phs_pumping,-4.7272,-8.6642,3.9371,45.44,TWh,2024,redeia_ise_2025_evolucion_demanda
+gen_biomass_waste,5.3102,5.8219,-0.5117,-8.79,TWh,2024,redata_2024_estructura_generacion_peninsular
+gen_ccgt_plus_chp,54.0828,48.4374,5.6454,11.66,TWh,2024,redata_2024_estructura_generacion_peninsular + redata_2024_estructura_generacion
+gen_phs_turbining,3.6533,5.4584,-1.8051,-33.07,TWh,2024,redeia_ise_2025_evolucion_demanda
+demand_phs_pumping,-4.8712,-8.6642,3.7931,43.78,TWh,2024,redeia_ise_2025_evolucion_demanda
 demand_b_c,239.692,239.6921,-0.0001,-0.0,TWh,2024,redata_2024_demanda_evolucion_peninsular
-co2_power_sector_total,20.759,21.9052,-1.1462,-5.23,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
-co2_ccgt,12.7726,11.9637,0.8089,6.76,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
+co2_power_sector_total,21.0202,21.9052,-0.885,-4.04,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
+co2_ccgt,13.042,11.9637,1.0783,9.01,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
 co2_chp,6.0034,6.0034,-0.0,-0.0,MtCO2,2024,redata_2024_emisiones_co2_peninsular_mensual
 co2_coal,0.0,2.9144,-2.9144,-100.0,MtCO2,2024,redata_2024_emisiones_co2_mensual
-emission_intensity_kg_mwh,86.6069,91.3887,-4.7818,-5.23,kgCO2/MWh,2024,redata_2024_emisiones_co2_peninsular_mensual + redata_2024_demanda_evolucion_peninsular
-net_export_fr,-9.7194,-3.0134,-6.706,-222.54,TWh,2024,redata_2024_intercambios_francia
-net_export_pt,16.1189,10.465,5.6539,54.03,TWh,2024,redata_2024_intercambios_portugal
+emission_intensity_kg_mwh,87.6966,91.3887,-3.6922,-4.04,kgCO2/MWh,2024,redata_2024_emisiones_co2_peninsular_mensual + redata_2024_demanda_evolucion_peninsular
+net_export_fr,-9.42,-3.0134,-6.4067,-212.61,TWh,2024,redata_2024_intercambios_francia
+net_export_pt,16.1336,10.465,5.6686,54.17,TWh,2024,redata_2024_intercambios_portugal
 net_export_ma_ad,2.7754,2.7754,-0.0,-0.0,TWh,2024,redata_2024_intercambios_marruecos + redata_2024_intercambios_andorra
-net_export_total,9.1749,10.227,-1.0521,-10.29,TWh,2024,redata_2024_frontera_fisicos
-day_ahead_price_omie_avg,82.8153,63.04,19.7753,31.37,EUR/MWh_el,2024,omie_2024_informe_anual
-cf_onwind,0.2141,0.2197,-0.0057,-2.57,p.u.,2024,redata_2024_estructura_generacion_peninsular + redeia_ise_2025_potencia_instalada
-cf_solar_pv,0.1767,0.1719,0.0048,2.79,p.u.,2024,redata_2024_estructura_generacion_peninsular + redeia_ise_2025_potencia_instalada
+net_export_total,9.4889,10.227,-0.738,-7.22,TWh,2024,redata_2024_frontera_fisicos
+day_ahead_price_omie_avg,82.5366,63.04,19.4966,30.93,EUR/MWh_el,2024,omie_2024_informe_anual
+cf_onwind,0.2136,0.2197,-0.0062,-2.81,p.u.,2024,redata_2024_estructura_generacion_peninsular + redeia_ise_2025_potencia_instalada
+cf_solar_pv,0.1764,0.1719,0.0045,2.62,p.u.,2024,redata_2024_estructura_generacion_peninsular + redeia_ise_2025_potencia_instalada
 load_shedding_share,0.0,0.0,0.0,,p.u.,2024,

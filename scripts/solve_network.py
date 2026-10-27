@@ -8,7 +8,7 @@ Takes the base network from ``prepare_network.py``, attaches the data center
 (flat load at the configured site, Aragon by default; best-resource-class PPA
 candidates; standalone battery; see ``scripts/data_center.py``), adds the policy constraint
 from ``scripts/cfe_constraints.py`` as linopy extra functionality, and solves
-with HiGHS (default) or Gurobi. Grid-credit policies resolve the bilinear
+with the configured LP solver (HiGHS by default). Grid-credit policies resolve the bilinear
 grid-CFE term with fixed forward passes in ``scripts/iterate.py``, starting from
 the solved ``unmatched_dc`` network's import-traced hourly grid CFE factor
 (``scripts/calculate_grid_cfe.py``). Writes the solved network, a one-row metrics
@@ -46,8 +46,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TARGET: float = 0.80
 DEFAULT_LOAD_SHEDDING_COST: float = 10000.0
-# Per-solver defaults: HiGHS dual simplex (study default, open); Gurobi barrier without
-# crossover (PyPSA-Eur's gurobi-default), ~7x faster than its crossover on the hourly LP.
+# Per-solver options passed to linopy; HiGHS dual simplex is the study default.
 SOLVER_DEFAULTS: dict[str, dict[str, Any]] = {
     "highs": {"solver": "simplex", "threads": 2},
     "gurobi": {
@@ -325,7 +324,7 @@ def solve_network(
         with tempfile.TemporaryDirectory() as tmpdir:
             iter_opts = {"io_api": "direct", "solver_name": solver_name, **opts}
             if solver_name == "highs":
-                # basis warm-start between passes; Gurobi is fast enough without
+                # basis warm-start between passes
                 bas = Path(tmpdir) / "highs_iter.bas"
                 iter_opts.update({"basis_fn": bas, "warmstart_fn": bas})
             n, convergence_df = solve_with_grid_iteration(
@@ -383,7 +382,6 @@ def solve_network(
         "excess_cap": sigma,
         "objective": float(n.objective),
         "solve_time_s": solve_time_s,
-        "solver": solver_name,
         "iterations": len(convergence_df),
         "max_delta": float(convergence_df["max_delta"].iloc[-1]),
     }
@@ -446,7 +444,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=str,
         default=DEFAULT_SOLVER_NAME,
         choices=sorted(SOLVER_DEFAULTS),
-        help="LP solver: highs (default, open) or gurobi (barrier, no crossover).",
+        help="LP solver (default: highs).",
     )
     parser.add_argument(
         "--meta",

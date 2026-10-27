@@ -221,8 +221,8 @@ spain_cfe:
   ppa:
     carriers: [onwind, solar, solar-hsat]
   solving:
-    # LP solver for the study solves: highs (default; open-source, reproducible) or
-    # gurobi (barrier without crossover, PyPSA-Eur's gurobi-default; see README).
+    # LP solver for the study solves (open-source HiGHS by default); per-solver
+    # options live in scripts/solve_network.py.
     solver: highs
   iteration:
     # Forward passes for the endogenous grid CFE factor (Riepin & Brown 2024:

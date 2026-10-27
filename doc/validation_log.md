@@ -65,8 +65,8 @@ coordinates). The wind factor below covers only the residual.
 | Load shedding (< 0.01%) | 0 | 0 | PASS |
 | Net exports (sign and ±50%) | −196% | **+9.49 vs +10.23 TWh (−7.2%)** | PASS |
 
-The table comes from an hourly Gurobi barrier solve. At 3h, HiGHS reached a different, equally
-optimal dispatch of this LP, about 0.1 TWh apart on nuclear and on the French exchange.
+The table comes from an hourly solve. This LP has multiple optima: at 3h, a second solver run
+reached a different, equally optimal dispatch, about 0.1 TWh apart on nuclear and on the French exchange.
 
 ## 5. The net-exports gate
 

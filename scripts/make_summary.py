@@ -40,7 +40,6 @@ IDENTIFIER_COLUMNS: frozenset[str] = frozenset(
         "target",
         "siting",
         "excess_cap",
-        "solver",
         "solve_time_s",
         "iterations",
         "max_delta",

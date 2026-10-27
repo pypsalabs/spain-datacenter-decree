@@ -120,12 +120,9 @@ Every modelling choice favors verifiability:
 - Fleet: frozen background fleet, calibrated to cited national data
   (`data/custom/*.csv`; every number sourced in `doc/data_sources.md`). Only the data
   center's PPA and battery assets are extendable.
-- Solver: HiGHS by default, so anyone can reproduce a study without a license; Gurobi via
-  `spain_cfe.solving.solver` (barrier without crossover, PyPSA-Eur's `gurobi-default`).
-  At 3-hourly resolution, one full-year dispatch solves in ~2 min (HiGHS) or ~25 s
-  (Gurobi) at ~4 GB RAM. The study results are hourly Gurobi runs: ~1 min for the
-  dispatch and 2–7 min per data center scenario at ~10 GB RAM; the full suite of 47
-  solves takes ~1 h on 8 cores.
+- Solver: HiGHS (open source, no license needed), set in `spain_cfe.solving.solver`.
+  A full-year solve needs ~4 GB RAM at 3-hourly resolution and ~10 GB at the hourly
+  resolution of the study results.
 
 ## Scenario options
 

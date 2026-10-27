@@ -17,6 +17,7 @@ configfile: "config/config.spain.yaml"
 
 import re
 
+from scripts.plot_by_size import FIGURES as FIGURES_BY_SIZE
 from scripts.plot_summary import FIGURES
 from scripts.plot_validation import CF_CARRIERS
 
@@ -38,13 +39,22 @@ def ex_tag(sigma):
 def suite_plots(wildcards):
     """Figure files of the selected suite: one folder per run, DC size and sales cap."""
     plots = PLOTS + [f"heatmap_{policy}_{siting}" for policy, siting in SCENARIOS]
-    return [
+    per_size = [
         f"{OUT}/{run}/plots/{dc_mw}mw_ex{ex_tag(sigma)}/{plot}.pdf"
         for run in SUITE["runs"]
         for dc_mw in SUITE["dc_mw"]
         for sigma in SUITE["excess_cap"]
         for plot in plots
     ]
+    # cross-size figures only where the suite has sizes to compare
+    by_size = [
+        f"{OUT}/{run}/plots/by_size_ex{ex_tag(sigma)}/{plot}.pdf"
+        for run in SUITE["runs"]
+        for sigma in SUITE["excess_cap"]
+        for plot in FIGURES_BY_SIZE
+        if len(SUITE["dc_mw"]) > 1
+    ]
+    return per_size + by_size
 
 
 rule all:
@@ -416,6 +426,32 @@ rule plot_summary:
             --weather-year {params.weather_year} \
             --dc-mw {wildcards.dc_mw} \
             --plots-dir "{OUT}/{wildcards.run}/plots/{wildcards.dc_mw}mw_ex{wildcards.excess}" \
+            --format {wildcards.ext}
+        """
+
+
+rule plot_by_size:
+    """Produces the supplementary cross-size figures of one run and sales cap."""
+    input:
+        code=["scripts/plot_by_size.py", "scripts/plot_summary.py"],
+        summary=f"{OUT}/scenarios.csv",
+        style="scripts/plots.mplstyle",
+    output:
+        expand(
+            f"{OUT}/{{{{run}}}}/plots/by_size_ex{{{{excess}}}}/{{plot}}.{{{{ext}}}}",
+            plot=list(FIGURES_BY_SIZE),
+        ),
+    threads: 1
+    params:
+        excess_cap=lambda w: int(w.excess) / 100,
+        weather_year=lambda w: w.run.removeprefix("wy"),
+    shell:
+        """
+        PYTHONPATH="{workflow.basedir}" python -m scripts.plot_by_size \
+            --summary "{input.summary}" \
+            --excess-cap {params.excess_cap} \
+            --weather-year {params.weather_year} \
+            --plots-dir "{OUT}/{wildcards.run}/plots/by_size_ex{wildcards.excess}" \
             --format {wildcards.ext}
         """
 

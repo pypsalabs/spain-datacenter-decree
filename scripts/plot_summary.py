@@ -315,7 +315,7 @@ def _notes(rows: pd.DataFrame) -> str:
     return note
 
 
-def _caption(fig: plt.Figure, summary: str) -> None:
+def _caption(fig: plt.Figure, summary: str, fontsize: float = CAPTION_FONTSIZE) -> None:
     """
     Caption under the figure: what is shown and how each quantity is defined.
 
@@ -323,14 +323,14 @@ def _caption(fig: plt.Figure, summary: str) -> None:
     in the current font.
     """
     text_pt, _, _ = TextToPath().get_text_width_height_descent(
-        summary, FontProperties(size=CAPTION_FONTSIZE), ismath=False
+        summary, FontProperties(size=fontsize), ismath=False
     )
     width = int(
         CAPTION_WIDTH * fig.get_size_inches()[0] * 72.0 * len(summary) / text_pt
     )
     lines = textwrap.wrap(summary, width)
     fig.supxlabel(
-        "\n".join(lines), x=0.0, ha="left", fontsize=CAPTION_FONTSIZE, linespacing=1.35
+        "\n".join(lines), x=0.0, ha="left", fontsize=fontsize, linespacing=1.35
     )
 
 

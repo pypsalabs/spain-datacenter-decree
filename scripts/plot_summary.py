@@ -53,13 +53,9 @@ class Policy(NamedTuple):
 
 
 TARGETS = (80, 90)  # the decree's 80%, and 90% as a sensitivity
-# policy key template -> (axis group label, name template, colour), in order of relevance
+# policy key template -> (axis group label, name template, colour), in plotting
+# order; the decree's every-hour rule closes the axis
 FAMILIES: dict[str, tuple[str, str, str]] = {
-    "strict_hourly_{t}_ppa_only": (
-        "Every hour\n(decree: 80%)",
-        "{t}% every hour",
-        "#D55E00",
-    ),
     "hourly_{t}_ppa_only": ("Hourly\non average", "Hourly {t}% on average", "#0072B2"),
     "hourly_{t}_grid_credit": (
         "Hourly avg.\n+ credit",
@@ -84,14 +80,17 @@ TRANSITION_NOTE = (
     " P2: 8–9, 14–18 and 22–24 h on those days, and 9–14 h and 18–22 h on weekdays"
     " in March and November; local time, national holidays excluded)."
 )
+
+
+def _targets(key: str, group: str, name: str, color: str) -> dict[str, Policy]:
+    """One ``Policy`` per target share of a policy family."""
+    return {key.format(t=t): Policy(group, t, name.format(t=t), color) for t in TARGETS}
+
+
 # scenario key (see scenario_key) -> Policy, grouped by family
 POLICIES: dict[str, Policy] = (
     {"unmatched_dc": Policy("No policy", None, "No policy", "#999999")}
-    | {
-        key.format(t=t): Policy(group, t, name.format(t=t), color)
-        for key, (group, name, color) in FAMILIES.items()
-        for t in TARGETS
-    }
+    | {k: p for key, spec in FAMILIES.items() for k, p in _targets(key, *spec).items()}
     | {
         "transition_p1_60": Policy(
             TRANSITION_GROUP,
@@ -108,10 +107,16 @@ POLICIES: dict[str, Policy] = (
             "2029",
         ),
     }
+    | _targets(
+        "strict_hourly_{t}_ppa_only",
+        "Every hour\n(decree: 80%)",
+        "{t}% every hour",
+        "#D55E00",
+    )
 )
 DECREE = "strict_hourly_80_ppa_only"
-# every figure shows the decree, no policy and the 80% average; others join when solved
-REQUIRED = ["unmatched_dc", DECREE, "hourly_80_ppa_only"]
+# every figure shows no policy, the 80% average and the decree; others join when solved
+REQUIRED = ["unmatched_dc", "hourly_80_ppa_only", DECREE]
 LOCAL = "hourly_80_ppa_only@local_region"
 BASELINE = "no_dc"
 GROUP_GAP = 0.4  # extra space between policy groups, in bar slots
@@ -127,8 +132,8 @@ GRID_RES_COLOR = "#b9d3c3"
 GRID_COLOR = "#8c8c8c"
 SALES_COLOR = "#cfcfcf"
 IMPORT_COLOR = "#a0a0a0"
-OPERATING = "Spanish plants and storage (operating cost)"
-DC_COSTS = "Data center PPAs and battery"
+OPERATING = "Extra fuel and running costs of Spanish plants"
+DC_COSTS = "Data center PPAs and battery (annuities)"
 
 # Spanish supply groups -> (network carriers, tech_colors key)
 SUPPLY_GROUPS: dict[str, tuple[tuple[str, ...], str]] = {
@@ -588,9 +593,10 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         fig,
         f"Change in the Spanish power system with a {r.at[no, 'dc_mw']:.0f} MW data "
         f"center in {site} against a baseline without it, absolute (left axes) and in "
-        "percent of the baseline level (right axes). System cost: operating cost of "
-        "Spanish plants and storage (light), then the data center's PPA and battery "
-        "costs on top (dark), ending at the total. CO2: fuel burnt "
+        "percent of the baseline level (right axes). System cost: fuel, CO2 (EU ETS) "
+        "and running costs of Spanish power plants and storage (light; imports "
+        "excluded), then the data center's PPA and battery annuities on top (dark), "
+        "ending at the total. CO2: fuel burnt "
         "in Spanish plants times its carbon content. CO2 intensity: Spanish CO2 per "
         "kWh of Spanish generation, the data center's PPAs included. Gas: fuel burnt "
         "in Spanish gas-fired power plants (CCGT, OCGT). Spot price: hourly nodal "

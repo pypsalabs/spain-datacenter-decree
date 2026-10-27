@@ -12,6 +12,13 @@ results/wy2024/*
 !results/wy2024/hourly/
 !results/wy2024/plots/
 results/wy2024/plots/**/*.png
+!results/draft_2026_10/
+results/draft_2026_10/*
+!results/draft_2026_10/scenarios.csv
+!results/draft_2026_10/wy2024/
+results/draft_2026_10/wy2024/*
+!results/draft_2026_10/wy2024/plots/
+results/draft_2026_10/wy2024/plots/**/*.png
 cutouts/
 benchmarks/
 logs/

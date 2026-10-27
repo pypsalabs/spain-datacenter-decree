@@ -34,7 +34,6 @@ from matplotlib.font_manager import FontProperties  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Patch  # noqa: E402
 from matplotlib.textpath import TextToPath  # noqa: E402
-from matplotlib.ticker import MaxNLocator  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -288,6 +287,13 @@ def _signed(v: float, decimals: int) -> str:
     return f"{v:+.{decimals}f}".replace("-", "−")
 
 
+def _percent(v: float, base: float) -> str:
+    """``v`` as a signed percent of ``base``, one decimal below 2%."""
+    pct = 100.0 * v / base
+    text = f"{pct:+.1f}%" if abs(pct) < 2.0 else f"{pct:+.0f}%"
+    return f"({text})".replace("-", "−")
+
+
 def _legend(fig: plt.Figure, handles: list, labels: list[str], ncol: int) -> None:
     """Frameless multi-column legend above the plot area, bar series first."""
     entries = sorted(
@@ -497,13 +503,6 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         ("cost", "Δ system cost\n(M€/yr)", "es_system_cost_eur", 1e-6, 0),
         ("co2", "$\\Delta$ CO$_2$ emissions\n(Mt/yr)", "es_total_co2_mt", 1.0, 2),
         (
-            "intensity",
-            "$\\Delta$ CO$_2$ intensity\n(g/kWh)",
-            "es_co2_intensity_g_per_kwh",
-            1.0,
-            1,
-        ),
-        (
             "gas",
             "$\\Delta$ gas for power\n(TWh$_{th}$/yr)",
             "es_gas_fuel_mwh_th",
@@ -513,7 +512,7 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         ("price", "Δ spot price\n(€/MWh)", "es_mean_price_eur_mwh", 1.0, 2),
     ]
     fig, axd = plt.subplot_mosaic(
-        [[p[0]] for p in panels], figsize=(_width(policies, 2.0), 9.4), sharex=True
+        [[p[0]] for p in panels], figsize=(_width(policies, 2.0), 7.6), sharex=True
     )
     bar_colors = [POLICIES[p].color for p in policies]
     for key, label, col, scale, decimals in panels:
@@ -554,51 +553,51 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         _zero_line(ax)
         lo, hi = min(0.0, bottom), max(0.0, tops.max())
         pad = 0.05 * (hi - lo)
+        base = float(rows.at[BASELINE, col]) * scale
         for x, v, top in zip(label_x, vals, tops, strict=True):
-            ax.text(
-                x,
-                (top if v >= 0.0 else v) + np.sign(v) * pad,
+            # the change, and under it the same change in percent of the baseline
+            y = (top if v >= 0.0 else v) + np.sign(v) * pad
+            up = v >= 0.0
+            ax.annotate(
                 _signed(v, decimals),
+                (x, y),
+                xytext=(0.0, 7.0 if up else 0.0),
+                textcoords="offset points",
                 ha="center",
-                va="bottom" if v >= 0.0 else "top",
+                va="bottom" if up else "top",
                 fontsize=6,
             )
+            ax.annotate(
+                _percent(v, base),
+                (x, y),
+                xytext=(0.0, 0.0 if up else -7.0),
+                textcoords="offset points",
+                ha="center",
+                va="bottom" if up else "top",
+                fontsize=6,
+                color="#777777",
+            )
         ax.set_ylim(
-            lo - (0.3 * (hi - lo) if vals.min() < 0.0 else 0.0),
-            hi + (0.3 * (hi - lo) if hi > 0.0 else pad),
+            lo - (0.4 * (hi - lo) if vals.min() < 0.0 else 0.0),
+            hi + (0.4 * (hi - lo) if hi > 0.0 else pad),
         )
         ax.set_ylabel(label)
         top = ax.get_ylim()[1]
         # no ticks or gridlines below zero: negative bars hang below the baseline
         ax.set_yticks([t for t in ax.get_yticks() if 0.0 <= t <= top])
-        base = float(rows.at[BASELINE, col]) * scale
-        relative = ax.secondary_yaxis(
-            "right",
-            functions=(
-                lambda v, b=base: 100.0 * v / b,
-                lambda q, b=base: q * b / 100.0,
-            ),
-        )
-        relative.set_ylabel("% of baseline")
-        relative.spines["right"].set_visible(False)
-        top_pct = 100.0 * top / base
-        pct_ticks = MaxNLocator(nbins=5, steps=[1, 2, 2.5, 5, 10]).tick_values(
-            0.0, top_pct
-        )
-        relative.set_yticks([q for q in pct_ticks if 0.0 <= q <= top_pct])
 
     no = "unmatched_dc"
     site = site_name(r.at[no, "sites"])
     _caption(
         fig,
         f"Change in the Spanish power system with a {r.at[no, 'dc_mw']:.0f} MW data "
-        f"center in {site} against a baseline without it, absolute (left axes) and in "
-        "percent of the baseline level (right axes). System cost: fuel, CO2 (EU ETS) "
+        f"center in {site} against a baseline without it: each bar carries the change "
+        "and, in grey, the same change in percent of the baseline level. System cost: "
+        "fuel, CO2 (EU ETS) "
         "and running costs of Spanish power plants and storage (light; imports "
         "excluded), then the data center's PPA and battery annuities on top (dark), "
         "ending at the total. CO2: fuel burnt "
-        "in Spanish plants times its carbon content. CO2 intensity: Spanish CO2 per "
-        "kWh of Spanish generation, the data center's PPAs included. Gas: fuel burnt "
+        "in Spanish plants times its carbon content. Gas: fuel burnt "
         "in Spanish gas-fired power plants (CCGT, OCGT). Spot price: hourly nodal "
         "prices weighted by Spanish demand, the data center excluded." + _notes(r),
     )

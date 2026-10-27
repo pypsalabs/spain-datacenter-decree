@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Iegor Riepin
+#
+# SPDX-License-Identifier: MIT
+
+# Selects the revised draft suite: snakemake --configfile config/suite.draft_2026_10.yaml
+spain_cfe:
+  suite: draft_2026_10

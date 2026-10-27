@@ -6,6 +6,14 @@ centers: a PyPSA model of today's Spanish electricity system (2025 fleet), built
 procurement model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe) and the
 previous research of [Riepin & Brown (2024)](https://doi.org/10.1016/j.esr.2024.101488).
 
+The modelling was done on 18–21 October 2026 to
+quantify what the
+[draft royal decree](https://www.miteco.gob.es/es/energia/participacion/2026/detalle-participacion-publica-k-851.html)
+of August 2026 would mean for Spain's electricity system, in the open and for the public
+interest. On 27 October 2026 the repository was updated to represent the transition rules
+of the revised draft of 26 October 2026; see
+[Update: the revised draft of 26 October 2026](#update-the-revised-draft-of-26-october-2026).
+
 ## Why this study?
 
 The next decade of digital infrastructure will be built somewhere and powered by
@@ -148,6 +156,20 @@ options:
   [ERA5](https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5) reanalysis data,
   with SARAH-3 satellite data for solar.
 
+### Update: the revised draft of 26 October 2026
+
+With a new draft released on 26 October 2026 introducing a five-year transition for data
+centers that join the grid operator's automatic load-reduction scheme (DT1: the hourly
+floor applies only in tariff periods P1 and P2 of the access tariffs, hour by hour, and
+all other hours are unconstrained), we include two new scenario options to represent it,
+called `transition_p1_60` (60% in tariff period P1, to 2028) and `transition_p1_70_p2_60`
+(70% in P1 and 60% in P2, from 2029). `scripts/tariff_periods.py` holds the period
+calendar of CNMC Circular 3/2020 (P1: 9–14 h and 18–22 h on weekdays in January,
+February, July and December; P2: 8–9, 14–18 and 22–24 h on those days, and 9–14 h and
+18–22 h on weekdays in March and November; local time, national holidays excluded). They
+run as a suite of their own, `draft_2026_10`, with its table and figures under
+`results/draft_2026_10/`; see the workflow command below.
+
 ## Study stages
 
 The study keeps what we measure strictly separate from what we assume. The `{year}`
@@ -189,6 +211,8 @@ Two commands run everything (incl. installation of the pinned environment).
 ```bash
 # full case study: upstream build, scenario solves, summary, figures
 pixi run --manifest-path pypsa-eur/pixi.toml snakemake -c all
+# the revised draft's version, with its own table and figures under results/draft_2026_10/
+pixi run --manifest-path pypsa-eur/pixi.toml snakemake -c all --configfile config/suite.draft_2026_10.yaml
 
 # 2024 back-cast and its validation reports (not needed for the case study)
 pixi run --manifest-path pypsa-eur/pixi.toml snakemake validation -c all

@@ -24,6 +24,8 @@ HORIZON = config["planning_horizons"][0]
 SUITE = config["spain_cfe"]["suites"][config["spain_cfe"]["suite"]]
 # (policy, PPA siting) pairs of the selected suite
 SCENARIOS = [(p, siting) for siting, ps in SUITE["policies"].items() for p in ps]
+# summary table and figures of the suite; the solved scenarios are shared across suites
+OUT = SUITE.get("output_dir", "results")
 NO_SURPLUS_POLICIES = ("no_dc", "unmatched_dc")
 PLOTS = list(FIGURES)  # file names of the summary figures
 
@@ -37,7 +39,7 @@ def suite_plots(wildcards):
     """Figure files of the selected suite: one folder per run, DC size and sales cap."""
     plots = PLOTS + [f"heatmap_{policy}_{siting}" for policy, siting in SCENARIOS]
     return [
-        f"results/{run}/plots/{dc_mw}mw_ex{ex_tag(sigma)}/{plot}.pdf"
+        f"{OUT}/{run}/plots/{dc_mw}mw_ex{ex_tag(sigma)}/{plot}.pdf"
         for run in SUITE["runs"]
         for dc_mw in SUITE["dc_mw"]
         for sigma in SUITE["excess_cap"]
@@ -49,7 +51,7 @@ rule all:
     """Full case study: upstream build, scenario solves, summary, figures."""
     default_target: True
     input:
-        "results/scenarios.csv",
+        f"{OUT}/scenarios.csv",
         suite_plots,
 
 
@@ -125,7 +127,7 @@ wildcard_constraints:
     run=r"wy\d{4}",
     year=r"\d{4}",
     variant="|".join(config["spain_cfe"]["variants"]),
-    policy=r"no_dc|unmatched_dc|annual_\d+_res|(?:strict_)?hourly_\d+_(?:ppa_only|grid_credit)(?:_cfe)?",
+    policy=r"no_dc|unmatched_dc|annual_\d+_res|(?:strict_)?hourly_\d+_(?:ppa_only|grid_credit)(?:_cfe)?|transition(?:_p\d_\d+)+",
     target=r"\d+(?:\.\d+)?",
     dc_mw=r"\d+(?:\.\d+)?",
     siting=r"spain_wide|local_region",
@@ -309,7 +311,7 @@ rule plot_validation:
 
 def policy_target(policy):
     """Matching target embedded in the policy name (0 for untargeted policies)."""
-    digits = re.search(r"(\d+)", policy)
+    digits = re.search(r"(?<![a-z])(\d+)", policy)  # skips period markers such as p1
     return int(digits.group(1)) if digits else 0
 
 
@@ -379,7 +381,7 @@ rule make_summary:
         code=["scripts/make_summary.py"],
         metrics=suite_summaries,
     output:
-        summary="results/scenarios.csv",
+        summary=f"{OUT}/scenarios.csv",
     threads: 1
     shell:
         """
@@ -393,12 +395,13 @@ rule plot_summary:
     """Produces the study figures of one run, DC size and sales cap from the summary table."""
     input:
         code=["scripts/plot_summary.py"],
-        summary="results/scenarios.csv",
+        summary=f"{OUT}/scenarios.csv",
         colors="pypsa-eur/config/plotting.default.yaml",
         style="scripts/plots.mplstyle",
     output:
         expand(
-            "results/{{run}}/plots/{{dc_mw}}mw_ex{{excess}}/{plot}.{{ext}}", plot=PLOTS
+            f"{OUT}/{{{{run}}}}/plots/{{{{dc_mw}}}}mw_ex{{{{excess}}}}/{{plot}}.{{{{ext}}}}",
+            plot=PLOTS,
         ),
     threads: 1
     params:
@@ -412,7 +415,7 @@ rule plot_summary:
             --excess-cap {params.excess_cap} \
             --weather-year {params.weather_year} \
             --dc-mw {wildcards.dc_mw} \
-            --plots-dir "results/{wildcards.run}/plots/{wildcards.dc_mw}mw_ex{wildcards.excess}" \
+            --plots-dir "{OUT}/{wildcards.run}/plots/{wildcards.dc_mw}mw_ex{wildcards.excess}" \
             --format {wildcards.ext}
         """
 
@@ -434,7 +437,7 @@ rule plot_heatmap:
         code=["scripts/plot_heatmap.py", "scripts/plot_summary.py"],
         style="scripts/plots.mplstyle",
     output:
-        "results/{run}/plots/{dc_mw}mw_ex{excess}/heatmap_{policy}_{siting}.{ext}",
+        f"{OUT}/{{run}}/plots/{{dc_mw}}mw_ex{{excess}}/heatmap_{{policy}}_{{siting}}.{{ext}}",
     threads: 1
     shell:
         """

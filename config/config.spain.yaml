@@ -136,6 +136,8 @@ spain_cfe:
   # sum_t ex_t <= sigma * sum_t d_t, one scenario per value. The study uses 0.0
   # (surplus is stored or curtailed); add 0.20 for a sales-allowed scenario (ex20).
   # The no_dc and unmatched_dc baselines have no surplus and are solved once, under ex0.
+  # output_dir: where a suite writes its summary table and figures (default results/);
+  # solved scenarios are shared across suites under results/{run}/.
   suite: core
   suites:
     # Working subset: the 2024 reference weather year, one DC size, all policies.
@@ -165,6 +167,24 @@ spain_cfe:
         local_region: [hourly_80_ppa_only, hourly_90_ppa_only]
       dc_mw: [500, 2000, 4000, 6000]
       excess_cap: [0.0]
+    # The revised draft of 26 October 2026. Its five-year transition (DT1) for data
+    # centers in the automatic load-reduction scheme floors the matched share only in
+    # tariff periods P1 and P2: 60% in P1 hours to end-2028 (transition_p1_60), then 70% in
+    # P1 and 60% in P2 (transition_p1_70_p2_60).
+    # Run: snakemake --configfile config/suite.draft_2026_10.yaml
+    draft_2026_10:
+      runs: [wy2024]
+      policies:
+        spain_wide:
+        - unmatched_dc
+        - strict_hourly_80_ppa_only
+        - hourly_80_ppa_only
+        - hourly_90_ppa_only
+        - transition_p1_60
+        - transition_p1_70_p2_60
+      dc_mw: [500]
+      excess_cap: [0.0]
+      output_dir: results/draft_2026_10
   # prepare_network.py patch engine: cited corrections, each individually switchable.
   patches:
     boundary_flows: true        # FR border closure from measured 2024 flows (model closure, always on)

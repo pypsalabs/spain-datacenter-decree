@@ -17,6 +17,9 @@ table, and the per-pass convergence log.
 Policies: ``no_dc``, ``unmatched_dc``, ``annual_{target}_res``, ``hourly_80_ppa_only``,
 ``hourly_80_grid_credit``, ``strict_hourly_80_ppa_only``,
 ``strict_hourly_80_grid_credit``; the ``_cfe`` suffix counts nuclear as clean.
+``transition_p1_60`` and ``transition_p1_70_p2_60`` floor the matched share only
+in the named tariff periods (the revised draft's five-year transition); the first
+share doubles as the reported target.
 """
 
 from __future__ import annotations
@@ -114,7 +117,7 @@ def resolve_target(policy: str, target: float | str | None = None) -> float:
     policy_norm = str(policy).strip().lower()
     if policy_norm in NO_TARGET_POLICIES:
         return 0.0
-    m = re.search(r"(\d+(?:\.\d+)?)", policy_norm)
+    m = re.search(r"(?<![a-z])(\d+(?:\.\d+)?)", policy_norm)
     if target is not None and float(target) > 0.0:
         val = float(target)
         val = val / 100.0 if val > 1.0 else val

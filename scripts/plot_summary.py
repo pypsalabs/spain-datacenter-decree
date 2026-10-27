@@ -49,6 +49,7 @@ class Policy(NamedTuple):
     target: int | None
     name: str
     color: str  # Okabe-Ito
+    tick: str | None = None  # axis tick when it is not the target share
 
 
 TARGETS = (80, 90)  # the decree's 80%, and 90% as a sensitivity
@@ -72,17 +73,45 @@ FAMILIES: dict[str, tuple[str, str, str]] = {
     ),
     "annual_{t}_res": ("Annual", "Annual {t}%", "#009E73"),
 }
+TRANSITION_GROUP = "Transition rules\n(tariff periods P1/P2)"  # the revised draft's DT1
+TRANSITION_NOTE = (
+    " Transition rules: the revised draft's phase-in for data centers in the"
+    " automatic load-reduction scheme, a floor in tariff periods P1 and P2 only,"
+    " applied hour by hour as in Art. 9:"
+    " 60% in P1 hours under the 2026 rules (to 2028), then 70% in P1 and 60% in P2"
+    " hours under the 2029 rules; all other hours are unconstrained"
+    " (P1: 9–14 h and 18–22 h on weekdays in January, February, July and December;"
+    " P2: 8–9, 14–18 and 22–24 h on those days, and 9–14 h and 18–22 h on weekdays"
+    " in March and November; local time, national holidays excluded)."
+)
 # scenario key (see scenario_key) -> Policy, grouped by family
-POLICIES: dict[str, Policy] = {
-    "unmatched_dc": Policy("No policy", None, "No policy", "#999999")
-} | {
-    key.format(t=t): Policy(group, t, name.format(t=t), color)
-    for key, (group, name, color) in FAMILIES.items()
-    for t in TARGETS
-}
-# the decree's target: every figure shows it; other targets join when solved
-REQUIRED = [k for k, p in POLICIES.items() if p.target in (None, TARGETS[0])]
+POLICIES: dict[str, Policy] = (
+    {"unmatched_dc": Policy("No policy", None, "No policy", "#999999")}
+    | {
+        key.format(t=t): Policy(group, t, name.format(t=t), color)
+        for key, (group, name, color) in FAMILIES.items()
+        for t in TARGETS
+    }
+    | {
+        "transition_p1_60": Policy(
+            TRANSITION_GROUP,
+            None,
+            "Transition, 2026 rules (60% in P1 hours)",
+            "#E69F00",
+            "2026",
+        ),
+        "transition_p1_70_p2_60": Policy(
+            TRANSITION_GROUP,
+            None,
+            "Transition, 2029 rules (70% in P1, 60% in P2 hours)",
+            "#E69F00",
+            "2029",
+        ),
+    }
+)
 DECREE = "strict_hourly_80_ppa_only"
+# every figure shows the decree, no policy and the 80% average; others join when solved
+REQUIRED = ["unmatched_dc", DECREE, "hourly_80_ppa_only"]
 LOCAL = "hourly_80_ppa_only@local_region"
 BASELINE = "no_dc"
 GROUP_GAP = 0.4  # extra space between policy groups, in bar slots
@@ -116,7 +145,7 @@ SUPPLY_GROUPS: dict[str, tuple[tuple[str, ...], str]] = {
 }
 MIN_SUPPLY_SHIFT_TWH = 0.02
 CAPTION_FONTSIZE = 6.5
-CAPTION_WIDTH = 0.98  # share of the figure width
+CAPTION_WIDTH = 0.95  # share of the figure width
 G_PER_KWH_PER_MT_PER_MWH = 1.0e12 / 1.0e3
 
 
@@ -178,11 +207,16 @@ def _width(policies: list[str], margin: float = 1.0) -> float:
     return margin + SLOT_IN * (pos[-1] + 1.0)
 
 
+def _tick(p: Policy) -> str:
+    if p.tick is not None:
+        return p.tick
+    return "" if p.target is None else f"{p.target}%"
+
+
 def _policy_axis(ax: plt.Axes, policies: list[str]) -> np.ndarray:
     """Policy axis: targets as ticks, policy groups below them, the decree highlighted."""
     pos, group_id = _positions(policies)
-    targets = [POLICIES[p].target for p in policies]
-    ax.set_xticks(pos, ["" if t is None else f"{t}%" for t in targets])
+    ax.set_xticks(pos, [_tick(POLICIES[p]) for p in policies])
     i = policies.index(DECREE)
     band = {"color": POLICIES[DECREE].color, "alpha": 0.08, "linewidth": 0}
     ax.axvspan(pos[i] - 0.5, pos[i] + 0.5, zorder=0, **band)
@@ -258,9 +292,16 @@ def _legend(fig: plt.Figure, handles: list, labels: list[str], ncol: int) -> Non
     fig.legend(*zip(*entries, strict=True), loc="outside upper left", ncol=ncol)
 
 
-def _siting_note(rows: pd.DataFrame) -> str:
-    site = site_name(rows.at[LOCAL, "sites"])
-    return f" PPAs anywhere in mainland Spain unless marked local ({site} only)."
+def _notes(rows: pd.DataFrame) -> str:
+    """Caption tail: PPA siting, and the transition rules when those scenarios are shown."""
+    if LOCAL in rows.index:
+        site = site_name(rows.at[LOCAL, "sites"])
+        note = f" PPAs anywhere in mainland Spain unless marked local ({site} only)."
+    else:
+        note = " PPAs anywhere in mainland Spain."
+    if any(POLICIES[p].group == TRANSITION_GROUP for p in shown_policies(rows)):
+        note += TRANSITION_NOTE
+    return note
 
 
 def _caption(fig: plt.Figure, summary: str) -> None:
@@ -314,7 +355,7 @@ def plot_clean_coverage(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figur
         fig,
         "Share of the data center's consumption covered by renewables in the same "
         "hour: by its own PPAs and battery (dark), or by the renewable share of its "
-        "grid purchases (light; import-traced, nuclear excluded)." + _siting_note(r),
+        "grid purchases (light; import-traced, nuclear excluded)." + _notes(r),
     )
     return fig
 
@@ -382,7 +423,7 @@ def plot_portfolio(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
         fig,
         "The data center's contracted assets (a) and their output (b); hatched: "
         "output curtailed, as surplus cannot be sold; dashed: the data center's load, "
-        "as capacity (a) and annual consumption (b)." + _siting_note(r),
+        "as capacity (a) and annual consumption (b)." + _notes(r),
     )
     return fig
 
@@ -437,7 +478,7 @@ def plot_dc_cost(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure:
         fig,
         "The data center's cost per MWh it consumes: PPA and battery annuities plus "
         "grid purchases (bold line: net cost). Surplus PPA output cannot be sold, so "
-        "no revenue offsets it." + _siting_note(r),
+        "no revenue offsets it." + _notes(r),
     )
     return fig
 
@@ -553,8 +594,7 @@ def plot_system_impact(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Figure
         "in Spanish plants times its carbon content. CO2 intensity: Spanish CO2 per "
         "kWh of Spanish generation, the data center's PPAs included. Gas: fuel burnt "
         "in Spanish gas-fired power plants (CCGT, OCGT). Spot price: hourly nodal "
-        "prices weighted by Spanish demand, the data center excluded."
-        + _siting_note(r),
+        "prices weighted by Spanish demand, the data center excluded." + _notes(r),
     )
     return fig
 
@@ -599,8 +639,7 @@ def plot_generation_shift(rows: pd.DataFrame, colors: dict[str, str]) -> plt.Fig
         fig,
         "Change in Spanish electricity supply against no data center; dashed line: "
         "the data center's consumption. Surplus cannot be sold, so the data center's "
-        "PPAs supply at most its own consumption (plus battery losses)."
-        + _siting_note(r),
+        "PPAs supply at most its own consumption (plus battery losses)." + _notes(r),
     )
     return fig
 
@@ -650,7 +689,7 @@ def plot_dc_emission_intensity(
         "(filled): the change in whole-model emissions against no data center, per "
         "kWh it consumes. Attributional (hollow): the emissions of its grid purchases, "
         "valued at the hourly emission factor of Spanish supply (imports traced to "
-        "their exporter's mix), divided by all its consumption." + _siting_note(r),
+        "their exporter's mix), divided by all its consumption." + _notes(r),
     )
     return fig
 

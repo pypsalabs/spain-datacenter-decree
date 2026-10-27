@@ -10,9 +10,10 @@ import pandas as pd
 import pypsa
 import pytest
 
-from scripts.cfe_constraints import dc_metrics
+from scripts.cfe_constraints import dc_metrics, transition_targets
 from scripts.data_center import attach_data_center
 from scripts.solve_network import resolve_cfe0, resolve_target, solve_network
+from scripts.tariff_periods import tariff_period
 
 
 def _solve(n: pypsa.Network, costs: pd.DataFrame, policy: str, **kw):
@@ -37,6 +38,7 @@ def test_resolve_target_from_policy_names() -> None:
     assert resolve_target("annual_80_res") == pytest.approx(0.80)
     assert resolve_target("annual_res") == pytest.approx(1.0)
     assert resolve_target("hourly_80_grid_credit", 80.0) == pytest.approx(0.80)
+    assert resolve_target("transition_p1_70_p2_60") == pytest.approx(0.70)
     with pytest.raises(ValueError, match="embeds target"):
         resolve_target("hourly_80_grid_credit", 60.0)
 
@@ -158,3 +160,31 @@ def test_strict_hourly_meets_every_hour(toy_base, toy_costs) -> None:
     # per-hour check from the solved primal: matched share >= 80% of load in every hour
     per_t = dc_metrics(n)["constraint_lhs_per_t"]
     assert (per_t >= 0.80 * 100.0 - 1e-4).all()
+
+
+@pytest.mark.parametrize(
+    ("policy", "floors"),
+    [
+        ("transition_p1_60", {"P1": 0.6}),
+        ("transition_p1_70_p2_60", {"P1": 0.7, "P2": 0.6}),
+    ],
+)
+def test_transition_targets(policy: str, floors: dict[str, float]) -> None:
+    assert transition_targets(policy) == floors
+
+
+@pytest.mark.parametrize("policy", ["transition", "transition_60", "transition_p1_60x"])
+def test_transition_targets_reject_malformed_names(policy: str) -> None:
+    with pytest.raises(ValueError, match="transition_p"):
+        transition_targets(policy)
+
+
+def test_transition_floors_only_the_named_periods(toy_base, toy_costs) -> None:
+    # the toy's second day is a high-season weekday: 9 P1 and 7 P2 hours
+    n, conv, metrics = _solve(toy_base, toy_costs, "transition_p1_70_p2_60")
+    period = tariff_period(n.snapshots)
+    per_t = dc_metrics(n)["constraint_lhs_per_t"]
+    assert n.model.constraints["DC-transition-floor"].size == 16
+    assert (per_t[period == "P1"] >= 70.0 - 1e-4).all()
+    assert (per_t[period == "P2"] >= 60.0 - 1e-4).all()
+    assert per_t[period == "P6"].min() < 60.0  # unconstrained hours buy from the grid

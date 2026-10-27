@@ -26,6 +26,10 @@ Policy constraints:
   \ge x \sum_t d_t`
 - ``strict_hourly``: the same left-hand side per snapshot,
   :math:`\ge x \cdot d_t \; \forall t` (the draft royal decree's Art. 9).
+- ``transition``: the per-snapshot floor only in the tariff periods named in the
+  policy, :math:`\ge x_p \cdot d_t` for :math:`t \in p`, e.g.
+  ``transition_p1_60`` and ``transition_p1_70_p2_60`` (the revised draft's
+  DT1, see ``scripts/tariff_periods.py``); other hours are unconstrained.
 - ``annual_res``: :math:`\sum_{r,t} a_{r,t} G_r = x \sum_t d_t`, the contracted
   PPA yield (availability :math:`a_{r,t}` times capacity :math:`G_r`, whether the
   output is used, sold or curtailed) equals the target volume, as in Riepin &
@@ -43,6 +47,7 @@ enters through :math:`\underline{g}_{s,t}` in the balance and increases
 """
 
 import logging
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -50,6 +55,7 @@ import pandas as pd
 import pypsa
 
 from scripts.calculate_grid_cfe import align_to_snapshots
+from scripts.tariff_periods import tariff_period
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +63,17 @@ DEFAULT_DC_PREFIX: str = "DC"
 # EUR/MWh on sales ex_t: rules out buying and selling in the same snapshot (a cost
 # on one leg suffices) while staying negligible next to the policy costs
 EX_COST: float = 0.01
+
+
+def transition_targets(policy: str) -> dict[str, float]:
+    """Floor per tariff period of a ``transition`` policy, e.g. ``{'P1': 0.7, 'P2': 0.6}``."""
+    tail = policy.strip().lower().removeprefix("transition")
+    pairs = re.findall(r"_p(\d)_(\d+)", tail)
+    if not pairs or "".join(f"_p{p}_{x}" for p, x in pairs) != tail:
+        raise ValueError(
+            f"Policy '{policy}' is not of the form transition_p<period>_<share>[...]."
+        )
+    return {f"P{p}": float(x) / 100.0 for p, x in pairs}
 
 
 def _resolve_dc_components(
@@ -162,9 +179,11 @@ def add_dc_cfe_constraints(
         or scenario variants (e.g. ``'hourly_80_ppa_only'``,
         ``'hourly_80_grid_credit'``, ``'strict_hourly_80_ppa_only'``,
         ``'annual_100_res'``, ``'annual_80_res'``, ``'unmatched_dc'``,
-        ``'no_dc'``).
+        ``'no_dc'``); ``'transition_p1_60'`` or ``'transition_p1_70_p2_60'``
+        floor the matched share by tariff period.
     target : float
-        The matching target ``x`` as a fraction in ``[0, 1]``.
+        The matching target ``x`` as a fraction in ``[0, 1]``; transition
+        policies carry their targets in the name.
     excess_share : float | None, optional
         Cap ``sigma`` on annual sales to the grid relative to total DC demand,
         ``sum_t ex_t <= sigma * sum_t d_t``; ``None`` leaves sales unlimited.
@@ -250,6 +269,16 @@ def add_dc_cfe_constraints(
             name="DC-strict-hourly-cfe",
         )
         logger.info(f"Added DC strict hourly CFE constraint (x={target:.3f}).")
+    elif policy_norm.startswith("transition"):
+        floors = transition_targets(policy_norm)
+        x_t = tariff_period(n.snapshots).map(floors).fillna(0.0)
+        x_t.index = snapshots
+        on = snapshots[x_t.to_numpy() > 0.0]
+        n.model.add_constraints(
+            matched_t.sel(snapshot=on) >= x_t[on] * d[on],
+            name="DC-transition-floor",
+        )
+        logger.info(f"Added DC transition floor in {len(on)} snapshots ({floors}).")
     elif policy_norm.startswith("hourly"):
         n.model.add_constraints(
             matched_total >= float(target) * total_demand,

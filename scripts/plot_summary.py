@@ -70,14 +70,11 @@ FAMILIES: dict[str, tuple[str, str, str]] = {
 }
 TRANSITION_GROUP = "Transition rules\n(tariff periods P1/P2)"  # the revised draft's DT1
 TRANSITION_NOTE = (
-    " Transition rules: the revised draft's phase-in for data centers in the"
-    " automatic load-reduction scheme, a floor in tariff periods P1 and P2 only,"
-    " applied hour by hour as in Art. 9:"
-    " 60% in P1 hours under the 2026 rules (to 2028), then 70% in P1 and 60% in P2"
-    " hours under the 2029 rules; all other hours are unconstrained"
-    " (P1: 9–14 h and 18–22 h on weekdays in January, February, July and December;"
-    " P2: 8–9, 14–18 and 22–24 h on those days, and 9–14 h and 18–22 h on weekdays"
-    " in March and November; local time, national holidays excluded)."
+    " Transition rules: the revised draft's optional phase-in, a floor applied"
+    " hour by hour only in peak tariff periods (P1: weekday daytime and evening"
+    " hours in winter and July; P2: adjoining hours and March/November):"
+    " 60% in P1 under the 2026 rules, then 70% in P1 and 60% in P2 from 2029."
+    " All other hours are unconstrained."
 )
 
 

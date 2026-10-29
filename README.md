@@ -58,46 +58,61 @@ group, can check the numbers, challenge them, and build on them.
 > in Aragon (a small part of the 6.3 GW of grid access data centers already hold) makes
 > Spain burn 10% more gas for power, emit about 1 Mt more CO2 a year, and pay almost 300
 > M€ more a year to run its power system. Gas sets the price, so the spot price rises by
-> about 2 €/MWh for every consumer, the data center included. With hourly matching in
-> place, as the decree writes it or as it is usually defined, that rise and the added
-> emissions shrink by 80% or more, and the data center covers at least 80% of its use
-> with its own renewable and storage contracts, shielded from the gas-set spot price.
-> How emissions are counted matters: the average grid mix suggests about 70 gCO2/kWh for
-> the data center's consumption (attributional), while the actual change in emissions is
-> four times larger (consequential), because gas serves the new demand.
+> about 1.3 €/MWh for every consumer, the data center included. With hourly matching in
+> place at 80% or 90% of consumption, that rise and the added emissions shrink by
+> roughly the same share, and the data center covers it with its own renewable and
+> storage contracts, shielded from the gas-set spot price. How emissions are counted
+> matters: the average grid mix suggests about 70 gCO2/kWh for the data center's
+> consumption (attributional), while the actual change in emissions is four times larger
+> (consequential), because gas serves the new demand.
 >
 > One clause of the draft decree needs fixing: it asks for 80% *in every hour*, not 80%
 > *hour by hour* over the year, the usual meaning of hourly matching (as in
 > [Google's CFE score](https://sustainability.google/reports/24x7-carbon-free-energy-methodologies-metrics/)).
 > Meeting 80% in every hour means covering even the darkest, calmest winter hours, which
-> takes a portfolio that overshoots the rest of the time: it reaches about 98% under the
-> usual definition and costs the data center more than buying from the grid. With that
-> one fix, the decree delivers most of the social benefits at a low cost to the data
-> center industry, and cuts Spain's dependence on imported gas and the data centers'
-> exposure to gas price swings.
+> takes a portfolio that overshoots the rest of the time: it reaches about 99% under the
+> usual definition, costs data centers more than buying from the grid, and costs the
+> system more than having no rule at all. With that one fix, the decree delivers most of
+> the social benefits, and data centers pay less than they would for grid power at the
+> price their own demand pushes up. It also cuts Spain's dependence on imported gas and
+> the data centers' exposure to gas price swings.
+>
+> **Update, 27 October 2026.** The revised draft of 26 October adds an optional
+> five-year transition for data centers that accept automatic curtailment: the hourly
+> floor then applies only in peak tariff periods (60% in P1 to 2028, then 70% in P1 and
+> 60% in P2). Both stages are modelled and included as scenario options. Hourly matching
+> on an annual average cuts emissions more, at the same or lower cost, than these
+> transition rules: 80% on average beats the 2026 rule on both counts, and 90% on
+> average matches the 2029 rule on cost with half the emissions increase and less of
+> the cost passed on to other consumers.
 
-A showcase snapshot of the study figures for a selected case, a 500 MW data center in
-Aragon, each with its caption, is in [doc/showcase](doc/showcase):
+The figures below tell the story of a 500 MW data center in Aragon under each rule:
 
-- [Spanish system impact](doc/showcase/system_impact.png): system cost, emissions,
-  electricity sector gas burn and spot price against a baseline without the data center
-- [Hourly clean coverage](doc/showcase/dc_clean_coverage.png): the share of the data
-  center's consumption covered by renewables in the same hour
-- [Procurement portfolio](doc/showcase/dc_portfolio.png): contracted wind, solar and
-  battery, and their electricity yield and curtailment
-- [Data center cost](doc/showcase/dc_cost.png): the cost per MWh consumed
-- [Emission intensity](doc/showcase/dc_emission_intensity.png): consequential and
-  attributional CO2 per kWh consumed
-- [Shift in Spanish supply](doc/showcase/system_generation_shift.png): what serves the
-  data center's consumption
+- [Spanish system impact](results/draft_2026_10/wy2024/plots/500mw_ex0/system_impact.pdf):
+  system cost, emissions, electricity sector gas burn and spot price against a baseline
+  without the data center
+- [Shift in Spanish supply](results/draft_2026_10/wy2024/plots/500mw_ex0/system_generation_shift.pdf):
+  what serves the data center's consumption
+- [Emission intensity](results/draft_2026_10/wy2024/plots/500mw_ex0/dc_emission_intensity.pdf):
+  consequential and attributional CO2 per kWh consumed
+- [Data center cost](results/draft_2026_10/wy2024/plots/500mw_ex0/dc_cost.pdf): the cost
+  per MWh consumed
+- [Procurement portfolio](results/draft_2026_10/wy2024/plots/500mw_ex0/dc_portfolio.pdf):
+  contracted wind, solar and battery, and their electricity yield and curtailment
+- [Hourly clean coverage](results/draft_2026_10/wy2024/plots/500mw_ex0/dc_clean_coverage.pdf):
+  the share of the data center's consumption covered by renewables in the same hour
 - Hourly CFE score and emission intensity of the data center's consumption:
-  [no policy](doc/showcase/heatmap_unmatched_dc_spain_wide.png),
-  [decree](doc/showcase/heatmap_strict_hourly_80_ppa_only_spain_wide.png),
-  [hourly 80% on average](doc/showcase/heatmap_hourly_80_ppa_only_spain_wide.png),
-  [with grid credit](doc/showcase/heatmap_hourly_80_grid_credit_spain_wide.png),
-  [local](doc/showcase/heatmap_hourly_80_ppa_only_local_region.png),
-  [annual 80%](doc/showcase/heatmap_annual_80_res_spain_wide.png)
-- [Raw summary csv](doc/showcase/scenarios.csv)
+  [no policy](results/draft_2026_10/wy2024/plots/500mw_ex0/heatmap_unmatched_dc_spain_wide.pdf),
+  [hourly 80% on average](results/draft_2026_10/wy2024/plots/500mw_ex0/heatmap_hourly_80_ppa_only_spain_wide.pdf),
+  [hourly 90% on average](results/draft_2026_10/wy2024/plots/500mw_ex0/heatmap_hourly_90_ppa_only_spain_wide.pdf),
+  [transition rule 2026](results/draft_2026_10/wy2024/plots/500mw_ex0/heatmap_transition_p1_60_spain_wide.pdf),
+  [transition rule 2029](results/draft_2026_10/wy2024/plots/500mw_ex0/heatmap_transition_p1_70_p2_60_spain_wide.pdf),
+  [decree: 80% every hour](results/draft_2026_10/wy2024/plots/500mw_ex0/heatmap_strict_hourly_80_ppa_only_spain_wide.pdf)
+- [Summary csv](results/draft_2026_10/scenarios.csv)
+
+Other procurement designs (annual matching, grid credit, local procurement, 90% in
+every hour) and larger data center buildouts, up to 6,000 MW, are available as
+[plots](results/wy2024/plots) and [summary csv](results/scenarios.csv) too.
 
 Running the [workflow](#workflow) writes the full set to `results/`: solved networks,
 summary CSVs and plots for every scenario.

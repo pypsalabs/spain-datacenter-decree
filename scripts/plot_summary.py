@@ -707,7 +707,7 @@ FIGURES: dict[str, Callable[[pd.DataFrame, dict[str, str]], plt.Figure]] = {
 
 
 def main(argv: list[str] | None = None) -> None:
-    """CLI entry point: write every study figure as PDF (study) or PNG (showcase)."""
+    """CLI entry point: write every study figure as PDF, or PNG on request."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summary", type=Path, required=True)

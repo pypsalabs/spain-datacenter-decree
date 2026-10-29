@@ -19,10 +19,11 @@ of the revised draft of 26 October 2026; see
 The next decade of digital infrastructure will be built somewhere and powered by
 something. Spain is deciding how. A
 [draft royal decree](https://www.miteco.gob.es/es/energia/participacion/2026/detalle-participacion-publica-k-851.html)
-would require new data centers (from 1 MW of grid access) to back, in every hour, at
-least 80% of their consumption with renewable electricity generated that same hour by
-new Spanish installations, with forfeiture of grid access on non-compliance. The stakes
-are measured in gigawatts: data centers hold 6.3 GW of granted transmission access
+would require new data centers (from 1 MW of grid access in the August draft, 10 MW in
+the revised one) to back, in every hour, at least 80% of their consumption with
+renewable electricity generated that same hour by new Spanish installations, with
+forfeiture of grid access on non-compliance. The stakes are measured in gigawatts: data
+centers hold 6.3 GW of granted transmission access
 ([Red Eléctrica access map via pv magazine](https://www.pv-magazine.es/2026/10/02/red-electrica-asigna-633-gw-de-acceso-a-centros-de-datos-el-34-de-los-1852-gw-otorgados-a-la-demanda/), Oct 2026), and
 more than 12 GW of access and connection rights granted since 2021 ([MITECO](https://www.miteco.gob.es/content/dam/miteco/es/prensa/20260827_NdP_El_Gobierno_plantea_impulsar_los_centros_de_datos_sostenibles.pdf),
 Aug 2026).
@@ -178,12 +179,11 @@ centers that join the grid operator's automatic load-reduction scheme (DT1: the 
 floor applies only in tariff periods P1 and P2 of the access tariffs, hour by hour, and
 all other hours are unconstrained), we include two new scenario options to represent it,
 called `transition_p1_60` (60% in tariff period P1, to 2028) and `transition_p1_70_p2_60`
-(70% in P1 and 60% in P2, from 2029). `scripts/tariff_periods.py` holds the period
-calendar of CNMC Circular 3/2020 (P1: 9–14 h and 18–22 h on weekdays in January,
-February, July and December; P2: 8–9, 14–18 and 22–24 h on those days, and 9–14 h and
-18–22 h on weekdays in March and November; local time, national holidays excluded). They
-run as a suite of their own, `draft_2026_10`, with its table and figures under
-`results/draft_2026_10/`; see the workflow command below.
+(70% in P1 and 60% in P2, from 2029). The periods follow CNMC Circular 3/2020 (P1: 9–14 h
+and 18–22 h on weekdays in January, February, July and December; P2: 8–9, 14–18 and
+22–24 h on those days, and 9–14 h and 18–22 h on weekdays in March and November; local
+time, national holidays excluded). They run as a suite of their own, `draft_2026_10`; see
+the workflow command below.
 
 ## Study stages
 
@@ -191,7 +191,8 @@ The study keeps what we measure strictly separate from what we assume. The `{yea
 wildcard is the data vintage; the run is the weather year. Fleet, demand, price and NTC
 patches read rows for `{year}`; hydro inflow keys on the run's weather year; the France
 border flows are the measured 2024 series in every run; the wind-bias factor is derived on
-the back-cast and applied to other data years as fixed cited constants.
+the back-cast and applied to other data years as a fixed cited constant
+(`data/custom/wind_correction.csv`).
 
 | Stage | run (weather) | `{year}` (data) | variant | artifacts |
 |---|---|---|---|---|
@@ -199,11 +200,6 @@ the back-cast and applied to other data years as fixed cited constants.
 | (ii) back-cast calibration + validation | wy2024 | 2024 | patched | `base_2024_patched.nc` → `validation_patched` |
 | (iii) case study | wy2024 | 2025 | patched | `base_2025_patched.nc` → DC procurement-policy solves → `scenarios.csv` |
 | (iv) weather-year sensitivities (open for extension) | wy2010 / wy2013 / wy2020 | 2025 | patched | `base_2025_patched.nc` per run → DC procurement-policy solves → `scenarios.csv` |
-
-On the wy2024 reference the case study uses every weather-dependent closure in-sample:
-measured 2024 border flows with 2024 weather, observed 2024 hydro energy, and the
-wind-bias factor derived on the back-cast (stage ii) and applied as a fixed cited
-constant (`data/custom/wind_correction.csv`) in stage (iii).
 
 ## Setup
 
@@ -262,7 +258,7 @@ calibration visualisation.
 
 MIT © 2026 Iegor Riepin (PyPSA Labs gGmbH); see [LICENSES/](LICENSES/),
 [REUSE](https://reuse.software/)-compliant. Vendored
-third-party primary sources under `data/custom/sources/` keep their providers' licences,
+third-party primary sources keep their providers' licences,
 registered per file in [doc/data_sources.md](doc/data_sources.md).
 
 ## Independence

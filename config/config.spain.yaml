@@ -138,9 +138,9 @@ spain_cfe:
   # The no_dc and unmatched_dc baselines have no surplus and are solved once, under ex0.
   # output_dir: where a suite writes its summary table and figures (default results/);
   # solved scenarios are shared across suites under results/{run}/.
-  suite: core
+  suite: full
   suites:
-    # Working subset: the 2024 reference weather year, one DC size, all policies.
+    # Quick subset: one DC size, 80% policies. Select with --config "spain_cfe={suite: core}".
     core:
       runs: [wy2024]
       policies:

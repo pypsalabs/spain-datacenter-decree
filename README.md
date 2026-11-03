@@ -1,10 +1,14 @@
 # Spain Datacenter Decree
 
-A study of Spain's proposed 80% hourly matching (24/7 CFE) requirement for new data
-centers: a PyPSA model of today's Spanish electricity system (2025 fleet), built on
-[PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with data center PPA & 24/7-CFE
-procurement model following [PyPSA/247-cfe](https://github.com/PyPSA/247-cfe) and the
-previous research of [Riepin & Brown (2024)](https://doi.org/10.1016/j.esr.2024.101488).
+> [!NOTE]
+> **Published study.** This work underpins the report
+> [Getting Spain's Data Center Decree Right: Hourly Matching That Cuts Emissions and Costs](https://energytag.org/wp-content/uploads/2026/10/20261029-FINAL-Getting-Spains-Data-Center-Decree-Right_-Hourly-Matching-That-Cuts-Emissions-and-Costs-v4-1.pdf)
+> (29 October 2026), published with [EnergyTag](https://energytag.org).
+
+The model here builds upon [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur), with the
+data center PPA and 24/7 CFE procurement model following
+[PyPSA/247-cfe](https://github.com/PyPSA/247-cfe) and former research work by
+[Riepin & Brown (2024)](https://doi.org/10.1016/j.esr.2024.101488).
 
 The modelling was done on 18–21 October 2026 to
 quantify what the
@@ -30,11 +34,10 @@ Aug 2026).
 
 The policy's logic: additional demand must bring additional clean supply, matched at the
 hours it actually consumes. Done right, this makes new load a system asset. It finances
-new wind, solar and storage, caps its own marginal emissions, and hedges the operator
-against wholesale price volatility. Without it, every new flat gigawatt is served by the
-gas margin: higher emissions, deeper gas import dependency, higher consumer prices, and
-data centers exposed to every price swing. Bad for Spanish society, and bad for the data
-center operators themselves.
+new wind, solar and storage, caps its own emissions, and hedges the operator against
+wholesale price volatility. Without it, every new gigawatt of demand is served by the gas
+margin: higher emissions, deeper gas import dependency, higher consumer prices, and data
+centers exposed to every price swing.
 
 This study provides a transparent, quantitative assessment of the policy's impact. The
 repository contains a dispatch model of today's Spanish electricity system, validated
@@ -68,15 +71,14 @@ group, can check the numbers, challenge them, and build on them.
 > (consequential), because gas serves the new demand.
 >
 > One clause of the draft decree needs fixing: it asks for 80% *in every hour*, not 80%
-> *hour by hour* over the year, the usual meaning of hourly matching (as in
-> [Google's CFE score](https://sustainability.google/reports/24x7-carbon-free-energy-methodologies-metrics/)).
-> Meeting 80% in every hour means covering even the darkest, calmest winter hours, which
-> takes a portfolio that overshoots the rest of the time: it reaches about 99% under the
-> usual definition, costs data centers more than buying from the grid, and costs the
-> system more than having no rule at all. With that one fix, the decree delivers most of
-> the social benefits, and data centers pay less than they would for grid power at the
-> price their own demand pushes up. It also cuts Spain's dependence on imported gas and
-> the data centers' exposure to gas price swings.
+> *hour by hour* over the year. Meeting 80% in every hour means covering even the
+> darkest, calmest winter hours, which takes a portfolio that overshoots the rest of the
+> time: it reaches about 99% as an annual average of the hourly matching score, costs
+> data centers more than buying from the grid, and costs the system more than having no
+> rule at all. With this clause amended, the decree delivers most of the social benefits,
+> and data centers pay less than they would for grid power at the price their own demand
+> pushes up. It also cuts Spain's dependence on imported gas and the data centers'
+> exposure to gas price swings.
 >
 > **Update, 27 October 2026.** The revised draft of 26 October adds an optional
 > five-year transition for data centers that accept automatic curtailment: the hourly
